@@ -1,0 +1,24 @@
+# Environment variables / secrets
+.env
+.env*.local
+.env.production
+.env.staging
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Expo & Build artifacts
+.expo/
+dist/
+web-build/
+*.apk
+*.aab
+*.ipa
+
+# Backups
+backups/
+
+# macOS / OS junk
+.DS_Store
+*.log
