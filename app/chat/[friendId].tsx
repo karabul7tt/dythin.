@@ -35,12 +35,23 @@ export default function ChatScreen() {
     if (friendId && session?.user.id) {
       fetchFriendProfile()
       fetchMessages()
+      markAsRead()
       const unsubscribe = subscribeToMessages()
       return () => {
         unsubscribe?.()
       }
     }
   }, [friendId, session?.user.id])
+
+  async function markAsRead() {
+    if (!session?.user.id || !friendId) return
+    await supabase
+      .from('messages')
+      .update({ is_read: true })
+      .eq('sender_id', friendId)
+      .eq('receiver_id', session.user.id)
+      .eq('is_read', false)
+  }
 
   async function fetchFriendProfile() {
     const { data } = await supabase
@@ -71,21 +82,27 @@ export default function ChatScreen() {
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'messages',
         },
         payload => {
-          const newMsg = payload.new as Message
-          if (
-            (newMsg.sender_id === session?.user.id && newMsg.receiver_id === friendId) ||
-            (newMsg.sender_id === friendId && newMsg.receiver_id === session?.user.id)
-          ) {
-            setMessages(prev => {
-              if (prev.some(m => m.id === newMsg.id)) return prev
-              return [...prev, newMsg]
-            })
-            setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100)
+          if (payload.eventType === 'INSERT') {
+            const newMsg = payload.new as Message
+            if (
+              (newMsg.sender_id === session?.user.id && newMsg.receiver_id === friendId) ||
+              (newMsg.sender_id === friendId && newMsg.receiver_id === session?.user.id)
+            ) {
+              setMessages(prev => {
+                if (prev.some(m => m.id === newMsg.id)) return prev
+                return [...prev, newMsg]
+              })
+              markAsRead()
+              setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100)
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedMsg = payload.new as Message
+            setMessages(prev => prev.map(m => (m.id === updatedMsg.id ? updatedMsg : m)))
           }
         }
       )
@@ -284,7 +301,18 @@ export default function ChatScreen() {
                   <View key={m.id || Math.random().toString()} style={isMine ? s.bubbleRowMine : s.bubbleRowOther}>
                     <View style={isMine ? s.bubbleMine : s.bubbleOther}>
                       <Text style={isMine ? s.msgTextMine : s.msgTextOther}>{m.content}</Text>
-                      <Text style={isMine ? s.timeMine : s.timeOther}>{formatTime(m.created_at)}</Text>
+                      {isMine ? (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-end', gap: 4, marginTop: 4 }}>
+                          <Text style={s.timeMine}>{formatTime(m.created_at)}</Text>
+                          {m.is_read ? (
+                            <Text style={{ color: '#6EE7B7', fontSize: 11, fontWeight: '800' }}>✓✓</Text>
+                          ) : (
+                            <Text style={{ color: 'rgba(255, 255, 255, 0.65)', fontSize: 11, fontWeight: '700' }}>✓</Text>
+                          )}
+                        </View>
+                      ) : (
+                        <Text style={s.timeOther}>{formatTime(m.created_at)}</Text>
+                      )}
                     </View>
                   </View>
                 )

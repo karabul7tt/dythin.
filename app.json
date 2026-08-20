@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#111111"
+      "backgroundColor": "#0a0a12"
     },
     "ios": {
       "supportsTablet": false,
@@ -19,7 +19,7 @@
       "package": "com.dythin.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#111111"
+        "backgroundColor": "#0a0a12"
       }
     },
     "web": {
