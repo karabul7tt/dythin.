@@ -9,11 +9,13 @@ import SwipeCard from '../../components/SwipeCard'
 import type { Post } from '../../lib/types'
 import CommentInput from '../../components/CommentInput'
 import { useFocusEffect } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
 export default function VoteScreen() {
   const { theme, session } = useApp()
+  const router = useRouter()
   const userId = session?.user.id
   const [posts, setPosts] = useState<Post[]>([])
   const [friendPosts, setFriendPosts] = useState<Post[]>([])
@@ -104,9 +106,6 @@ export default function VoteScreen() {
       Alert.alert('Hata', error.message)
       return
     }
-    const voteId = data?.[0]?.id as string
-    setCurrentVoteId(voteId)
-    setCommentVisible(true)
     // Remove current post from stack
     if (tab === 'public') setPosts(prev => prev.slice(1))
     else setFriendPosts(prev => prev.slice(1))
@@ -196,8 +195,8 @@ export default function VoteScreen() {
     tabBtnActive: { backgroundColor: theme.accent },
     tabText: { fontSize: 12, color: theme.textSub, fontWeight: '500' },
     tabTextActive: { color: theme.bg },
-    cardArea: { flex: 1, width: SCREEN_WIDTH - 32, alignItems: 'center', justifyContent: 'center' },
-    btnRow: { flexDirection: 'row', gap: 12, paddingVertical: 18, width: SCREEN_WIDTH - 32, justifyContent: 'center' },
+    cardArea: { height: 530, width: SCREEN_WIDTH - 20, alignItems: 'center', justifyContent: 'center' },
+    btnRow: { flexDirection: 'row', gap: 12, paddingVertical: 10, width: SCREEN_WIDTH - 20, justifyContent: 'center', marginTop: 6 },
     actionBtn: {
       flex: 1,
       flexDirection: 'row',
@@ -252,31 +251,45 @@ export default function VoteScreen() {
   return (
     <SafeAreaView style={s.container}>
       <View style={s.inner}>
-        <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: SCREEN_WIDTH - 24, marginVertical: 8 }}>
+          <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.card, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: theme.border }}
+            onPress={() => router.push('/messages')}
+            activeOpacity={0.8}
+          >
+            <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }}>Mesajlar 💬</Text>
+          </TouchableOpacity>
+        </View>
 
-        <View style={s.tabRow}>
-          <TouchableOpacity style={[s.tabBtn, tab === 'public' && s.tabBtnActive]} onPress={() => setTab('public')}>
-            <Text style={[s.tabText, tab === 'public' && s.tabTextActive]}>🌍 Genel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[s.tabBtn, tab === 'friends' && s.tabBtnActive]} onPress={() => setTab('friends')}>
-            <Text style={[s.tabText, tab === 'friends' && s.tabTextActive]}>👥 Arkadaşlar</Text>
-          </TouchableOpacity>
+        {/* Centered Tabs Row with Far-Right Moderation Icons */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: SCREEN_WIDTH - 24, position: 'relative', marginBottom: 8 }}>
+          <View style={s.tabRow}>
+            <TouchableOpacity style={[s.tabBtn, tab === 'public' && s.tabBtnActive]} onPress={() => setTab('public')}>
+              <Text style={[s.tabText, tab === 'public' && s.tabTextActive]}>🌍 Genel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.tabBtn, tab === 'friends' && s.tabBtnActive]} onPress={() => setTab('friends')}>
+              <Text style={[s.tabText, tab === 'friends' && s.tabTextActive]}>👥 Arkadaşlar</Text>
+            </TouchableOpacity>
+          </View>
+
+          {current && (
+            <View style={{ position: 'absolute', right: 4, flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+              <TouchableOpacity onPress={handleReport} style={{ padding: 4 }}>
+                <Text style={{ fontSize: 14 }}>🚩</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleBlock} style={{ padding: 4 }}>
+                <Text style={{ fontSize: 14 }}>🚫</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {current ? (
           <>
-            <Text style={s.counter}>{currentPosts.length} oylama bekliyor</Text>
-            <View style={s.moderationRow}>
-              <TouchableOpacity style={s.moderationBtn} onPress={handleReport}>
-                <Text style={s.moderationText}>🚩 Bildir</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={s.moderationBtn} onPress={handleBlock}>
-                <Text style={s.moderationText}>🚫 Engelle</Text>
-              </TouchableOpacity>
-            </View>
             <View style={s.cardArea}>
               {currentPosts[1] && (
-                <View style={{ position: 'absolute', width: SCREEN_WIDTH - 32, height: 440, borderRadius: 20, backgroundColor: theme.card, opacity: 0.4, transform: [{ scale: 0.95 }, { translateY: 10 }] }} />
+                <View style={{ position: 'absolute', width: SCREEN_WIDTH - 20, height: 530, borderRadius: 20, backgroundColor: theme.card, opacity: 0.4, transform: [{ scale: 0.95 }, { translateY: 10 }] }} />
               )}
               <SwipeCard
                 key={current.id}
@@ -289,22 +302,16 @@ export default function VoteScreen() {
               {current.image_b_url ? (
                 <>
                   <TouchableOpacity style={[s.actionBtn, s.btnCardA]} onPress={() => handleVote('A')} activeOpacity={0.75}>
-                    <View style={s.badgeCircleA}>
-                      <Text style={s.badgeLetterA}>A</Text>
-                    </View>
                     <View style={s.btnTextCol}>
-                      <Text style={s.btnMainTextA}>Fotoğraf A</Text>
-                      <Text style={s.btnSubText}>👈 Sol Seçenek</Text>
+                      <Text style={s.btnMainTextA}>Soldaki</Text>
+                      <Text style={s.btnSubText}>Sola Kaydır</Text>
                     </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity style={[s.actionBtn, s.btnCardB]} onPress={() => handleVote('B')} activeOpacity={0.75}>
                     <View style={s.btnTextCol}>
-                      <Text style={s.btnMainTextB}>Fotoğraf B</Text>
-                      <Text style={s.btnSubTextB}>Sağ Seçenek 👉</Text>
-                    </View>
-                    <View style={s.badgeCircleB}>
-                      <Text style={s.badgeLetterB}>B</Text>
+                      <Text style={s.btnMainTextB}>Sağdaki</Text>
+                      <Text style={s.btnSubTextB}>Sağa Kaydır</Text>
                     </View>
                   </TouchableOpacity>
                 </>
@@ -332,12 +339,6 @@ export default function VoteScreen() {
                 </>
               )}
             </View>
-            <CommentInput
-              visible={commentVisible}
-              onClose={() => setCommentVisible(false)}
-              onSubmit={submitComment}
-              initialText={commentText}
-            />
           </>
         ) : (
           <View style={s.empty}>

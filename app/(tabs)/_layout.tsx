@@ -1,28 +1,82 @@
 import { Tabs } from 'expo-router'
 import { useApp } from '../../context/AppContext'
-import { View, Text } from 'react-native'
-
-function TabIcon({ focused, label, accent }: { focused: boolean; label: string; accent: string }) {
-  return (
-    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ fontSize: 12, color: focused ? accent : '#555' }}>{label}</Text>
-    </View>
-  )
-}
+import { Ionicons } from '@expo/vector-icons'
+import { Platform } from 'react-native'
 
 export default function TabLayout() {
   const { theme } = useApp()
+
   return (
-    <Tabs screenOptions={{
-      headerShown: false,
-      tabBarStyle: { backgroundColor: theme.tabBar, borderTopColor: theme.border, height: 60 },
-      tabBarActiveTintColor: theme.accent,
-      tabBarInactiveTintColor: '#555',
-    }}>
-      <Tabs.Screen name="index" options={{ title: 'Oyla', tabBarIcon: ({ focused }) => <TabIcon focused={focused} label="◎" accent={theme.accent} /> }} />
-<Tabs.Screen name="create" options={{ title: 'Paylaş', tabBarIcon: ({ focused }) => <TabIcon focused={focused} label="+" accent={theme.accent} /> }} />
-      <Tabs.Screen name="results" options={{ title: 'Sonuçlar', tabBarIcon: ({ focused }) => <TabIcon focused={focused} label="☆" accent={theme.accent} /> }} />
-      <Tabs.Screen name="profile" options={{ title: 'Profil', tabBarIcon: ({ focused }) => <TabIcon focused={focused} label="👤" accent={theme.accent} /> }} />
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: theme.tabBar,
+          borderTopColor: theme.border,
+          height: Platform.OS === 'ios' ? 80 : 54,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 6,
+          paddingTop: 6,
+        },
+        tabBarActiveTintColor: theme.accent,
+        tabBarInactiveTintColor: '#666',
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '600',
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Oyla',
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? 'sparkles' : 'sparkles-outline'}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="create"
+        options={{
+          title: 'Paylaş',
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? 'add-circle' : 'add-circle-outline'}
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="results"
+        options={{
+          title: 'Sonuçlar',
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? 'stats-chart' : 'stats-chart-outline'}
+              size={19}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profil',
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? 'person' : 'person-outline'}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
       <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
   )

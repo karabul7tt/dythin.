@@ -77,10 +77,6 @@ export default function Login() {
         Alert.alert('Hata', 'Kullanıcı adı zorunludur.')
         return
       }
-      if (cleanUsername.length < 3) {
-        Alert.alert('Hata', 'Kullanıcı adı en az 3 karakter olmalıdır.')
-        return
-      }
       if (!confirmPassword.trim()) {
         Alert.alert('Hata', 'Lütfen şifrenizi tekrar girin.')
         return
@@ -170,7 +166,7 @@ export default function Login() {
   async function handleVerifyOtp() {
     const cleanToken = otpCode.trim()
     if (!cleanToken || cleanToken.length < 6) {
-      Alert.alert('Eksik Kod', 'Lütfen e-postanıza gelen 6 haneli doğrulama kodunu girin.')
+      Alert.alert('Eksik Kod', 'Lütfen e-postanıza gelen doğrulama kodunu girin.')
       return
     }
 
@@ -194,7 +190,7 @@ export default function Login() {
       }
 
       if (error) {
-        Alert.alert('Doğrulama Başarısız', 'Girdiğiniz 6 haneli kod geçersiz veya süresi dolmuş. Lütfen tekrar deneyin.')
+        Alert.alert('Doğrulama Başarısız', 'Girdiğiniz doğrulama kodu geçersiz veya süresi dolmuş. Lütfen tekrar deneyin.')
       } else {
         if (data.user) {
           await supabase
@@ -206,7 +202,7 @@ export default function Login() {
             })
         }
 
-        // 6 haneli kod doğrulandıktan sonra otomatik giriş yap
+        // 6-8 haneli kod doğrulandıktan sonra otomatik giriş yap
         if (password) {
           await supabase.auth.signInWithPassword({
             email: email.trim(),
@@ -260,17 +256,17 @@ export default function Login() {
                 E-Posta Doğrulama Kodu
               </Text>
               <Text style={{ fontSize: 13, color: '#aaa', textAlign: 'center', marginBottom: 20 }}>
-                {email} adresinize gönderilen 6 haneli doğrulama kodunu girin.
+                {email} adresinize gönderilen doğrulama kodunu girin.
               </Text>
 
               <TextInput
-                style={[inputStyle, { fontSize: 22, letterSpacing: 8, textAlign: 'center' }]}
+                style={[inputStyle, { fontSize: 20, letterSpacing: 4, textAlign: 'center' }]}
                 value={otpCode}
                 onChangeText={setOtpCode}
-                placeholder="000000"
+                placeholder="Doğrulama Kodu"
                 placeholderTextColor="#444"
                 keyboardType="number-pad"
-                maxLength={6}
+                maxLength={8}
                 returnKeyType="done"
                 onSubmitEditing={Keyboard.dismiss}
                 editable={!loading}

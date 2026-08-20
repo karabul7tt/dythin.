@@ -14,11 +14,12 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false)
 
   async function verifyCode() {
+    const cleanCode = code.trim()
     if (!email) return Alert.alert('Hata', 'E-posta adresi bulunamadı. Lütfen tekrar dene.')
-    if (!/^\d{6}$/.test(code)) return Alert.alert('Kodu kontrol et', 'E-postadaki 6 haneli kodu gir.')
+    if (!/^\d{6,8}$/.test(cleanCode)) return Alert.alert('Kodu kontrol et', 'E-postadaki doğrulama kodunu gir.')
 
     setLoading(true)
-    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'recovery' })
+    const { error } = await supabase.auth.verifyOtp({ email, token: cleanCode, type: 'recovery' })
     setLoading(false)
 
     if (error) return Alert.alert('Kod geçersiz', error.message)
@@ -46,19 +47,19 @@ export default function ResetPassword() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, justifyContent: 'center', padding: 28 }}>
         <Text style={{ fontSize: 32, fontWeight: '700', color: '#f0f0f0', textAlign: 'center', marginBottom: 8 }}>Şifre sıfırla</Text>
         <Text style={{ fontSize: 14, color: '#aaa', textAlign: 'center', marginBottom: 30 }}>
-          {verified ? 'Yeni şifreni belirle.' : `${email} adresine gönderilen 6 haneli kodu gir.`}
+          {verified ? 'Yeni şifreni belirle.' : `${email} adresine gönderilen doğrulama kodunu gir.`}
         </Text>
 
         {!verified ? (
           <>
             <TextInput
-              style={[inputStyle, { textAlign: 'center', letterSpacing: 8, fontSize: 22 }]}
+              style={[inputStyle, { textAlign: 'center', letterSpacing: 4, fontSize: 20 }]}
               value={code}
-              onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="000000"
+              onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 8))}
+              placeholder="Doğrulama Kodu"
               placeholderTextColor="#555"
               keyboardType="number-pad"
-              maxLength={6}
+              maxLength={8}
               editable={!loading}
             />
             <TouchableOpacity style={{ backgroundColor: '#7F77DD', borderRadius: 14, padding: 16, alignItems: 'center' }} onPress={verifyCode} disabled={loading}>

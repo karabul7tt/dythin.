@@ -1,0 +1,6 @@
+# Robots.txt for Dythin (https://dythin.com.tr)
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://dythin.com.tr/sitemap.xml

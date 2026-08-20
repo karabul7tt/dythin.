@@ -27,6 +27,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [themeName, setThemeNameState] = useState<ThemeName>('purple')
 
   useEffect(() => {
+    // Uygulama ilk açıldığında bildirim iznini sor
+    registerForPushNotificationsAsync()
+
     AsyncStorage.getItem('themeName').then((saved) => {
       if (saved) setThemeNameState(saved as ThemeName)
     })

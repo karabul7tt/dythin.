@@ -1,32 +1,35 @@
-# dyth-nson
+# Dythin. — Kararsızlıktan Kurtar Kendini 📸🗳️
 
-Dietitian and Health Tracking mobile application built with React Native and Expo.
+Dythin, kullanıcıların kararsız kaldıkları kombinler, ürünler ve tercihler için topluluktan ve arkadaşlarından A/B fotoğrafları veya tekli görseller ile oy toplamasını sağlayan React Native ve Expo tabanlı mobil oylama uygulamasıdır.
 
-## Features
+## 🚀 Özellikler
 
-- Diyetisyen ve danışan takip sistemi
-- Beslenme ve öğün takibi
-- Supabase arka plan veritabanı entegrasyonu
-- iOS ve Android mobil uyumlu arayüz
+- **Tinder Tarzı Oylama (Swipe Feed):** Kararsız kalınan gönderileri sağa/sola kaydırarak oy verme.
+- **A/B Karşılaştırma Modu:** İki farklı kombin veya fotoğraf arasında topluluk kararını öğrenme.
+- **Genel & Arkadaşlar Filtrelemesi:** Gönderileri herkese açık veya sadece arkadaşlara özel paylaşabilme.
+- **Sonuçlar & İstatistikler:** Oyların yüzde dağılımı, kazanan fotoğraf göstergesi ve zaman sayacı.
+- **Kullanıcı Moderasyonu & Güvenlik:** İçerik bildirme (Report), kullanıcı engelleme (Block), XSS sanitization, rate limiting ve App Store uyumlu Hesap Silme işlevi.
+- **Dinamik Temalar:** Mor & Gece, Siyah & Altın, Pembe & Krem, Yeşil & Bej renk temaları.
 
-## Technologies
+## 🛠️ Teknolojiler
 
-- React Native / Expo
-- TypeScript
-- Supabase (Database & Auth)
+- **Mobil Framework:** React Native / Expo (v54), Expo Router (v6)
+- **Dil:** TypeScript
+- **Veritabanı & Kimlik Doğrulama:** Supabase (PostgreSQL, Auth, Storage, RLS)
+- **Bildirimler:** Expo Notifications
 
-## Setup and Running
+## 📦 Kurulum ve Çalıştırma
 
-Install dependencies:
+Bağımlılıkları yükleyin:
 ```bash
 npm install
 ```
 
-Start Expo development server:
+Expo geliştirici sunucusunu başlatın:
 ```bash
 npx expo start
 ```
 
-## License
+## 📄 Lisans
 
-This project is licensed under the MIT License.
+Bu proje MIT lisansı ile lisanslanmıştır.

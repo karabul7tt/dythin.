@@ -88,9 +88,6 @@ export default function ShareScreen() {
     if (!cleanTitle || !imageA) {
       return Alert.alert('Eksik Bilgi', 'Başlık ve en az 1 fotoğraf seçimi zorunludur.')
     }
-    if (cleanTitle.length < 3) {
-      return Alert.alert('Geçersiz Başlık', 'Başlık en az 3 karakter olmalıdır.')
-    }
     if (cleanTitle.length > 100) {
       return Alert.alert('Başlık Çok Uzun', 'Başlık en fazla 100 karakter olabilir.')
     }
@@ -116,6 +113,7 @@ export default function ShareScreen() {
         user_id: session?.user.id,
         title: cleanTitle,
         description: cleanDesc || null,
+        image_a_url: urlA,
         image_url: urlA,
         audience,
         is_active: true,
@@ -124,6 +122,13 @@ export default function ShareScreen() {
       postPayload.expires_at = expiresAt
 
       let { error } = await supabase.from('posts').insert(postPayload)
+
+      // Fallback if image_a_url column does not exist in remote DB schema
+      if (error && (error.message.includes('image_a_url') || error.code === 'PGRST204')) {
+        delete postPayload.image_a_url
+        const res = await supabase.from('posts').insert(postPayload)
+        error = res.error
+      }
 
       // Fallback if expires_at column does not exist in remote DB schema
       if (error && (error.message.includes('expires_at') || error.code === 'PGRST204')) {

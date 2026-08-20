@@ -31,6 +31,9 @@ export default function CommentInput({ visible, onClose, onSubmit, initialText =
             placeholder="Yorum..."
             value={text}
             onChangeText={setText}
+            returnKeyType="done"
+            blurOnSubmit={true}
+            onSubmitEditing={handleSubmit}
           />
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.button} onPress={onClose}>

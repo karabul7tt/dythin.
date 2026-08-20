@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  Keyboard,
 } from 'react-native'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
@@ -24,12 +25,58 @@ export default function SettingsScreen() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [messagePrivacy, setMessagePrivacy] = useState<'everyone' | 'friends'>('everyone')
+  const [isPrivate, setIsPrivate] = useState(false)
 
   // Modals for legal compliance
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
 
   const router = useRouter()
+
+  useEffect(() => {
+    if (session?.user.id) {
+      fetchPrivacySettings()
+    }
+  }, [session?.user.id])
+
+  async function fetchPrivacySettings() {
+    const { data } = await supabase
+      .from('profiles')
+      .select('message_privacy, is_private')
+      .eq('id', session?.user.id)
+      .single()
+
+    if (data) {
+      if (data.message_privacy) setMessagePrivacy(data.message_privacy as 'everyone' | 'friends')
+      if (typeof data.is_private === 'boolean') setIsPrivate(data.is_private)
+    }
+  }
+
+  async function handleTogglePrivate() {
+    const newValue = !isPrivate
+    setIsPrivate(newValue)
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_private: newValue })
+      .eq('id', session?.user.id)
+
+    if (error && error.code !== '42703') {
+      Alert.alert('Hata', error.message)
+    }
+  }
+
+  async function handleUpdateMessagePrivacy(option: 'everyone' | 'friends') {
+    setMessagePrivacy(option)
+    const { error } = await supabase
+      .from('profiles')
+      .update({ message_privacy: option })
+      .eq('id', session?.user.id)
+
+    if (error && error.code !== '42703') {
+      Alert.alert('Hata', error.message)
+    }
+  }
 
   async function handleEnableNotifications() {
     if (!session?.user.id) return
@@ -203,6 +250,53 @@ export default function SettingsScreen() {
           dythin<Text style={s.logoDot}>.</Text>
         </Text>
 
+        <Text style={s.sectionLabel}>GİZLİLİK & MESAJLAR</Text>
+        <View style={s.card}>
+          <View style={{ padding: 14 }}>
+            <Text style={s.rowLabel}>Kimler Mesaj Gönderebilir?</Text>
+            <Text style={s.rowSub}>Sizi kimlerin mesajla rahatsız edebileceğini belirleyin</Text>
+
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+              <TouchableOpacity
+                style={[
+                  { flex: 1, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: theme.border, alignItems: 'center' },
+                  messagePrivacy === 'everyone' && { backgroundColor: theme.accent, borderColor: theme.accent },
+                ]}
+                onPress={() => handleUpdateMessagePrivacy('everyone')}
+                activeOpacity={0.8}
+              >
+                <Text style={{ fontSize: 13, fontWeight: '600', color: messagePrivacy === 'everyone' ? '#ffffff' : theme.textSub }}>
+                  Herkes
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  { flex: 1, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: theme.border, alignItems: 'center' },
+                  messagePrivacy === 'friends' && { backgroundColor: theme.accent, borderColor: theme.accent },
+                ]}
+                onPress={() => handleUpdateMessagePrivacy('friends')}
+                activeOpacity={0.8}
+              >
+                <Text style={{ fontSize: 13, fontWeight: '600', color: messagePrivacy === 'friends' ? '#ffffff' : theme.textSub }}>
+                  Sadece Arkadaşlarım
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Gizli Profil Row */}
+            <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 18, paddingTop: 14, borderTopWidth: 0.5, borderTopColor: theme.border }} onPress={handleTogglePrivate} activeOpacity={0.8}>
+              <View style={{ flex: 1, paddingRight: 10 }}>
+                <Text style={s.rowLabel}>Gizli Profil (Hesabı Gizle)</Text>
+                <Text style={s.rowSub}>Profilinizi gizlediğinizde oylamalarınızı sadece arkadaşlarınız görebilir</Text>
+              </View>
+              <View style={[{ width: 44, height: 26, borderRadius: 13, backgroundColor: theme.bg, borderWidth: 1, borderColor: theme.border, justifyContent: 'center', padding: 2 }, isPrivate && { backgroundColor: theme.accent, borderColor: theme.accent }]}>
+                <View style={[{ width: 20, height: 20, borderRadius: 10, backgroundColor: theme.textSub }, isPrivate && { alignSelf: 'flex-end', backgroundColor: '#ffffff' }]} />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <Text style={s.sectionLabel}>BİLDİRİMLER</Text>
         <View style={s.card}>
           <TouchableOpacity style={s.rowLast} onPress={handleEnableNotifications} disabled={loading}>
@@ -235,6 +329,7 @@ export default function SettingsScreen() {
                 placeholder="Eski şifre"
                 placeholderTextColor={theme.textSub}
                 secureTextEntry
+                returnKeyType="next"
                 editable={!loading}
               />
               <TextInput
@@ -244,6 +339,7 @@ export default function SettingsScreen() {
                 placeholder="Yeni şifre"
                 placeholderTextColor={theme.textSub}
                 secureTextEntry
+                returnKeyType="next"
                 editable={!loading}
               />
               <TextInput
@@ -253,6 +349,9 @@ export default function SettingsScreen() {
                 placeholder="Yeni şifre (tekrar)"
                 placeholderTextColor={theme.textSub}
                 secureTextEntry
+                returnKeyType="done"
+                blurOnSubmit={true}
+                onSubmitEditing={Keyboard.dismiss}
                 editable={!loading}
               />
               <TouchableOpacity style={s.passwordSave} onPress={handleChangePassword} disabled={loading}>

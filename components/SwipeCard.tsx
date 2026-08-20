@@ -57,8 +57,8 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
 
   const s = StyleSheet.create({
     card: {
-      width: SCREEN_WIDTH - 32,
-      borderRadius: 22,
+      width: SCREEN_WIDTH - 20,
+      borderRadius: 20,
       overflow: 'hidden',
       borderWidth: 1,
       borderColor: theme.border,
@@ -73,7 +73,7 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
     imageContainer: {
       flexDirection: 'row',
       width: '100%',
-      height: 390,
+      height: 470,
       position: 'relative',
     },
     imageHalfContainer: {
@@ -87,38 +87,25 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
     },
     imageFull: {
       width: '100%',
-      height: 390,
+      height: 470,
     },
-    photoTag: {
-      position: 'absolute',
-      bottom: 12,
-      paddingHorizontal: 12,
-      paddingVertical: 5,
-      borderRadius: 20,
-      backgroundColor: 'rgba(14, 14, 26, 0.85)',
-      borderWidth: 1,
-    },
-    tagA: { left: 12, borderColor: 'rgba(201, 168, 76, 0.6)' },
-    tagB: { right: 12, borderColor: 'rgba(127, 119, 221, 0.6)' },
-    tagTextA: { color: '#C9A84C', fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
-    tagTextB: { color: '#7F77DD', fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
-    info: { padding: 16 },
-    title: { fontSize: 16, fontWeight: '700', color: theme.text, marginBottom: 4 },
-    desc: { fontSize: 13, color: theme.textSub, lineHeight: 18 },
+    info: { padding: 14 },
+    title: { fontSize: 15, fontWeight: '700', color: theme.text, marginBottom: 2 },
+    desc: { fontSize: 12, color: theme.textSub, lineHeight: 16 },
     badge: {
       position: 'absolute',
       top: 24,
       paddingHorizontal: 18,
       paddingVertical: 10,
       borderRadius: 14,
-      borderWidth: 2,
+      borderWidth: 1.5,
       backgroundColor: 'rgba(14, 14, 26, 0.92)',
     },
     rightBadge: { left: 20, borderColor: '#7F77DD' },
     leftBadge: { right: 20, borderColor: '#C9A84C' },
     singleLikeBadge: { left: 20, borderColor: '#4EBA6F' },
     singleNopeBadge: { right: 20, borderColor: '#E55353' },
-    badgeText: { fontSize: 16, fontWeight: '800', letterSpacing: 1 },
+    badgeText: { fontSize: 15, fontWeight: '700', letterSpacing: 0.5 },
     rightText: { color: '#7F77DD' },
     leftText: { color: '#C9A84C' },
     singleLikeText: { color: '#4EBA6F' },
@@ -132,40 +119,36 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
     >
       {post.image_b_url ? (
         <View style={s.imageContainer}>
-          <View style={s.imageHalfContainer}>
-            <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.imageHalf} resizeMode="cover" />
-            <View style={[s.photoTag, s.tagA]}>
-              <Text style={s.tagTextA}>FOTO A</Text>
-            </View>
+          <View style={[s.imageHalfContainer, { backgroundColor: '#0a0a12' }]}>
+            <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.imageHalf} resizeMode="contain" />
           </View>
 
-          <View style={[s.imageHalfContainer, { borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.15)' }]}>
-            <Image source={{ uri: post.image_b_url }} style={s.imageHalf} resizeMode="cover" />
-            <View style={[s.photoTag, s.tagB]}>
-              <Text style={s.tagTextB}>FOTO B</Text>
-            </View>
+          <View style={[s.imageHalfContainer, { borderLeftWidth: 1.5, borderLeftColor: 'rgba(255,255,255,0.2)', backgroundColor: '#0a0a12' }]}>
+            <Image source={{ uri: post.image_b_url }} style={s.imageHalf} resizeMode="contain" />
           </View>
         </View>
       ) : (
-        <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.imageFull} resizeMode="cover" />
+        <View style={{ width: '100%', height: 470, backgroundColor: '#0a0a12' }}>
+          <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.imageFull} resizeMode="contain" />
+        </View>
       )}
 
       {post.image_b_url ? (
         <>
           <Animated.View style={[s.badge, s.rightBadge, { opacity: likeOpacity }]}>
-            <Text style={[s.badgeText, s.rightText]}>SEÇENEK B</Text>
+            <Text style={[s.badgeText, s.rightText]}>Sağdaki Seçildi</Text>
           </Animated.View>
           <Animated.View style={[s.badge, s.leftBadge, { opacity: nopeOpacity }]}>
-            <Text style={[s.badgeText, s.leftText]}>SEÇENEK A</Text>
+            <Text style={[s.badgeText, s.leftText]}>Soldaki Seçildi</Text>
           </Animated.View>
         </>
       ) : (
         <>
           <Animated.View style={[s.badge, s.singleLikeBadge, { opacity: likeOpacity }]}>
-            <Text style={[s.badgeText, s.singleLikeText]}>BEĞENDİM ✓</Text>
+            <Text style={[s.badgeText, s.singleLikeText]}>Beğendim</Text>
           </Animated.View>
           <Animated.View style={[s.badge, s.singleNopeBadge, { opacity: nopeOpacity }]}>
-            <Text style={[s.badgeText, s.singleNopeText]}>GEÇTİM ✕</Text>
+            <Text style={[s.badgeText, s.singleNopeText]}>Geçtim</Text>
           </Animated.View>
         </>
       )}

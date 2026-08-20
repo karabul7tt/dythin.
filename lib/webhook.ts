@@ -14,7 +14,7 @@ export async function verifyWebhookSignature(
   signature: string,
   secret: string
 ): Promise<boolean> {
-  if (!payload || !signature || !secret) {
+  if (!payload || !signature || !secret || typeof crypto === 'undefined' || !crypto.subtle) {
     return false
   }
 

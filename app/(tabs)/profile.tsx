@@ -10,6 +10,7 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  Keyboard,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useApp } from '../../context/AppContext'
@@ -21,11 +22,14 @@ import type { Profile, FriendRecord, FriendshipWithProfiles } from '../../lib/ty
 
 export default function ProfileScreen() {
   const { theme, session } = useApp()
-  const userId = session?.user.id
+  const userId = session?.user?.id
   const router = useRouter()
   const [tab, setTab] = useState<'profile' | 'friends'>('profile')
   const [fullName, setFullName] = useState('')
   const [username, setUsername] = useState('')
+  const [initialFullName, setInitialFullName] = useState('')
+  const [initialUsername, setInitialUsername] = useState('')
+  const [lastUsernameUpdate, setLastUsernameUpdate] = useState<string | null>(null)
   const [avatar, setAvatar] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [stats, setStats] = useState({ posts: 0, votes: 0, friends: 0 })
@@ -34,6 +38,7 @@ export default function ProfileScreen() {
   const [friends, setFriends] = useState<FriendRecord[]>([])
   const [requests, setRequests] = useState<FriendRecord[]>([])
   const [searching, setSearching] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
     if (!userId) return
@@ -49,9 +54,14 @@ export default function ProfileScreen() {
       .single()
     if (data) {
       const prof = data as Profile
-      setUsername(prof.username || '')
-      setFullName(prof.full_name || '')
+      const uName = prof.username || ''
+      const fName = prof.full_name || ''
+      setUsername(uName)
+      setFullName(fName)
+      setInitialUsername(uName)
+      setInitialFullName(fName)
       setAvatar(prof.avatar_url || null)
+      setLastUsernameUpdate(prof.updated_at || null)
     }
     const { count: postCount } = await supabase
       .from('posts').select('*', { count: 'exact', head: true }).eq('user_id', session?.user.id)
@@ -89,6 +99,10 @@ export default function ProfileScreen() {
   }
 
   async function pickAvatar() {
+    if (!isEditing) {
+      Alert.alert('Bilgi', 'Profil fotoğrafınızı değiştirmek için önce "Düzenle" butonuna basın.')
+      return
+    }
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (!permission.granted) {
       Alert.alert('Fotoğraf İzni Gerekli', 'Profil fotoğrafı seçebilmek için fotoğraf erişimine izin verin.')
@@ -124,11 +138,48 @@ export default function ProfileScreen() {
     const cleanFullName = sanitizeInput(fullName)
 
     if (!cleanUsername) return Alert.alert('Hata', 'Kullanıcı adı boş olamaz.')
-    if (cleanUsername.length < 3) return Alert.alert('Hata', 'Kullanıcı adı en az 3 karakter olmalıdır.')
 
     setLoading(true)
     try {
       if (!session?.user?.id) throw new Error('Oturum açmış kullanıcı bulunamadı.')
+
+      const isUsernameChanged = cleanUsername.toLowerCase() !== initialUsername.toLowerCase()
+
+      // 1. 14 Günlük Kullanıcı Adı Değiştirme Kuralı
+      if (isUsernameChanged && lastUsernameUpdate) {
+        const lastUpdate = new Date(lastUsernameUpdate).getTime()
+        const now = new Date().getTime()
+        const daysDiff = (now - lastUpdate) / (1000 * 3600 * 24)
+
+        if (daysDiff < 14) {
+          const remainingDays = Math.ceil(14 - daysDiff)
+          setLoading(false)
+          return Alert.alert(
+            'Kullanıcı Adı Değiştirilemez',
+            `Kullanıcı adınızı 14 günde bir değiştirebilirsiniz. Bir sonraki değiştirme hakkınız: ${remainingDays} gün sonra.`
+          )
+        }
+      }
+
+      // 2. Benzersiz Kullanıcı Adı Denetimi
+      if (isUsernameChanged) {
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('id')
+          .ilike('username', cleanUsername)
+          .neq('id', session.user.id)
+          .maybeSingle()
+
+        if (existingUser) {
+          setLoading(false)
+          return Alert.alert(
+            'Kullanıcı Adı Alınmış',
+            'Bu kullanıcı adı başka bir üye tarafından kullanılıyor. Lütfen farklı bir kullanıcı adı seçin.'
+          )
+        }
+      }
+
+      const nowIso = new Date().toISOString()
 
       let { error } = await supabase
         .from('profiles')
@@ -136,10 +187,10 @@ export default function ProfileScreen() {
           id: session.user.id,
           username: cleanUsername,
           full_name: cleanFullName,
+          updated_at: nowIso,
         })
 
       if (error) {
-        // Fallback: full_name kolonu henüz sunucuda yoksa sadece id ve username upsert et
         const res = await supabase
           .from('profiles')
           .upsert({
@@ -152,12 +203,24 @@ export default function ProfileScreen() {
       if (error) {
         Alert.alert('Güncelleme Başarısız', getCleanErrorMessage(error))
       } else {
-        Alert.alert('Profil Güncellendi 🎉', 'Bilgileriniz başarıyla kaydedildi.')
+        setInitialFullName(cleanFullName)
+        setInitialUsername(cleanUsername)
+        if (isUsernameChanged) {
+          setLastUsernameUpdate(nowIso)
+        }
+        setIsEditing(false)
+        Alert.alert('Profil Güncellendi', 'Bilgileriniz başarıyla kaydedildi.')
       }
     } catch (e: any) {
       Alert.alert('Hata', getCleanErrorMessage(e))
     }
     setLoading(false)
+  }
+
+  function cancelEdit() {
+    setFullName(initialFullName)
+    setUsername(initialUsername)
+    setIsEditing(false)
   }
 
   async function searchUser() {
@@ -298,11 +361,11 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={s.container}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={s.topRow}>
           <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
-          <TouchableOpacity style={s.settingsBtn} onPress={() => router.push('/(tabs)/settings')}>
-            <Text style={{ fontSize: 18 }}>⚙️</Text>
+          <TouchableOpacity style={[s.settingsBtn, { width: 'auto', paddingHorizontal: 12 }]} onPress={() => router.push('/(tabs)/settings')}>
+            <Text style={{ fontSize: 13, color: theme.textSub, fontWeight: '600' }}>Ayarlar</Text>
           </TouchableOpacity>
         </View>
 
@@ -311,10 +374,12 @@ export default function ProfileScreen() {
           <TouchableOpacity style={s.avatarContainer} onPress={pickAvatar} activeOpacity={0.8}>
             {avatar
               ? <Image source={{ uri: avatar }} style={s.avatar} />
-              : <View style={s.avatarPlaceholder}><Text style={{ fontSize: 36 }}>👤</Text></View>}
-            <View style={s.cameraBadge}>
-              <Text style={{ fontSize: 12 }}>📷</Text>
-            </View>
+              : <View style={s.avatarPlaceholder}><Text style={{ fontSize: 24, fontWeight: '700', color: theme.textSub }}>{(username || 'D')[0].toUpperCase()}</Text></View>}
+            {isEditing && (
+              <View style={s.cameraBadge}>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: theme.bg }}>+</Text>
+              </View>
+            )}
           </TouchableOpacity>
           <Text style={s.displayName}>{fullName || username || 'Kullanıcı'}</Text>
           <Text style={s.handleText}>@{username || 'kullanici'}</Text>
@@ -324,61 +389,75 @@ export default function ProfileScreen() {
         <View style={s.statsRow}>
           <View style={s.statCard}>
             <Text style={s.statNum}>{stats.posts}</Text>
-            <Text style={s.statLabel}>📸 Paylaşım</Text>
+            <Text style={s.statLabel}>Paylaşım</Text>
           </View>
           <View style={s.statCard}>
             <Text style={s.statNum}>{stats.votes}</Text>
-            <Text style={s.statLabel}>🗳️ Oy</Text>
+            <Text style={s.statLabel}>Oy</Text>
           </View>
           <View style={s.statCard}>
             <Text style={s.statNum}>{stats.friends}</Text>
-            <Text style={s.statLabel}>👥 Arkadaş</Text>
+            <Text style={s.statLabel}>Arkadaş</Text>
           </View>
         </View>
 
         {/* Tab Switcher */}
         <View style={s.tabRow}>
           <TouchableOpacity style={[s.tabBtn, tab === 'profile' && s.tabBtnActive]} onPress={() => setTab('profile')}>
-            <Text style={[s.tabText, tab === 'profile' && s.tabTextActive]}>👤 Profil Bilgileri</Text>
+            <Text style={[s.tabText, tab === 'profile' && s.tabTextActive]}>Profil Bilgileri</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[s.tabBtn, tab === 'friends' && s.tabBtnActive]} onPress={() => setTab('friends')}>
             <Text style={[s.tabText, tab === 'friends' && s.tabTextActive]}>
-              👥 Arkadaşlar {requests.length > 0 ? `(${requests.length})` : ''}
+              Arkadaşlar {requests.length > 0 ? `(${requests.length})` : ''}
             </Text>
           </TouchableOpacity>
         </View>
 
         {tab === 'profile' ? (
           <View style={s.formCard}>
-            <Text style={s.inputLabel}>AD SOYAD</Text>
-            <TextInput
-              style={s.input}
-              value={fullName}
-              onChangeText={setFullName}
-              placeholder="Ad Soyad"
-              placeholderTextColor={theme.textSub}
-            />
+            {!isEditing ? (
+              <TouchableOpacity style={s.saveBtn} onPress={() => setIsEditing(true)} activeOpacity={0.8}>
+                <Text style={s.saveBtnText}>Düzenle</Text>
+              </TouchableOpacity>
+            ) : (
+              <>
+                <Text style={s.inputLabel}>AD SOYAD</Text>
+                <TextInput
+                  style={s.input}
+                  value={fullName}
+                  onChangeText={setFullName}
+                  placeholder="Ad Soyad"
+                  placeholderTextColor={theme.textSub}
+                  editable={!loading}
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
 
-            <Text style={s.inputLabel}>KULLANICI ADI</Text>
-            <TextInput
-              style={s.input}
-              value={username}
-              onChangeText={setUsername}
-              placeholder="kullanici_adi"
-              placeholderTextColor={theme.textSub}
-              autoCapitalize="none"
-            />
+                <Text style={s.inputLabel}>KULLANICI ADI</Text>
+                <TextInput
+                  style={s.input}
+                  value={username}
+                  onChangeText={setUsername}
+                  placeholder="kullanici_adi"
+                  placeholderTextColor={theme.textSub}
+                  autoCapitalize="none"
+                  editable={!loading}
+                  returnKeyType="done"
+                  blurOnSubmit={true}
+                  onSubmitEditing={Keyboard.dismiss}
+                />
 
-            <Text style={s.inputLabel}>E-POSTA</Text>
-            <TextInput
-              style={[s.input, { opacity: 0.7 }]}
-              value={session?.user.email}
-              editable={false}
-            />
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
+                  <TouchableOpacity style={[s.saveBtn, { flex: 1, backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.border }]} onPress={cancelEdit} disabled={loading} activeOpacity={0.8}>
+                    <Text style={[s.saveBtnText, { color: theme.textSub }]}>İptal</Text>
+                  </TouchableOpacity>
 
-            <TouchableOpacity style={s.saveBtn} onPress={saveProfileInfo} disabled={loading} activeOpacity={0.8}>
-              {loading ? <ActivityIndicator color={theme.bg} /> : <Text style={s.saveBtnText}>Profil Bilgilerini Güncelle</Text>}
-            </TouchableOpacity>
+                  <TouchableOpacity style={[s.saveBtn, { flex: 1.5 }]} onPress={saveProfileInfo} disabled={loading} activeOpacity={0.8}>
+                    {loading ? <ActivityIndicator color={theme.bg} /> : <Text style={s.saveBtnText}>Kaydet</Text>}
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
           </View>
         ) : (
           <>
@@ -391,6 +470,8 @@ export default function ProfileScreen() {
                 placeholder="Kullanıcı adı ara..."
                 placeholderTextColor={theme.textSub}
                 autoCapitalize="none"
+                returnKeyType="search"
+                blurOnSubmit={true}
                 onSubmitEditing={searchUser}
               />
               <TouchableOpacity style={s.searchBtn} onPress={searchUser} disabled={searching} activeOpacity={0.8}>
@@ -399,15 +480,19 @@ export default function ProfileScreen() {
             </View>
 
             {searchResult && searchResult !== 'not_found' && (
-              <View style={s.friendCard}>
+              <TouchableOpacity
+                style={s.friendCard}
+                onPress={() => router.push({ pathname: '/user-profile', params: { userId: (searchResult as Profile).id } })}
+                activeOpacity={0.8}
+              >
                 {searchResult.avatar_url
                   ? <Image source={{ uri: searchResult.avatar_url }} style={s.friendAvatar} />
-                  : <View style={s.friendAvatarPlaceholder}><Text>👤</Text></View>}
+                  : <View style={s.friendAvatarPlaceholder}><Text style={{ fontSize: 16, fontWeight: '700', color: theme.textSub }}>{searchResult.username[0].toUpperCase()}</Text></View>}
                 <Text style={s.friendName}>{searchResult.username}</Text>
                 <TouchableOpacity style={s.addBtn} onPress={() => sendRequest((searchResult as Profile).id)}>
                   <Text style={s.addBtnText}>+ Ekle</Text>
                 </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             )}
             {searchResult === 'not_found' && <Text style={s.empty}>Aradığınız kullanıcı bulunamadı</Text>}
 
@@ -416,10 +501,15 @@ export default function ProfileScreen() {
               <>
                 <Text style={s.sectionLabel}>ARKADAŞLIK İSTEKLERİ</Text>
                 {requests.map(r => (
-                  <View key={r.friendship_id} style={s.friendCard}>
+                  <TouchableOpacity
+                    key={r.friendship_id}
+                    style={s.friendCard}
+                    onPress={() => router.push({ pathname: '/user-profile', params: { userId: r.id } })}
+                    activeOpacity={0.8}
+                  >
                     {r.avatar_url
                       ? <Image source={{ uri: r.avatar_url }} style={s.friendAvatar} />
-                      : <View style={s.friendAvatarPlaceholder}><Text>👤</Text></View>}
+                      : <View style={s.friendAvatarPlaceholder}><Text style={{ fontSize: 16, fontWeight: '700', color: theme.textSub }}>{r.username[0].toUpperCase()}</Text></View>}
                     <Text style={s.friendName}>{r.username}</Text>
                     <TouchableOpacity style={s.rejectBtn} onPress={() => rejectRequest(r.friendship_id)}>
                       <Text style={s.rejectBtnText}>Reddet</Text>
@@ -427,7 +517,7 @@ export default function ProfileScreen() {
                     <TouchableOpacity style={s.acceptBtn} onPress={() => acceptRequest(r.friendship_id)}>
                       <Text style={s.acceptBtnText}>Kabul Et</Text>
                     </TouchableOpacity>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </>
             )}
@@ -437,15 +527,26 @@ export default function ProfileScreen() {
             {friends.length === 0 ? (
               <Text style={s.empty}>Henüz listenizde arkadaşınız yok.{'\n'}Kullanıcı adıyla arayıp arkadaş ekleyebilirsiniz!</Text>
             ) : friends.map(f => (
-              <View key={f.friendship_id} style={s.friendCard}>
+              <TouchableOpacity
+                key={f.friendship_id}
+                style={s.friendCard}
+                onPress={() => router.push({ pathname: '/user-profile', params: { userId: f.id } })}
+                activeOpacity={0.8}
+              >
                 {f.avatar_url
                   ? <Image source={{ uri: f.avatar_url }} style={s.friendAvatar} />
-                  : <View style={s.friendAvatarPlaceholder}><Text>👤</Text></View>}
+                  : <View style={s.friendAvatarPlaceholder}><Text style={{ fontSize: 16, fontWeight: '700', color: theme.textSub }}>{f.username[0].toUpperCase()}</Text></View>}
                 <Text style={s.friendName}>{f.username}</Text>
+                <TouchableOpacity
+                  style={[s.acceptBtn, { paddingHorizontal: 12, paddingVertical: 6, marginRight: 6 }]}
+                  onPress={() => router.push({ pathname: '/chat/[friendId]', params: { friendId: f.id } })}
+                >
+                  <Text style={s.acceptBtnText}>Mesaj 💬</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={s.removeBtn} onPress={() => removeFriend(f.friendship_id)}>
                   <Text style={s.removeBtnText}>Çıkar</Text>
                 </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             ))}
           </>
         )}

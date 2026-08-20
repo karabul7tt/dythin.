@@ -15,24 +15,30 @@ Notifications.setNotificationHandler({
 })
 
 export async function registerForPushNotificationsAsync(userId?: string): Promise<string | null> {
-  if (!Device.isDevice) {
-    return null
-  }
+  let finalStatus = 'denied'
+  try {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync()
+    finalStatus = existingStatus
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync()
-  let finalStatus = existingStatus
-
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync()
-    finalStatus = status
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync()
+      finalStatus = status
+    }
+  } catch (e) {
+    // Permission request failed or not supported
   }
 
   if (finalStatus !== 'granted') {
     return null
   }
 
+  if (!Device.isDevice) {
+    return null
+  }
+
   try {
-    const tokenData = await Notifications.getExpoPushTokenAsync()
+    const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID || 'f7bea319-3747-4543-8ef1-503ca5d49a12'
+    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId })
     const pushToken = tokenData.data
 
     if (userId && pushToken) {

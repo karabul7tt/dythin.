@@ -1,0 +1,194 @@
+import React, { useEffect, useState } from 'react'
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from 'react-native'
+import { useRouter } from 'expo-router'
+import { useApp } from '../context/AppContext'
+import { supabase } from '../lib/supabase'
+import type { Profile, Message } from '../lib/types'
+
+type ChatItem = {
+  friend: Profile
+  lastMessage: Message
+}
+
+export default function MessagesInboxScreen() {
+  const { theme, session } = useApp()
+  const router = useRouter()
+  const [chats, setChats] = useState<ChatItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (session?.user.id) {
+      fetchConversations()
+    }
+  }, [session?.user.id])
+
+  async function fetchConversations() {
+    setLoading(true)
+    const userId = session?.user.id
+    if (!userId) return
+
+    // Fetch all messages involving the current user
+    const { data: rawMessages } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+      .order('created_at', { ascending: false })
+
+    if (!rawMessages || rawMessages.length === 0) {
+      setChats([])
+      setLoading(false)
+      return
+    }
+
+    // Group by friend ID to get the latest message for each chat
+    const friendMap: { [friendId: string]: Message } = {}
+    rawMessages.forEach(msg => {
+      const friendId = msg.sender_id === userId ? msg.receiver_id : msg.sender_id
+      if (!friendMap[friendId]) {
+        friendMap[friendId] = msg as Message
+      }
+    })
+
+    const friendIds = Object.keys(friendMap)
+    if (friendIds.length === 0) {
+      setChats([])
+      setLoading(false)
+      return
+    }
+
+    // Fetch friend profiles
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('*')
+      .in('id', friendIds)
+
+    const profileMap: { [id: string]: Profile } = {}
+    profiles?.forEach(p => {
+      profileMap[p.id] = p as Profile
+    })
+
+    const chatItems: ChatItem[] = friendIds.map(fId => ({
+      friend: profileMap[fId] || { id: fId, username: 'Kullanıcı', avatar_url: null, created_at: '' },
+      lastMessage: friendMap[fId],
+    }))
+
+    setChats(chatItems)
+    setLoading(false)
+  }
+
+  function formatTime(iso: string) {
+    if (!iso) return ''
+    const d = new Date(iso)
+    const hours = d.getHours().toString().padStart(2, '0')
+    const mins = d.getMinutes().toString().padStart(2, '0')
+    return `${hours}:${mins}`
+  }
+
+  const s = StyleSheet.create({
+    container: { flex: 1, backgroundColor: theme.bg },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+      borderBottomWidth: 0.5,
+      borderBottomColor: theme.border,
+    },
+    backBtn: { paddingRight: 16 },
+    backText: { fontSize: 20, color: theme.text },
+    headerTitle: { fontSize: 18, fontWeight: '700', color: theme.text },
+    scroll: { padding: 16 },
+    
+    chatCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.card,
+      borderRadius: 16,
+      padding: 14,
+      marginBottom: 12,
+      borderWidth: 0.5,
+      borderColor: theme.border,
+    },
+    avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 14 },
+    avatarPlaceholder: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      backgroundColor: theme.bg,
+      borderWidth: 1,
+      borderColor: theme.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 14,
+    },
+    chatInfo: { flex: 1 },
+    topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+    friendName: { fontSize: 15, fontWeight: '700', color: theme.text },
+    timeText: { fontSize: 11, color: theme.textSub },
+    lastMsgText: { fontSize: 13, color: theme.textSub },
+    emptyText: { color: theme.textSub, fontSize: 14, textAlign: 'center', marginVertical: 60 },
+  })
+
+  return (
+    <SafeAreaView style={s.container}>
+      <View style={s.header}>
+        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+          <Text style={s.backText}>←</Text>
+        </TouchableOpacity>
+        <Text style={s.headerTitle}>Mesajlarım 💬</Text>
+      </View>
+
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator color={theme.accent} />
+        </View>
+      ) : (
+        <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+          {chats.length === 0 ? (
+            <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+              <Text style={s.emptyText}>Henüz hiç mesajınız yok.{'\n'}Arkadaşlarınızın profilinden sohbet başlatabilirsiniz!</Text>
+            </View>
+          ) : (
+            chats.map(item => (
+              <TouchableOpacity
+                key={item.friend.id}
+                style={s.chatCard}
+                onPress={() => router.push({ pathname: '/chat/[friendId]', params: { friendId: item.friend.id } })}
+                activeOpacity={0.8}
+              >
+                {item.friend.avatar_url ? (
+                  <Image source={{ uri: item.friend.avatar_url }} style={s.avatar} />
+                ) : (
+                  <View style={s.avatarPlaceholder}>
+                    <Text style={{ fontSize: 18, fontWeight: '700', color: theme.textSub }}>
+                      {(item.friend.username || 'D')[0].toUpperCase()}
+                    </Text>
+                  </View>
+                )}
+
+                <View style={s.chatInfo}>
+                  <View style={s.topRow}>
+                    <Text style={s.friendName}>{item.friend.full_name || item.friend.username || 'Kullanıcı'}</Text>
+                    <Text style={s.timeText}>{formatTime(item.lastMessage.created_at)}</Text>
+                  </View>
+                  <Text style={s.lastMsgText} numberOfLines={1}>
+                    {item.lastMessage.sender_id === session?.user.id ? 'Sen: ' : ''}{item.lastMessage.content}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
+        </ScrollView>
+      )}
+    </SafeAreaView>
+  )
+}

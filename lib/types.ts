@@ -9,7 +9,20 @@ export type Profile = {
   avatar_url: string | null
   push_token: string | null
   role?: UserRole // 'user' veya 'admin' rolü
+  message_privacy?: 'everyone' | 'friends' // Mesaj gizlilik ayarı
+  is_private?: boolean // Gizli hesap ayarı
+  updated_at?: string
   created_at: string
+}
+
+export type Message = {
+  id: string
+  sender_id: string
+  receiver_id: string
+  content: string
+  is_read?: boolean
+  created_at: string
+  sender?: Profile
 }
 
 export type Post = {
