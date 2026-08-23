@@ -207,18 +207,19 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
           {zoomUri && (
             <ScrollView
               key={zoomUri}
+              style={{ width: '100%', height: '100%' }}
+              contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}
               maximumZoomScale={4}
               minimumZoomScale={1}
-              zoomScale={1}
-              contentOffset={{ x: 0, y: 0 }}
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
-              style={{ width: '100%', height: '100%' }}
-              contentContainerStyle={{ width: SCREEN_WIDTH, height: Dimensions.get('window').height, justifyContent: 'center', alignItems: 'center' }}
+              bouncesZoom={false}
             >
-              <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-                <Image source={{ uri: zoomUri }} style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.4 }} resizeMode="contain" />
-              </TouchableOpacity>
+              <Image
+                source={{ uri: zoomUri }}
+                style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.3 }}
+                resizeMode="contain"
+              />
             </ScrollView>
           )}
 
