@@ -100,9 +100,9 @@ export default function ResultsScreen() {
     logoDot: { color: theme.accent },
     card: { borderRadius: 16, overflow: 'hidden', borderWidth: 0.5, borderColor: theme.border, marginBottom: 16, backgroundColor: theme.card },
     cardTop: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderBottomWidth: 0.5, borderBottomColor: theme.border },
-    thumbSingle: { width: 48, height: 48, borderRadius: 10 },
-    thumbABContainer: { flexDirection: 'row', gap: 4, width: 48, height: 48, borderRadius: 10, overflow: 'hidden' },
-    thumbHalf: { width: 22, height: 48 },
+    thumbSingle: { width: 52, height: 52, borderRadius: 10 },
+    thumbABContainer: { flexDirection: 'row', gap: 4, width: 68, height: 52, alignItems: 'center', justifyContent: 'center' },
+    thumbHalf: { width: 32, height: 52, borderRadius: 8, overflow: 'hidden' },
     cardTitle: { fontSize: 13, fontWeight: '600', color: theme.text, flex: 1 },
     cardSub: { fontSize: 10, color: theme.textSub, marginTop: 2 },
     deleteBtn: { width: 32, height: 32, borderRadius: 8, borderWidth: 0.5, borderColor: '#c0605a', alignItems: 'center', justifyContent: 'center' },
@@ -230,31 +230,40 @@ export default function ResultsScreen() {
 
       {/* Full-Screen Pinch-to-Zoom Lightbox Modal */}
       <Modal visible={!!zoomUri} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}
+          activeOpacity={1}
+          onPress={() => setZoomUri(null)}
+        >
           <TouchableOpacity
             style={{ position: 'absolute', top: 50, right: 20, zIndex: 10, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
             onPress={() => setZoomUri(null)}
           >
             <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
           </TouchableOpacity>
+
           {zoomUri && (
             <ScrollView
+              key={zoomUri}
               maximumZoomScale={4}
               minimumZoomScale={1}
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}
             >
-              <Image source={{ uri: zoomUri }} style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.8 }} resizeMode="contain" />
+              <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+                <Image source={{ uri: zoomUri }} style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.8 }} resizeMode="contain" />
+              </TouchableOpacity>
             </ScrollView>
           )}
+
           <TouchableOpacity
             style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20 }}
             onPress={() => setZoomUri(null)}
           >
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
           </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   )

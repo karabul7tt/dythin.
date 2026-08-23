@@ -192,31 +192,40 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
 
       {/* Full-Screen Zoom Lightbox Modal */}
       <Modal visible={!!zoomUri} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center', padding: 10 }}>
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}
+          activeOpacity={1}
+          onPress={() => setZoomUri(null)}
+        >
           <TouchableOpacity
             style={{ position: 'absolute', top: 50, right: 20, zIndex: 10, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
             onPress={() => setZoomUri(null)}
           >
             <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
           </TouchableOpacity>
+
           {zoomUri && (
             <ScrollView
+              key={zoomUri}
               maximumZoomScale={4}
               minimumZoomScale={1}
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}
             >
-              <Image source={{ uri: zoomUri }} style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.4 }} resizeMode="contain" />
+              <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+                <Image source={{ uri: zoomUri }} style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.4 }} resizeMode="contain" />
+              </TouchableOpacity>
             </ScrollView>
           )}
+
           <TouchableOpacity
             style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20 }}
             onPress={() => setZoomUri(null)}
           >
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
           </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </Animated.View>
   )
