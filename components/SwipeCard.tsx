@@ -16,14 +16,6 @@ type Props = {
 
 export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown }: Props) {
   const { theme } = useApp()
-  const [zoomUri, setZoomUri] = useState<string | null>(null)
-  const [zoomKey, setZoomKey] = useState<number>(0)
-
-  const openZoom = (uri: string) => {
-    setZoomKey(Date.now())
-    setZoomUri(uri)
-  }
-
   const position = useRef(new Animated.ValueXY()).current
 
   const rotate = position.x.interpolate({
@@ -49,23 +41,7 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
     onPanResponderMove: (_, gesture) => {
       position.setValue({ x: gesture.dx, y: gesture.dy })
     },
-    onPanResponderRelease: (evt, gesture) => {
-      // Tap Detection (moved less than 8px)
-      if (Math.abs(gesture.dx) < 8 && Math.abs(gesture.dy) < 8) {
-        const touchX = gesture.x0 || evt.nativeEvent.pageX || 0
-        if (post.image_b_url) {
-          if (touchX < SCREEN_WIDTH / 2) {
-            openZoom(post.image_a_url || (post as any).image_url)
-          } else {
-            openZoom(post.image_b_url)
-          }
-        } else {
-          openZoom(post.image_a_url || (post as any).image_url)
-        }
-        Animated.spring(position, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start()
-        return
-      }
-
+    onPanResponderRelease: (_, gesture) => {
       // Vertical Swipe Down (Reels / TikTok next poll skip)
       if (gesture.dy > SWIPE_THRESHOLD && Math.abs(gesture.dy) > Math.abs(gesture.dx)) {
         Animated.spring(position, { toValue: { x: 0, y: SCREEN_WIDTH * 1.5 }, useNativeDriver: false }).start()
@@ -144,8 +120,7 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
   })
 
   return (
-    <>
-      <Animated.View
+    <Animated.View
         style={[s.card, { transform: [{ translateX: position.x }, { translateY: position.y }, { rotate }] }]}
         {...panResponder.panHandlers}
       >
@@ -198,54 +173,5 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
         {post.description ? <Text style={s.desc}>{post.description}</Text> : null}
       </View>
     </Animated.View>
-
-    {/* Full-Screen Zoom Lightbox Modal OUTSIDE Animated.View */}
-    {!!zoomUri && (
-      <Modal visible={true} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
-          {/* Background tap to dismiss */}
-          <TouchableOpacity
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-            activeOpacity={1}
-            onPress={() => setZoomUri(null)}
-          />
-
-          {/* Close button top right */}
-          <TouchableOpacity
-            style={{ position: 'absolute', top: 50, right: 20, zIndex: 30, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
-            onPress={() => setZoomUri(null)}
-          >
-            <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
-          </TouchableOpacity>
-
-          {/* Image Zoom ScrollView */}
-          <ScrollView
-            key={zoomKey.toString()}
-            style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-            maximumZoomScale={4}
-            minimumZoomScale={1}
-            centerContent={true}
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            bouncesZoom={false}
-          >
-            <Image
-              source={{ uri: zoomUri }}
-              style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.75, alignSelf: 'center' }}
-              resizeMode="contain"
-            />
-          </ScrollView>
-
-          {/* Bottom Kapat button */}
-          <TouchableOpacity
-            style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, zIndex: 30 }}
-            onPress={() => setZoomUri(null)}
-          >
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-    )}
-  </>
-)
+  )
 }
