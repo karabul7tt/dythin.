@@ -209,9 +209,12 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
               key={zoomUri}
               maximumZoomScale={4}
               minimumZoomScale={1}
+              zoomScale={1}
+              contentOffset={{ x: 0, y: 0 }}
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}
+              style={{ width: '100%', height: '100%' }}
+              contentContainerStyle={{ width: SCREEN_WIDTH, height: Dimensions.get('window').height, justifyContent: 'center', alignItems: 'center' }}
             >
               <TouchableOpacity activeOpacity={1} onPress={() => {}}>
                 <Image source={{ uri: zoomUri }} style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.4 }} resizeMode="contain" />

@@ -247,9 +247,12 @@ export default function ResultsScreen() {
               key={zoomUri}
               maximumZoomScale={4}
               minimumZoomScale={1}
+              zoomScale={1}
+              contentOffset={{ x: 0, y: 0 }}
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}
+              style={{ width: '100%', height: '100%' }}
+              contentContainerStyle={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height, justifyContent: 'center', alignItems: 'center' }}
             >
               <TouchableOpacity activeOpacity={1} onPress={() => {}}>
                 <Image source={{ uri: zoomUri }} style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.8 }} resizeMode="contain" />
