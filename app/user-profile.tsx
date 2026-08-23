@@ -36,6 +36,11 @@ export default function UserProfileScreen() {
     setZoomUri(uri)
   }
 
+  const closeZoom = () => {
+    setZoomUri(null)
+    setZoomKey(0)
+  }
+
   useEffect(() => {
     if (userId) {
       fetchUserProfile()
@@ -461,19 +466,19 @@ export default function UserProfileScreen() {
 
       {/* Full-Screen Pinch-to-Zoom Lightbox Modal */}
       {!!zoomUri && (
-        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
+        <Modal visible={true} transparent animationType="fade" onRequestClose={closeZoom}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
             {/* Background tap to dismiss */}
             <TouchableOpacity
               style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               activeOpacity={1}
-              onPress={() => setZoomUri(null)}
+              onPress={closeZoom}
             />
 
             {/* Close button top right */}
             <TouchableOpacity
               style={{ position: 'absolute', top: 50, right: 20, zIndex: 30, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
-              onPress={() => setZoomUri(null)}
+              onPress={closeZoom}
             >
               <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
             </TouchableOpacity>
@@ -499,7 +504,7 @@ export default function UserProfileScreen() {
             {/* Bottom Kapat button */}
             <TouchableOpacity
               style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, zIndex: 30 }}
-              onPress={() => setZoomUri(null)}
+              onPress={closeZoom}
             >
               <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
             </TouchableOpacity>
