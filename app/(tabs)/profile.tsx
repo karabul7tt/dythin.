@@ -364,8 +364,26 @@ export default function ProfileScreen() {
       <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={s.topRow}>
           <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
-          <TouchableOpacity style={[s.settingsBtn, { width: 'auto', paddingHorizontal: 12 }]} onPress={() => router.push('/(tabs)/settings')}>
-            <Text style={{ fontSize: 13, color: theme.textSub, fontWeight: '600' }}>Ayarlar</Text>
+          <TouchableOpacity
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: theme.card,
+              borderWidth: 0.5,
+              borderColor: theme.border,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              elevation: 2,
+            }}
+            onPress={() => router.push('/(tabs)/settings')}
+            activeOpacity={0.75}
+          >
+            <Text style={{ fontSize: 16 }}>⚙️</Text>
           </TouchableOpacity>
         </View>
 

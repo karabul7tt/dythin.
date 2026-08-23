@@ -119,12 +119,18 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
     >
       {post.image_b_url ? (
         <View style={s.imageContainer}>
-          <View style={[s.imageHalfContainer, { backgroundColor: '#0a0a12' }]}>
-            <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.imageHalf} resizeMode="contain" />
+          <View style={[s.imageHalfContainer, { backgroundColor: '#0a0a12', overflow: 'hidden' }]}>
+            <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.imageHalf} resizeMode="cover" />
+            <View style={{ position: 'absolute', top: 10, left: 10, backgroundColor: 'rgba(201, 168, 76, 0.85)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 10, fontWeight: '800' }}>SOLDAN</Text>
+            </View>
           </View>
 
-          <View style={[s.imageHalfContainer, { borderLeftWidth: 1.5, borderLeftColor: 'rgba(255,255,255,0.2)', backgroundColor: '#0a0a12' }]}>
-            <Image source={{ uri: post.image_b_url }} style={s.imageHalf} resizeMode="contain" />
+          <View style={[s.imageHalfContainer, { borderLeftWidth: 2, borderLeftColor: 'rgba(255,255,255,0.4)', backgroundColor: '#0a0a12', overflow: 'hidden' }]}>
+            <Image source={{ uri: post.image_b_url }} style={s.imageHalf} resizeMode="cover" />
+            <View style={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(127, 119, 221, 0.85)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
+              <Text style={{ color: '#fff', fontSize: 10, fontWeight: '800' }}>SAĞDAN</Text>
+            </View>
           </View>
         </View>
       ) : (
