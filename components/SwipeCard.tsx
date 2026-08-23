@@ -135,13 +135,21 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
       {...panResponder.panHandlers}
     >
       {post.image_b_url ? (
-        <View style={s.imageContainer}>
-          <View style={[s.imageHalfContainer, { backgroundColor: '#0a0a12', justifyContent: 'center', alignItems: 'center' }]}>
-            <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.imageHalf} resizeMode="contain" />
+        <View style={{ flexDirection: 'row', width: '100%', height: 470, padding: 10, gap: 10 }}>
+          {/* Left Photo A */}
+          <View style={{ flex: 1, height: '100%', borderRadius: 16, overflow: 'hidden', backgroundColor: '#0a0a12', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', position: 'relative' }}>
+            <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+            <View style={{ position: 'absolute', bottom: 10, left: 10, backgroundColor: 'rgba(0,0,0,0.75)', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 }}>
+              <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: '700' }}>Sol</Text>
+            </View>
           </View>
 
-          <View style={[s.imageHalfContainer, { borderLeftWidth: 1.5, borderLeftColor: 'rgba(255,255,255,0.2)', backgroundColor: '#0a0a12', justifyContent: 'center', alignItems: 'center' }]}>
-            <Image source={{ uri: post.image_b_url }} style={s.imageHalf} resizeMode="contain" />
+          {/* Right Photo B */}
+          <View style={{ flex: 1, height: '100%', borderRadius: 16, overflow: 'hidden', backgroundColor: '#0a0a12', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', position: 'relative' }}>
+            <Image source={{ uri: post.image_b_url }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+            <View style={{ position: 'absolute', bottom: 10, right: 10, backgroundColor: 'rgba(0,0,0,0.75)', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 }}>
+              <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: '700' }}>Sağ</Text>
+            </View>
           </View>
         </View>
       ) : (
