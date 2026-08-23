@@ -44,10 +44,9 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
     onPanResponderRelease: (evt, gesture) => {
       // Tap Detection (moved less than 8px)
       if (Math.abs(gesture.dx) < 8 && Math.abs(gesture.dy) < 8) {
-        const tapX = evt.nativeEvent.locationX
-        const cardWidth = SCREEN_WIDTH - 20
+        const touchX = gesture.x0 || evt.nativeEvent.pageX || 0
         if (post.image_b_url) {
-          if (tapX < cardWidth / 2) {
+          if (touchX < SCREEN_WIDTH / 2) {
             setZoomUri(post.image_a_url || (post as any).image_url)
           } else {
             setZoomUri(post.image_b_url)
