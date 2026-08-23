@@ -181,7 +181,7 @@ export default function ResultsScreen() {
 
                 <View style={s.cardBody}>
                   <View style={s.barRow}>
-                    <Text style={[s.barLabel, { color: '#C9A84C' }]}>{isAB ? 'Sol' : 'Beğendim'}</Text>
+                    <Text style={[s.barLabel, { color: '#C9A84C' }]}>{isAB ? 'Sol' : 'Beğenildi'}</Text>
                     <View style={s.barTrack}>
                       <View style={[s.barFill, { width: `${pctA}%`, backgroundColor: '#C9A84C' }]} />
                     </View>
@@ -189,7 +189,7 @@ export default function ResultsScreen() {
                   </View>
 
                   <View style={s.barRow}>
-                    <Text style={[s.barLabel, { color: '#7F77DD' }]}>{isAB ? 'Sağ' : 'Geçtim'}</Text>
+                    <Text style={[s.barLabel, { color: '#7F77DD' }]}>{isAB ? 'Sağ' : 'Beğenilmedi'}</Text>
                     <View style={s.barTrack}>
                       <View style={[s.barFill, { width: `${pctB}%`, backgroundColor: '#7F77DD' }]} />
                     </View>

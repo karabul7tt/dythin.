@@ -331,8 +331,8 @@ export default function VoteScreen() {
                       <Text style={s.badgeLetterPass}>✕</Text>
                     </View>
                     <View style={s.btnTextCol}>
-                      <Text style={s.btnMainTextPass}>Geçtim</Text>
-                      <Text style={s.btnSubText}>Beğenmedim</Text>
+                      <Text style={s.btnMainTextPass}>Beğenmedim</Text>
+                      <Text style={s.btnSubText}>Geçtim (Sola Kaydır)</Text>
                     </View>
                   </TouchableOpacity>
 
@@ -342,7 +342,7 @@ export default function VoteScreen() {
                     </View>
                     <View style={s.btnTextCol}>
                       <Text style={s.btnMainTextLike}>Beğendim</Text>
-                      <Text style={s.btnSubTextB}>Harika Seçim</Text>
+                      <Text style={s.btnSubTextB}>Harika Seçim (Sağa Kaydır)</Text>
                     </View>
                   </TouchableOpacity>
                 </>
