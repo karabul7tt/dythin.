@@ -198,20 +198,20 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
       </View>
 
       {/* Full-Screen Zoom Lightbox Modal */}
-      <Modal visible={!!zoomUri} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
-        <TouchableOpacity
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}
-          activeOpacity={1}
-          onPress={() => setZoomUri(null)}
-        >
+      {!!zoomUri && (
+        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
           <TouchableOpacity
-            style={{ position: 'absolute', top: 50, right: 20, zIndex: 10, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+            style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}
+            activeOpacity={1}
             onPress={() => setZoomUri(null)}
           >
-            <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={{ position: 'absolute', top: 50, right: 20, zIndex: 10, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+              onPress={() => setZoomUri(null)}
+            >
+              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
+            </TouchableOpacity>
 
-          {zoomUri && (
             <ScrollView
               key={zoomKey.toString()}
               style={{ width: '100%', height: '100%' }}
@@ -228,16 +228,16 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
                 resizeMode="contain"
               />
             </ScrollView>
-          )}
 
-          <TouchableOpacity
-            style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20 }}
-            onPress={() => setZoomUri(null)}
-          >
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
+            <TouchableOpacity
+              style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20 }}
+              onPress={() => setZoomUri(null)}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
+            </TouchableOpacity>
           </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+        </Modal>
+      )}
     </Animated.View>
   )
 }
