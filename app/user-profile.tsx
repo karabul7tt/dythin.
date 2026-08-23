@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
   View,
   Text,
@@ -11,11 +11,86 @@ import {
   Alert,
   Modal,
   Dimensions,
+  Animated,
+  PanResponder,
 } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import type { Profile, Post, Vote } from '../lib/types'
+
+const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
+
+/** İki parmakla zoom yapılabilen tam ekran fotoğraf bileşeni */
+function ZoomablePhoto({ uri, accentColor, onClose }: { uri: string; accentColor: string; onClose: () => void }) {
+  const scale = useRef(new Animated.Value(1)).current
+  const lastScale = useRef(1)
+  const initialDistance = useRef(0)
+
+  const getDistance = (touches: any[]) => {
+    const dx = touches[0].pageX - touches[1].pageX
+    const dy = touches[0].pageY - touches[1].pageY
+    return Math.sqrt(dx * dx + dy * dy)
+  }
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: (evt) => evt.nativeEvent.touches.length === 2,
+      onMoveShouldSetPanResponder: (evt) => evt.nativeEvent.touches.length === 2,
+      onPanResponderGrant: (evt) => {
+        if (evt.nativeEvent.touches.length === 2) {
+          initialDistance.current = getDistance(Array.from(evt.nativeEvent.touches))
+        }
+      },
+      onPanResponderMove: (evt) => {
+        const touches = Array.from(evt.nativeEvent.touches)
+        if (touches.length === 2 && initialDistance.current > 0) {
+          const dist = getDistance(touches)
+          const newScale = Math.max(1, Math.min(4, lastScale.current * (dist / initialDistance.current)))
+          scale.setValue(newScale)
+        }
+      },
+      onPanResponderRelease: () => {
+        lastScale.current = (scale as any)._value ?? 1
+        if (lastScale.current < 1) {
+          Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start()
+          lastScale.current = 1
+        }
+        initialDistance.current = 0
+      },
+    })
+  ).current
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
+      <Animated.View style={{ transform: [{ scale }] }} {...panResponder.panHandlers}>
+        <Image
+          source={{ uri }}
+          style={{ width: WIN_W, height: WIN_H * 0.80 }}
+          resizeMode="contain"
+        />
+      </Animated.View>
+
+      {/* X butonu */}
+      <TouchableOpacity
+        style={{ position: 'absolute', top: 55, right: 20, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+        onPress={onClose}
+        activeOpacity={0.8}
+      >
+        <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
+      </TouchableOpacity>
+
+      {/* Kapat butonu */}
+      <TouchableOpacity
+        style={{ position: 'absolute', bottom: 45, backgroundColor: accentColor, paddingHorizontal: 32, paddingVertical: 13, borderRadius: 25 }}
+        onPress={onClose}
+        activeOpacity={0.8}
+      >
+        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Kapat</Text>
+      </TouchableOpacity>
+    </View>
+  )
+}
 
 export default function UserProfileScreen() {
   const { theme, session } = useApp()
@@ -469,44 +544,10 @@ export default function UserProfileScreen() {
         )}
       </ScrollView>
 
-      {/* Full-Screen Photo Lightbox */}
+      {/* Full-Screen Zoomable Photo Lightbox */}
       {zoomMounted && zoomUri ? (
         <Modal visible={true} transparent animationType="fade" onRequestClose={closeZoom} statusBarTranslucent>
-          <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
-
-            {/* Fotoğraf tam ekran */}
-            <Image
-              source={{ uri: zoomUri }}
-              style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.80 }}
-              resizeMode="contain"
-            />
-
-            {/* X butonu sağ üst */}
-            <TouchableOpacity
-              style={{ position: 'absolute', top: 55, right: 20, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
-              onPress={closeZoom}
-              activeOpacity={0.8}
-            >
-              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
-            </TouchableOpacity>
-
-            {/* Arka plana basınca kapat */}
-            <TouchableOpacity
-              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 110 }}
-              activeOpacity={1}
-              onPress={closeZoom}
-            />
-
-            {/* Kapat butonu alt */}
-            <TouchableOpacity
-              style={{ position: 'absolute', bottom: 45, backgroundColor: theme.accent, paddingHorizontal: 32, paddingVertical: 13, borderRadius: 25 }}
-              onPress={closeZoom}
-              activeOpacity={0.8}
-            >
-              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Kapat</Text>
-            </TouchableOpacity>
-
-          </View>
+          <ZoomablePhoto uri={zoomUri} accentColor={theme.accent} onClose={closeZoom} />
         </Modal>
       ) : null}
     </SafeAreaView>
