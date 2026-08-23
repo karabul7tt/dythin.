@@ -29,26 +29,21 @@ export default function UserProfileScreen() {
   const [loading, setLoading] = useState(true)
   const [votingMap, setVotingMap] = useState<{ [postId: string]: boolean }>({})
   const [zoomUri, setZoomUri] = useState<string>('')
-  const [zoomVisible, setZoomVisible] = useState(false)
-  const [zoomKey, setZoomKey] = useState(0)
+  const [zoomMounted, setZoomMounted] = useState(false)
 
   const openZoom = (uri: string) => {
-    // Önce tamamen kapat, sonra yeni bir key ile aç (iOS ScrollView sıfırlansın diye)
-    setZoomVisible(false)
+    // Tamamen unmount et, sonra yeni URI ile yeniden mount et
+    setZoomMounted(false)
     setZoomUri('')
     setTimeout(() => {
       setZoomUri(uri)
-      setZoomKey(k => k + 1)
-      setZoomVisible(true)
-    }, 50)
+      setZoomMounted(true)
+    }, 80)
   }
 
   const closeZoom = () => {
-    setZoomVisible(false)
-    setTimeout(() => {
-      setZoomUri('')
-      setZoomKey(0)
-    }, 300)
+    setZoomMounted(false)
+    setZoomUri('')
   }
 
   useEffect(() => {
@@ -474,28 +469,27 @@ export default function UserProfileScreen() {
         )}
       </ScrollView>
 
-      {/* Full-Screen Pinch-to-Zoom Lightbox Modal */}
-      <Modal visible={zoomVisible} transparent animationType="fade" onRequestClose={closeZoom}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
-          {/* Background tap to dismiss */}
-          <TouchableOpacity
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-            activeOpacity={1}
-            onPress={closeZoom}
-          />
+      {/* Full-Screen Pinch-to-Zoom Lightbox Modal — tamamen unmount/remount edilir */}
+      {zoomMounted && zoomUri ? (
+        <Modal visible={true} transparent animationType="fade" onRequestClose={closeZoom}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
+            {/* Background tap to dismiss */}
+            <TouchableOpacity
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              activeOpacity={1}
+              onPress={closeZoom}
+            />
 
-          {/* Close button top right */}
-          <TouchableOpacity
-            style={{ position: 'absolute', top: 50, right: 20, zIndex: 30, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
-            onPress={closeZoom}
-          >
-            <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
-          </TouchableOpacity>
+            {/* Close button top right */}
+            <TouchableOpacity
+              style={{ position: 'absolute', top: 50, right: 20, zIndex: 30, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+              onPress={closeZoom}
+            >
+              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
+            </TouchableOpacity>
 
-          {/* Image Zoom ScrollView — key değişince iOS zoom sıfırlanır */}
-          {zoomUri ? (
+            {/* Fresh ScrollView — her mount'ta sıfırdan başlar */}
             <ScrollView
-              key={`zoom-${zoomKey}`}
               style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height }}
               maximumZoomScale={4}
               minimumZoomScale={1}
@@ -510,17 +504,17 @@ export default function UserProfileScreen() {
                 resizeMode="contain"
               />
             </ScrollView>
-          ) : null}
 
-          {/* Bottom Kapat button */}
-          <TouchableOpacity
-            style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, zIndex: 30 }}
-            onPress={closeZoom}
-          >
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
+            {/* Bottom Kapat button */}
+            <TouchableOpacity
+              style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, zIndex: 30 }}
+              onPress={closeZoom}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      ) : null}
     </SafeAreaView>
   )
 }
