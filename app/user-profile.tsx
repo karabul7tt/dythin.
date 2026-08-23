@@ -469,49 +469,43 @@ export default function UserProfileScreen() {
         )}
       </ScrollView>
 
-      {/* Full-Screen Pinch-to-Zoom Lightbox Modal — tamamen unmount/remount edilir */}
+      {/* Full-Screen Photo Lightbox */}
       {zoomMounted && zoomUri ? (
-        <Modal visible={true} transparent animationType="fade" onRequestClose={closeZoom}>
-          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
-            {/* Background tap to dismiss */}
-            <TouchableOpacity
-              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-              activeOpacity={1}
-              onPress={closeZoom}
+        <Modal visible={true} transparent animationType="fade" onRequestClose={closeZoom} statusBarTranslucent>
+          <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
+
+            {/* Fotoğraf tam ekran */}
+            <Image
+              source={{ uri: zoomUri }}
+              style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.80 }}
+              resizeMode="contain"
             />
 
-            {/* Close button top right */}
+            {/* X butonu sağ üst */}
             <TouchableOpacity
-              style={{ position: 'absolute', top: 50, right: 20, zIndex: 30, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+              style={{ position: 'absolute', top: 55, right: 20, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
               onPress={closeZoom}
+              activeOpacity={0.8}
             >
               <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
             </TouchableOpacity>
 
-            {/* Fresh ScrollView — her mount'ta sıfırdan başlar */}
-            <ScrollView
-              style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height }}
-              maximumZoomScale={4}
-              minimumZoomScale={1}
-              centerContent={true}
-              showsHorizontalScrollIndicator={false}
-              showsVerticalScrollIndicator={false}
-              bouncesZoom={false}
-            >
-              <Image
-                source={{ uri: zoomUri }}
-                style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.75, alignSelf: 'center' }}
-                resizeMode="contain"
-              />
-            </ScrollView>
-
-            {/* Bottom Kapat button */}
+            {/* Arka plana basınca kapat */}
             <TouchableOpacity
-              style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, zIndex: 30 }}
+              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 110 }}
+              activeOpacity={1}
               onPress={closeZoom}
+            />
+
+            {/* Kapat butonu alt */}
+            <TouchableOpacity
+              style={{ position: 'absolute', bottom: 45, backgroundColor: theme.accent, paddingHorizontal: 32, paddingVertical: 13, borderRadius: 25 }}
+              onPress={closeZoom}
+              activeOpacity={0.8}
             >
-              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
+              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Kapat</Text>
             </TouchableOpacity>
+
           </View>
         </Modal>
       ) : null}
