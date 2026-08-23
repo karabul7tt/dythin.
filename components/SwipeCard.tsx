@@ -11,9 +11,10 @@ type Props = {
   post: Post
   onSwipeLeft: () => void
   onSwipeRight: () => void
+  onSwipeDown?: () => void
 }
 
-export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
+export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown }: Props) {
   const { theme } = useApp()
   const [zoomUri, setZoomUri] = useState<string | null>(null)
   const position = useRef(new Animated.ValueXY()).current
@@ -39,7 +40,7 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
   const panResponder = useRef(PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderMove: (_, gesture) => {
-      position.setValue({ x: gesture.dx, y: gesture.dy / 4 })
+      position.setValue({ x: gesture.dx, y: gesture.dy })
     },
     onPanResponderRelease: (evt, gesture) => {
       // Tap Detection (moved less than 8px)
@@ -58,7 +59,13 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
         return
       }
 
-      if (gesture.dx > SWIPE_THRESHOLD) {
+      // Vertical Swipe Down (Reels / TikTok next poll skip)
+      if (gesture.dy > SWIPE_THRESHOLD && Math.abs(gesture.dy) > Math.abs(gesture.dx)) {
+        Animated.spring(position, { toValue: { x: 0, y: SCREEN_WIDTH * 1.5 }, useNativeDriver: false }).start()
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+        if (onSwipeDown) setTimeout(onSwipeDown, 200)
+        else setTimeout(onSwipeLeft, 200)
+      } else if (gesture.dx > SWIPE_THRESHOLD) {
         Animated.spring(position, { toValue: { x: SCREEN_WIDTH * 1.5, y: 0 }, useNativeDriver: false }).start()
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
         setTimeout(onSwipeRight, 200)

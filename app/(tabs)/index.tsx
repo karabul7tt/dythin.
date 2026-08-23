@@ -248,6 +248,14 @@ export default function VoteScreen() {
     </SafeAreaView>
   )
 
+  function handleSkip() {
+    if (tab === 'public') {
+      setPosts(prev => prev.slice(1))
+    } else {
+      setFriendPosts(prev => prev.slice(1))
+    }
+  }
+
   return (
     <SafeAreaView style={s.container}>
       <View style={s.inner}>
@@ -296,6 +304,7 @@ export default function VoteScreen() {
                 post={current}
                 onSwipeLeft={() => handleVote('A')}
                 onSwipeRight={() => handleVote('B')}
+                onSwipeDown={handleSkip}
               />
             </View>
             <View style={s.btnRow}>
