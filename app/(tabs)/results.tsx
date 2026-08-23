@@ -256,17 +256,17 @@ export default function ResultsScreen() {
             {/* Image Zoom ScrollView */}
             <ScrollView
               key={zoomKey.toString()}
-              style={{ width: Dimensions.get('window').width, height: '100%' }}
-              contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}
+              style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height }}
               maximumZoomScale={4}
               minimumZoomScale={1}
+              centerContent={true}
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
               bouncesZoom={false}
             >
               <Image
                 source={{ uri: zoomUri }}
-                style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.8 }}
+                style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.75, alignSelf: 'center' }}
                 resizeMode="contain"
               />
             </ScrollView>

@@ -4,7 +4,7 @@ import { View, Text, Image, StyleSheet, Dimensions, PanResponder, Animated, Moda
 import { useApp } from '../context/AppContext'
 import type { Post } from '../lib/types'
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window')
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3
 
 type Props = {
@@ -219,17 +219,17 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
             {/* Image Zoom ScrollView */}
             <ScrollView
               key={zoomKey.toString()}
-              style={{ width: SCREEN_WIDTH, height: '100%' }}
-              contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}
+              style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
               maximumZoomScale={4}
               minimumZoomScale={1}
+              centerContent={true}
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
               bouncesZoom={false}
             >
               <Image
                 source={{ uri: zoomUri }}
-                style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.3 }}
+                style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.75, alignSelf: 'center' }}
                 resizeMode="contain"
               />
             </ScrollView>
