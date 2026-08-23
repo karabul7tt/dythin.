@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>dythin.com.tr</title>
+  <meta name="description" content="Kombinlerin, ürün tercihlerin ve kararsızlıkların için fotoğraflarınla topluluktan ve arkadaşlarından anında oy topla. %100 Ücretsiz!">
+  <meta name="keywords" content="dythin, oylama uygulaması, kombin seçimi, A/B karşılaştırma, sosyal oylama, kararsızlık uygulaması, moda tavsiyesi">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph / WhatsApp / Instagram / Facebook Link Önizleme Kartı -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dythin.com.tr/">
+  <meta property="og:title" content="dythin.com.tr">
+  <meta property="og:description" content="Kombinlerin ve kararsızlıkların için fotoğraflarınla topluluktan ve arkadaşlarından anında canlı oy topla.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&h=630&q=80">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://dythin.com.tr/">
+  <meta name="twitter:title" content="dythin.com.tr">
+  <meta name="twitter:description" content="Kombinlerin ve kararsızlıkların için fotoğraflarınla anında canlı oy topla.">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&h=630&q=80">
+
+  <!-- Site Logosu / Favicon -->
+  <link rel="icon" type="image/png" href="https://img.icons8.com/isometric/96/sparkles.png">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- AOS (Animate On Scroll) CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#000000',
+              card: '#0c0c14',
+              surface: '#141420',
+              border: '#1f1f30',
+              accent: '#7F77DD',
+              accentHover: '#6b63c7',
+              gold: '#C9A84C',
+              text: '#f5f5f7',
+              textSub: '#86868b',
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Helvetica Neue"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #000000;
+      color: #f5f5f7;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Apple Glass Header */
+    .apple-glass {
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Apple Glass Cards */
+    .apple-card {
+      background: rgba(18, 18, 28, 0.65);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .apple-card:hover {
+      border-color: rgba(127, 119, 221, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -15px rgba(127, 119, 221, 0.15);
+    }
+
+    /* iPhone 16 Pro Frame */
+    .iphone-frame {
+      width: 320px;
+      height: 650px;
+      background: #000;
+      border-radius: 54px;
+      border: 11px solid #1c1c1e;
+      position: relative;
+      box-shadow: 0 30px 100px -20px rgba(127, 119, 221, 0.3), 0 0 0 1px rgba(255,255,255,0.1);
+      overflow: hidden;
+    }
+    @media (min-width: 768px) {
+      .iphone-frame {
+        width: 350px;
+        height: 710px;
+        border-radius: 58px;
+        border-width: 12px;
+      }
+    }
+
+    /* Dynamic Island */
+    .dynamic-island {
+      width: 100px;
+      height: 28px;
+      background: #000;
+      border-radius: 20px;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+    }
+    .camera-dot {
+      width: 10px;
+      height: 10px;
+      background: #111;
+      border-radius: 50%;
+      border: 1px solid #222;
+    }
+
+    /* Apple Text Gradient */
+    .text-gradient {
+      background: linear-gradient(135deg, #ffffff 0%, #a1a1a6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .text-accent-gradient {
+      background: linear-gradient(135deg, #a49bf0 0%, #7F77DD 50%, #C9A84C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #000;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #222;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #333;
+    }
+  </style>
+</head>
+<body class="selection:bg-brand-accent selection:text-white overflow-x-hidden">
+
+  <!-- Navigation Bar -->
+  <header class="fixed top-0 left-0 right-0 z-50 apple-glass">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 group">
+        <span class="text-2xl font-bold tracking-tight text-white">dythin<span class="text-brand-accent">.</span></span>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-8 text-xs font-medium text-brand-textSub">
+        <a href="#features" class="hover:text-white transition-colors">Özellikler</a>
+        <a href="#scenarios" class="hover:text-white transition-colors">Kullanım Alanları</a>
+        <a href="#privacy" class="hover:text-white transition-colors">Gizlilik & Güvenlik</a>
+        <a href="#faq" class="hover:text-white transition-colors">SSS</a>
+      </nav>
+
+      <div class="flex items-center gap-4">
+        <button onclick="openQrModal()" class="hidden sm:inline-flex items-center gap-2 text-xs font-medium text-white/80 hover:text-white px-3 py-1.5 rounded-full border border-white/15 hover:border-white/30 transition-all">
+          <i class="fa-solid fa-qrcode text-brand-accent"></i>
+          <span>QR Tara</span>
+        </button>
+        <a href="#download" class="text-xs font-semibold text-black bg-white hover:bg-gray-200 px-4 py-2 rounded-full transition-all shadow-sm">
+          Uygulamayı İndir
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative pt-32 pb-20 md:pt-44 md:pb-32 overflow-hidden">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      
+      <!-- Hero Badge -->
+      <div data-aos="fade-down" class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-brand-textSub mb-8">
+        <span>Sosyal Karar Platformu</span>
+      </div>
+
+      <!-- Headline -->
+      <h1 data-aos="fade-up" data-aos-delay="100" class="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-gradient max-w-4xl mx-auto leading-[1.1] mb-6">
+        Kararsız Kaldığın Her An.<br />
+        <span class="text-accent-gradient">Tek Dokunuşla Doğru Seçim.</span>
+      </h1>
+
+      <!-- Subheadline -->
+      <p data-aos="fade-up" data-aos-delay="200" class="text-base sm:text-xl text-brand-textSub max-w-2xl mx-auto font-normal leading-relaxed mb-10">
+        Kombinlerin, ürün kıyaslamaların ve karar veremediğin her şey için fotoğraflarını yükle; topluluktan ve arkadaşlarından anında oy topla.
+      </p>
+
+      <!-- CTA Store Buttons -->
+      <div data-aos="fade-up" data-aos-delay="300" class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <a href="#download" class="w-full sm:w-auto flex items-center justify-center gap-3 bg-white text-black font-semibold px-7 py-3.5 rounded-full hover:bg-gray-100 transition-all text-sm shadow-lg shadow-white/5">
+          <i class="fa-brands fa-apple text-xl"></i>
+          <div class="text-left leading-none">
+            <div class="text-[9px] uppercase tracking-wider opacity-60">İndirin</div>
+            <div class="font-bold text-sm">App Store</div>
+          </div>
+        </a>
+
+        <a href="#download" class="w-full sm:w-auto flex items-center justify-center gap-3 bg-brand-surface text-white border border-white/10 font-semibold px-7 py-3.5 rounded-full hover:bg-brand-card hover:border-white/20 transition-all text-sm">
+          <i class="fa-brands fa-google-play text-lg text-brand-accent"></i>
+          <div class="text-left leading-none">
+            <div class="text-[9px] uppercase tracking-wider text-brand-textSub">İndirin</div>
+            <div class="font-bold text-sm">Google Play</div>
+          </div>
+        </a>
+
+        <button onclick="openQrModal()" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-transparent text-brand-textSub hover:text-white px-5 py-3.5 rounded-full text-xs font-medium transition-all">
+          <i class="fa-solid fa-qrcode"></i>
+          <span>QR Kod İle İncele</span>
+        </button>
+      </div>
+
+      <!-- Device Showcase -->
+      <div data-aos="zoom-in" data-aos-delay="400" class="relative max-w-md mx-auto flex justify-center">
+        <!-- Ambient Glow -->
+        <div class="absolute -inset-4 bg-gradient-to-r from-brand-accent/20 to-brand-gold/20 rounded-[60px] blur-3xl opacity-50 -z-10"></div>
+        
+        <!-- Phone Device Frame -->
+        <div class="iphone-frame text-left flex flex-col justify-between p-4">
+          <!-- Dynamic Notch -->
+          <div class="dynamic-island">
+            <div class="camera-dot"></div>
+          </div>
+
+          <!-- App Screen Header -->
+          <div class="pt-8 px-2 flex items-center justify-between border-b border-white/10 pb-3">
+            <span class="text-lg font-bold text-white tracking-tight">dythin<span class="text-brand-accent">.</span></span>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-brand-textSub bg-white/5 px-2 py-0.5 rounded-full">🌍 Genel</span>
+              <span class="text-[10px] text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded-full">2 oylama</span>
+            </div>
+          </div>
+
+          <!-- App Screen Card Content -->
+          <div class="my-auto py-2">
+            <div class="bg-[#12121e] rounded-2xl overflow-hidden border border-white/10 p-3 shadow-2xl">
+              <!-- Post Title -->
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-white">Bu iki kombin arasından hangisi? 👗</span>
+                <span class="text-[10px] text-brand-gold font-medium">⏱️ 14 saat kaldı</span>
+              </div>
+
+              <!-- Photos Side by Side -->
+              <div class="grid grid-cols-2 gap-2 h-56 rounded-xl overflow-hidden mb-3 bg-[#0a0a12] p-1">
+                <div class="relative h-full rounded-lg overflow-hidden border border-white/5">
+                  <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Kombin 1">
+                  <div class="absolute bottom-2 left-2 text-[10px] font-bold text-white bg-black/80 px-2 py-0.5 rounded-full">Sol</div>
+                </div>
+                <div class="relative h-full rounded-lg overflow-hidden border border-white/5">
+                  <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Kombin 2">
+                  <div class="absolute bottom-2 right-2 text-[10px] font-bold text-brand-accent bg-black/80 px-2 py-0.5 rounded-full">Sağ</div>
+                </div>
+              </div>
+
+              <!-- Vote Options Buttons -->
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                <button class="py-2 rounded-xl bg-[#1b1a28] border border-brand-gold text-brand-gold text-xs font-bold text-center">
+                  Soldaki
+                </button>
+                <button class="py-2 rounded-xl bg-brand-accent text-white text-xs font-bold text-center shadow-lg shadow-brand-accent/20">
+                  Sağdaki
+                </button>
+              </div>
+
+              <!-- Live Stats Bar -->
+              <div class="bg-black/40 rounded-lg p-2 border border-white/5">
+                <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden flex mb-1">
+                  <div class="h-full bg-brand-gold" style="width: 68%;"></div>
+                  <div class="h-full bg-brand-accent" style="width: 32%;"></div>
+                </div>
+                <div class="flex justify-between text-[9px] text-brand-textSub font-medium">
+                  <span>Soldaki: %68 (142 Oy)</span>
+                  <span>Sağdaki: %32 (66 Oy)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- App Bottom Nav Bar -->
+          <div class="pt-2 border-t border-white/10 flex justify-around text-brand-textSub text-xs">
+            <span class="text-brand-accent font-bold"><i class="fa-solid fa-layer-group"></i></span>
+            <span><i class="fa-solid fa-plus-circle"></i></span>
+            <span><i class="fa-solid fa-chart-pie"></i></span>
+            <span><i class="fa-solid fa-user"></i></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section id="features" class="py-24 border-t border-white/10 bg-black">
+    <div class="max-w-6xl mx-auto px-6">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
+        <h2 class="text-xs font-semibold text-brand-accent uppercase tracking-widest mb-3">Tasarım & Mimari</h2>
+        <p class="text-3xl sm:text-5xl font-bold tracking-tight text-white">Net, Hızlı ve Sade Özellikler</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Feature 1 -->
+        <div data-aos="fade-up" data-aos-delay="100" class="apple-card rounded-3xl p-8 flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-accent/15 border border-brand-accent/30 flex items-center justify-center text-brand-accent text-xl mb-6">
+              <i class="fa-solid fa-expand"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">Dev Kırpılmayan Görseller</h3>
+            <p class="text-sm text-brand-textSub leading-relaxed">
+              Fotoğraflarınız sıkışmaz, daralmaz. Yüksek çözünürlüklü dikey çerçevede kombin veya kıyafetinizin tamamı netlikle görünür.
+            </p>
+          </div>
+          <div class="mt-8 pt-4 border-t border-white/5 text-xs text-brand-accent font-medium">
+            %100 HD Görüntü Kalitesi &rarr;
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div data-aos="fade-up" data-aos-delay="200" class="apple-card rounded-3xl p-8 flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-gold/15 border border-brand-gold/30 flex items-center justify-center text-brand-gold text-xl mb-6">
+              <i class="fa-solid fa-comments"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">Anlık DM Sohbet</h3>
+            <p class="text-sm text-brand-textSub leading-relaxed">
+              Kararsız kaldığınız oylamayı sadece oylamakla kalmayın; arkadaşlarınızla anlık 1-a-1 mesajlaşarak fikir alışverişi yapın.
+            </p>
+          </div>
+          <div class="mt-8 pt-4 border-t border-white/5 text-xs text-brand-gold font-medium">
+            Canlı Mesajlaşma Altyapısı &rarr;
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div data-aos="fade-up" data-aos-delay="300" class="apple-card rounded-3xl p-8 flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-xl mb-6">
+              <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">Gizli Profil & Gizlilik</h3>
+            <p class="text-sm text-brand-textSub leading-relaxed">
+              Profilinizi tek tıkla gizliye alın. Oylamalarınızı ve içeriklerinizi sadece onayladığınız arkadaşlarınız incelesin.
+            </p>
+          </div>
+          <div class="mt-8 pt-4 border-t border-white/5 text-xs text-white/80 font-medium">
+            Uçtan Uca Tam Güvenlik &rarr;
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Usage Scenarios ("Kararsız Kaldığınız Her Yerde") -->
+  <section id="scenarios" class="py-24 bg-[#05050a] border-t border-white/10">
+    <div class="max-w-6xl mx-auto px-6">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
+        <h2 class="text-xs font-semibold text-brand-gold uppercase tracking-widest mb-3">Günlük Yaşam</h2>
+        <p class="text-3xl sm:text-5xl font-bold tracking-tight text-white">Kararsız Kaldığınız Her Yerde</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        
+        <!-- Scenario 1 -->
+        <div data-aos="fade-up" data-aos-delay="100" class="apple-card rounded-2xl p-6">
+          <div class="text-2xl mb-3 text-brand-accent"><i class="fa-solid fa-shirt"></i></div>
+          <h4 class="text-base font-bold text-white mb-2">Kombin & Stil</h4>
+          <p class="text-xs text-brand-textSub leading-normal">
+            "Aynadaki iki elbiseden hangisi akşamki davete daha çok uyar?"
+          </p>
+        </div>
+
+        <!-- Scenario 2 -->
+        <div data-aos="fade-up" data-aos-delay="200" class="apple-card rounded-2xl p-6">
+          <div class="text-2xl mb-3 text-brand-gold"><i class="fa-solid fa-bag-shopping"></i></div>
+          <h4 class="text-base font-bold text-white mb-2">Alışveriş & Ürünler</h4>
+          <p class="text-xs text-brand-textSub leading-normal">
+            "Siyah spor ayakkabı mı yoksa beyaz deri model mi?"
+          </p>
+        </div>
+
+        <!-- Scenario 3 -->
+        <div data-aos="fade-up" data-aos-delay="300" class="apple-card rounded-2xl p-6">
+          <div class="text-2xl mb-3 text-brand-accent"><i class="fa-solid fa-utensils"></i></div>
+          <h4 class="text-base font-bold text-white mb-2">Mekan & Yeme-İçme</h4>
+          <p class="text-xs text-brand-textSub leading-normal">
+            "Bu akşam kahveye nereye gitmeliyiz?"
+          </p>
+        </div>
+
+        <!-- Scenario 4 -->
+        <div data-aos="fade-up" data-aos-delay="400" class="apple-card rounded-2xl p-6">
+          <div class="text-2xl mb-3 text-white"><i class="fa-solid fa-film"></i></div>
+          <h4 class="text-base font-bold text-white mb-2">Film & Eğlence</h4>
+          <p class="text-xs text-brand-textSub leading-normal">
+            "Hangi diziyi izlemeye başlayalım?"
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- SSS (FAQ Accordion) Section -->
+  <section id="faq" class="py-24 border-t border-white/10 bg-[#05050b] w-full">
+    <div class="max-w-4xl mx-auto px-6 w-full">
+      
+      <div class="text-center mb-12" data-aos="fade-up">
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-3">Sıkça Sorulan Sorular</h2>
+        <p class="text-xs sm:text-sm text-brand-textSub font-normal">Aklınıza takılan sorular ve yanıtları.</p>
+      </div>
+
+      <div class="space-y-3.5 w-full" data-aos="fade-up" data-aos-delay="100">
+        
+        <!-- FAQ 1 -->
+        <div class="bg-[#12121e] border border-white/10 rounded-2xl overflow-hidden w-full">
+          <button onclick="toggleFaq(1)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-sm sm:text-base text-white hover:text-brand-accent transition-colors">
+            <span class="pr-4">1. Dythin tamamen ücretsiz mi?</span>
+            <i id="faqIcon-1" class="fa-solid fa-chevron-down text-brand-textSub text-xs transition-transform duration-300"></i>
+          </button>
+          <div id="faqAns-1" class="hidden px-6 pb-5 text-xs sm:text-sm text-brand-textSub leading-relaxed border-t border-white/5 pt-3">
+            Evet, Dythin tamamen ücretsizdir. Fotoğraf yüklemek, oylama başlatmak, DM mesajlaşmak ve tüm topluluk özelliklerinden faydalanmak için hiçbir ücret ödemezsiniz.
+          </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="bg-[#12121e] border border-white/10 rounded-2xl overflow-hidden w-full">
+          <button onclick="toggleFaq(2)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-sm sm:text-base text-white hover:text-brand-accent transition-colors">
+            <span class="pr-4">2. Oylamalarımı sadece arkadaşlarıma özel yapabilir miyim?</span>
+            <i id="faqIcon-2" class="fa-solid fa-chevron-down text-brand-textSub text-xs transition-transform duration-300"></i>
+          </button>
+          <div id="faqAns-2" class="hidden px-6 pb-5 text-xs sm:text-sm text-brand-textSub leading-relaxed border-t border-white/5 pt-3">
+            Evet, yeni bir oylama oluştururken hedef kitleyi "Sadece Arkadaşlarım" olarak seçebilir veya profilinizi gizliye alarak içeriklerinizi sadece izin verdiğiniz kişilere açabilirsiniz.
+          </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="bg-[#12121e] border border-white/10 rounded-2xl overflow-hidden w-full">
+          <button onclick="toggleFaq(3)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-sm sm:text-base text-white hover:text-brand-accent transition-colors">
+            <span class="pr-4">3. Oylama sistemi nasıl çalışır?</span>
+            <i id="faqIcon-3" class="fa-solid fa-chevron-down text-brand-textSub text-xs transition-transform duration-300"></i>
+          </button>
+          <div id="faqAns-3" class="hidden px-6 pb-5 text-xs sm:text-sm text-brand-textSub leading-relaxed border-t border-white/5 pt-3">
+            Fotoğraflarınızı veya tercihinizi yüklersiniz. Topluluk ve arkadaşlarınız 24 saat boyunca oy kullanır. Oyunuzu kullandığınız an veya 24 saat sürenin sonunda canlı oy dağılımı belirlenir.
+          </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="bg-[#12121e] border border-white/10 rounded-2xl overflow-hidden w-full">
+          <button onclick="toggleFaq(4)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-sm sm:text-base text-white hover:text-brand-accent transition-colors">
+            <span class="pr-4">4. Hesabımı ve verilerimi silebilir miyim?</span>
+            <i id="faqIcon-4" class="fa-solid fa-chevron-down text-brand-textSub text-xs transition-transform duration-300"></i>
+          </button>
+          <div id="faqAns-4" class="hidden px-6 pb-5 text-xs sm:text-sm text-brand-textSub leading-relaxed border-t border-white/5 pt-3">
+            Evet, Ayarlar bölümünden hesabınızı, oylamalarınızı ve kişisel verilerinizi dilediğiniz an kalıcı olarak silebilirsiniz.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Screenshot Bottom CTA Section -->
+  <section id="download" class="py-24 bg-[#000000] border-t border-white/10 text-center relative overflow-hidden w-full">
+    <div class="max-w-4xl mx-auto px-6 w-full" data-aos="fade-up">
+      
+      <h2 class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-tight mb-4">
+        Kararsızlığa son verin,<br />
+        <span class="text-brand-accent">Dythin</span> topluluğuna katılın.
+      </h2>
+      
+      <p class="text-xs sm:text-base text-brand-textSub font-normal mb-10 max-w-lg mx-auto">
+        Uygulamayı indirin, seçimleriniz için anında oy toplayın.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="https://dythin.com.tr" class="w-full sm:w-auto flex items-center justify-center gap-3 bg-white text-black font-semibold px-8 py-3.5 rounded-full hover:bg-gray-100 transition-all text-sm shadow-lg shadow-white/5">
+          <i class="fa-brands fa-apple text-xl"></i>
+          <span>App Store'dan İndir</span>
+        </a>
+        <a href="https://dythin.com.tr" class="w-full sm:w-auto flex items-center justify-center gap-3 bg-brand-surface text-white border border-white/15 font-semibold px-8 py-3.5 rounded-full hover:bg-brand-card transition-all text-sm">
+          <i class="fa-brands fa-google-play text-lg text-brand-accent"></i>
+          <span>Google Play'den İndir</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Clean Footer -->
+  <footer class="py-12 border-t border-white/10 bg-[#000000] text-xs text-brand-textSub w-full">
+    <div class="max-w-6xl mx-auto px-6 w-full flex flex-col md:flex-row items-center justify-between gap-6">
+      
+      <div class="flex items-center gap-3">
+        <span class="text-xl font-bold text-white tracking-tight">dythin<span class="text-brand-accent">.</span></span>
+        <span>&copy; 2026 Dythin Inc. Tüm Hakları Saklıdır.</span>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <a href="https://instagram.com/dythin.app" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center gap-2">
+          <i class="fa-brands fa-instagram text-sm"></i>
+          <span>dythin.app</span>
+        </a>
+        <button onclick="openModal('privacy')" class="hover:text-white transition-colors">Gizlilik Politikası</button>
+        <button onclick="openModal('terms')" class="hover:text-white transition-colors">Kullanım Koşulları</button>
+      </div>
+
+    </div>
+  </footer>
+
+  <script>
+    function toggleFaq(id) {
+      const ans = document.getElementById('faqAns-' + id);
+      const icon = document.getElementById('faqIcon-' + id);
+      if (ans.classList.contains('hidden')) {
+        ans.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+      } else {
+        ans.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+    }
+  </script>
+
+  <!-- QR Modal -->
+  <div id="qrModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center hidden p-4">
+    <div class="bg-[#12121e] border border-white/15 rounded-3xl p-8 max-w-sm w-full text-center relative shadow-2xl">
+      <button onclick="closeQrModal()" class="absolute top-4 right-4 text-brand-textSub hover:text-white text-lg">✕</button>
+      <div class="w-12 h-12 bg-brand-accent/20 rounded-full flex items-center justify-center text-brand-accent text-xl mx-auto mb-4">
+        <i class="fa-solid fa-qrcode"></i>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2">Dythin'i Hemen Aç</h3>
+      <p class="text-xs text-brand-textSub mb-6">iPhone kameranızı QR koda tutarak uygulamayı anında telefonunuzda test edin.</p>
+      
+      <div class="bg-white p-4 rounded-2xl inline-block mb-4">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=exp://u.expo.dev/update/dythin" alt="Dythin QR Code" class="w-44 h-44 mx-auto">
+      </div>
+      
+      <p class="text-[11px] text-brand-textSub">dythin.com.tr</p>
+    </div>
+  </div>
+
+  <!-- Legal Modal -->
+  <div id="legalModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center hidden p-4">
+    <div class="bg-[#12121e] border border-white/15 rounded-3xl p-6 max-w-lg w-full relative shadow-2xl max-h-[80vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+        <h3 id="legalTitle" class="text-lg font-bold text-white"></h3>
+        <button onclick="closeLegalModal()" class="text-brand-textSub hover:text-white text-lg">✕</button>
+      </div>
+      <div id="legalBody" class="overflow-y-auto text-xs text-brand-textSub leading-relaxed space-y-3 flex-1 pr-2">
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 800,
+      once: true,
+      easing: 'ease-out-quad'
+    });
+
+    function openQrModal() {
+      document.getElementById('qrModal').classList.remove('hidden');
+    }
+    function closeQrModal() {
+      document.getElementById('qrModal').classList.add('hidden');
+    }
+
+    function openModal(type) {
+      const modal = document.getElementById('legalModal');
+      const title = document.getElementById('legalTitle');
+      const body = document.getElementById('legalBody');
+
+      if (type === 'privacy') {
+        title.innerText = 'Gizlilik Politikası';
+        body.innerHTML = `
+          <p>Dythin ("Platform"), kullanıcılarının gizliliğine ve kişisel verilerinin korunmasına büyük önem vermektedir.</p>
+          <p><strong>1. Veri Toplama:</strong> Sadece kayıt esnasında sağlanan e-posta adresi, kullanıcı adı ve paylaşılan oylama fotoğrafları işlenmektedir.</p>
+          <p><strong>2. Veri Kullanımı:</strong> Verileriniz sadece platform içi oylama, mesajlaşma ve profil hizmetlerinin sunulması amacıyla kullanılır. Üçüncü taraflarla asla satılmaz veya paylaşılmaz.</p>
+          <p><strong>3. Hesap Gizliliği:</strong> Ayarlar bölümünden profilinizi gizliye alarak içeriklerinizi sadece arkadaşlarınızın erişimine açabilirsiniz.</p>
+        `;
+      } else {
+        title.innerText = 'Kullanım Koşulları';
+        body.innerHTML = `
+          <p>Dythin platformunu kullanarak aşağıdaki kullanım şartlarını kabul etmiş sayılırsınız:</p>
+          <p><strong>1. İçerik Sorumluluğu:</strong> Paylaşılan tüm oylamalar ve mesajlar ilgili kullanıcının sorumluluğundadır. Telif hakkı ihlali veya uygunsuz içerik paylaşılamaz.</p>
+          <p><strong>2. Topluluk Kuralları:</strong> Diğer kullanıcılara saygısızlık, taciz veya nefret söylemi içeren davranışlar hesabın askıya alınmasına neden olur.</p>
+          <p><strong>3. Hizmet Değişiklikleri:</strong> Dythin, platform özelliklerini güncelleme veya değiştirme hakkını saklı tutar.</p>
+        `;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeLegalModal() {
+      document.getElementById('legalModal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
