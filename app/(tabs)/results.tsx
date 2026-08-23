@@ -196,24 +196,7 @@ export default function ResultsScreen() {
                     <Text style={s.barNum}>%{pctB}</Text>
                   </View>
 
-                  <View
-                    style={[
-                      s.verdict,
-                      {
-                        backgroundColor: theme.bg,
-                        borderWidth: 0.5,
-                        borderColor: theme.border,
-                      },
-                    ]}
-                  >
-                    <Text style={[s.verdictText, { color: total === 0 ? theme.textSub : theme.text }]}>
-                      {total === 0
-                        ? 'Oy bekleniyor...'
-                        : isAB
-                        ? `Önde Olan: ${isAWinning ? 'Sol Taraf 🅰️' : 'Sağ Taraf 🅱️'}`
-                        : `Karar: ${isAWinning ? '✓ Beğenildi' : '✕ Geçildi'}`}
-                    </Text>
-                  </View>
+
 
                   {/* Yorumlar Listesi */}
                   {comments.length > 0 && (
