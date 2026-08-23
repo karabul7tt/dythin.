@@ -137,9 +137,6 @@ export default function ResultsScreen() {
           <Text style={s.logo}>
             dythin<Text style={s.logoDot}>.</Text>
           </Text>
-          <TouchableOpacity onPress={fetchResults}>
-            <Text style={{ color: theme.accent, fontSize: 12, fontWeight: '600' }}>Yenile 🔄</Text>
-          </TouchableOpacity>
         </View>
 
         {posts.length === 0 ? (
@@ -174,27 +171,27 @@ export default function ResultsScreen() {
                     </Text>
                   </View>
                   <TouchableOpacity
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(239, 68, 68, 0.12)', borderHeight: 1, borderWidth: 0.5, borderColor: 'rgba(239, 68, 68, 0.3)', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 6 }}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255, 255, 255, 0.05)', borderWidth: 0.5, borderColor: theme.border, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 6 }}
                     onPress={() => deletePost(post.id)}
                     activeOpacity={0.8}
                   >
-                    <Text style={{ color: '#ef4444', fontSize: 12, fontWeight: '600' }}>🗑️ Sil</Text>
+                    <Text style={{ color: theme.textSub, fontSize: 12, fontWeight: '600' }}>🗑️ Sil</Text>
                   </TouchableOpacity>
                 </View>
 
                 <View style={s.cardBody}>
                   <View style={s.barRow}>
-                    <Text style={[s.barLabel, { color: theme.accent }]}>{isAB ? '🅰️ Foto A' : 'Beğendim'}</Text>
+                    <Text style={[s.barLabel, { color: '#C9A84C' }]}>{isAB ? 'Sol' : 'Beğendim'}</Text>
                     <View style={s.barTrack}>
-                      <View style={[s.barFill, { width: `${pctA}%`, backgroundColor: theme.accent }]} />
+                      <View style={[s.barFill, { width: `${pctA}%`, backgroundColor: '#C9A84C' }]} />
                     </View>
                     <Text style={s.barNum}>%{pctA}</Text>
                   </View>
 
                   <View style={s.barRow}>
-                    <Text style={[s.barLabel, { color: '#c0605a' }]}>{isAB ? '🅱️ Foto B' : 'Geçtim'}</Text>
+                    <Text style={[s.barLabel, { color: '#7F77DD' }]}>{isAB ? 'Sağ' : 'Geçtim'}</Text>
                     <View style={s.barTrack}>
-                      <View style={[s.barFill, { width: `${pctB}%`, backgroundColor: '#c0605a' }]} />
+                      <View style={[s.barFill, { width: `${pctB}%`, backgroundColor: '#7F77DD' }]} />
                     </View>
                     <Text style={s.barNum}>%{pctB}</Text>
                   </View>
@@ -203,18 +200,18 @@ export default function ResultsScreen() {
                     style={[
                       s.verdict,
                       {
-                        backgroundColor: isAWinning ? '#162010' : '#1e1010',
+                        backgroundColor: theme.bg,
                         borderWidth: 0.5,
-                        borderColor: isAWinning ? '#1e3018' : '#2e1818',
+                        borderColor: theme.border,
                       },
                     ]}
                   >
-                    <Text style={[s.verdictText, { color: isAWinning ? '#7aaa50' : '#c0605a' }]}>
+                    <Text style={[s.verdictText, { color: total === 0 ? theme.textSub : theme.text }]}>
                       {total === 0
                         ? 'Oy bekleniyor...'
                         : isAB
-                        ? `Kazanan: ${isAWinning ? 'Fotoğraf A 🅰️' : 'Fotoğraf B 🅱️'}`
-                        : `Karar: ${isAWinning ? '✓ Devam Et' : '✕ Vazgeç'}`}
+                        ? `Önde Olan: ${isAWinning ? 'Sol Taraf 🅰️' : 'Sağ Taraf 🅱️'}`
+                        : `Karar: ${isAWinning ? '✓ Beğenildi' : '✕ Geçildi'}`}
                     </Text>
                   </View>
 
