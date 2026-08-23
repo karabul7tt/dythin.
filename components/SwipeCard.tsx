@@ -144,10 +144,11 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
   })
 
   return (
-    <Animated.View
-      style={[s.card, { transform: [{ translateX: position.x }, { translateY: position.y }, { rotate }] }]}
-      {...panResponder.panHandlers}
-    >
+    <>
+      <Animated.View
+        style={[s.card, { transform: [{ translateX: position.x }, { translateY: position.y }, { rotate }] }]}
+        {...panResponder.panHandlers}
+      >
       {post.image_b_url ? (
         <View style={{ flexDirection: 'row', width: '100%', height: 470, padding: 10, gap: 10 }}>
           {/* Left Photo A */}
@@ -196,54 +197,55 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
         <Text style={s.title}>{post.title}</Text>
         {post.description ? <Text style={s.desc}>{post.description}</Text> : null}
       </View>
-
-      {/* Full-Screen Zoom Lightbox Modal */}
-      {!!zoomUri && (
-        <Modal visible={true} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
-          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
-            {/* Background tap to dismiss */}
-            <TouchableOpacity
-              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-              activeOpacity={1}
-              onPress={() => setZoomUri(null)}
-            />
-
-            {/* Close button top right */}
-            <TouchableOpacity
-              style={{ position: 'absolute', top: 50, right: 20, zIndex: 30, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
-              onPress={() => setZoomUri(null)}
-            >
-              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
-            </TouchableOpacity>
-
-            {/* Image Zoom ScrollView */}
-            <ScrollView
-              key={zoomKey.toString()}
-              style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-              maximumZoomScale={4}
-              minimumZoomScale={1}
-              centerContent={true}
-              showsHorizontalScrollIndicator={false}
-              showsVerticalScrollIndicator={false}
-              bouncesZoom={false}
-            >
-              <Image
-                source={{ uri: zoomUri }}
-                style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.75, alignSelf: 'center' }}
-                resizeMode="contain"
-              />
-            </ScrollView>
-
-            {/* Bottom Kapat button */}
-            <TouchableOpacity
-              style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, zIndex: 30 }}
-              onPress={() => setZoomUri(null)}
-            >
-              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      )}
     </Animated.View>
-  )
+
+    {/* Full-Screen Zoom Lightbox Modal OUTSIDE Animated.View */}
+    {!!zoomUri && (
+      <Modal visible={true} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
+          {/* Background tap to dismiss */}
+          <TouchableOpacity
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            activeOpacity={1}
+            onPress={() => setZoomUri(null)}
+          />
+
+          {/* Close button top right */}
+          <TouchableOpacity
+            style={{ position: 'absolute', top: 50, right: 20, zIndex: 30, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+            onPress={() => setZoomUri(null)}
+          >
+            <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
+          </TouchableOpacity>
+
+          {/* Image Zoom ScrollView */}
+          <ScrollView
+            key={zoomKey.toString()}
+            style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+            maximumZoomScale={4}
+            minimumZoomScale={1}
+            centerContent={true}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            bouncesZoom={false}
+          >
+            <Image
+              source={{ uri: zoomUri }}
+              style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.75, alignSelf: 'center' }}
+              resizeMode="contain"
+            />
+          </ScrollView>
+
+          {/* Bottom Kapat button */}
+          <TouchableOpacity
+            style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, zIndex: 30 }}
+            onPress={() => setZoomUri(null)}
+          >
+            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    )}
+  </>
+)
 }
