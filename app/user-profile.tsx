@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
   Alert,
   Modal,
-  ScrollView,
   Dimensions,
 } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
