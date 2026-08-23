@@ -7,6 +7,66 @@ import type { Post } from '../lib/types'
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3
 
+function ZoomablePhoto({ uri, accentColor, onClose }: { uri: string; accentColor: string; onClose: () => void }) {
+  const scale = useRef(new Animated.Value(1)).current
+  const lastScale = useRef(1)
+  const initialDistance = useRef(0)
+
+  const getDistance = (touches: any[]) => {
+    const dx = touches[0].pageX - touches[1].pageX
+    const dy = touches[0].pageY - touches[1].pageY
+    return Math.sqrt(dx * dx + dy * dy)
+  }
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: (evt) => evt.nativeEvent.touches.length === 2,
+      onMoveShouldSetPanResponder: (evt) => evt.nativeEvent.touches.length === 2,
+      onPanResponderGrant: (evt) => {
+        if (evt.nativeEvent.touches.length === 2) {
+          initialDistance.current = getDistance(Array.from(evt.nativeEvent.touches))
+        }
+      },
+      onPanResponderMove: (evt) => {
+        const touches = Array.from(evt.nativeEvent.touches)
+        if (touches.length === 2 && initialDistance.current > 0) {
+          const dist = getDistance(touches)
+          const newScale = Math.max(1, Math.min(4, lastScale.current * (dist / initialDistance.current)))
+          scale.setValue(newScale)
+        }
+      },
+      onPanResponderRelease: () => {
+        lastScale.current = (scale as any)._value ?? 1
+        if (lastScale.current < 1) {
+          Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start()
+          lastScale.current = 1
+        }
+        initialDistance.current = 0
+      },
+    })
+  ).current
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
+      <Animated.View style={{ transform: [{ scale }] }} {...panResponder.panHandlers}>
+        <Image source={{ uri }} style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.80 }} resizeMode="contain" />
+      </Animated.View>
+      <TouchableOpacity
+        style={{ position: 'absolute', top: 55, right: 20, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+        onPress={onClose} activeOpacity={0.8}
+      >
+        <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{ position: 'absolute', bottom: 45, backgroundColor: accentColor, paddingHorizontal: 32, paddingVertical: 13, borderRadius: 25 }}
+        onPress={onClose} activeOpacity={0.8}
+      >
+        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Kapat</Text>
+      </TouchableOpacity>
+    </View>
+  )
+}
+
 type Props = {
   post: Post
   onSwipeLeft: () => void
@@ -16,18 +76,16 @@ type Props = {
 
 export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown }: Props) {
   const { theme } = useApp()
-  const [zoomUri, setZoomUri] = useState<string | null>(null)
-  const [zoomKey, setZoomKey] = useState<number>(0)
+  const [zoomUri, setZoomUri] = useState('')
+  const [zoomMounted, setZoomMounted] = useState(false)
 
   const openZoom = (uri: string) => {
-    setZoomKey(Date.now())
-    setZoomUri(uri)
+    setZoomMounted(false)
+    setZoomUri('')
+    setTimeout(() => { setZoomUri(uri); setZoomMounted(true) }, 80)
   }
 
-  const closeZoom = () => {
-    setZoomUri(null)
-    setZoomKey(0)
-  }
+  const closeZoom = () => { setZoomMounted(false); setZoomUri('') }
 
   const position = useRef(new Animated.ValueXY()).current
 
@@ -204,53 +262,11 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
         </View>
       </Animated.View>
 
-      {/* Full-Screen Zoom Lightbox Modal OUTSIDE Animated.View */}
-      {!!zoomUri && (
-        <Modal visible={true} transparent animationType="fade" onRequestClose={closeZoom}>
-          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
-            {/* Background tap to dismiss */}
-            <TouchableOpacity
-              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-              activeOpacity={1}
-              onPress={closeZoom}
-            />
-
-            {/* Close button top right */}
-            <TouchableOpacity
-              style={{ position: 'absolute', top: 50, right: 20, zIndex: 30, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
-              onPress={closeZoom}
-            >
-              <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
-            </TouchableOpacity>
-
-            {/* Image Zoom ScrollView */}
-            <ScrollView
-              key={zoomKey.toString()}
-              style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-              maximumZoomScale={4}
-              minimumZoomScale={1}
-              centerContent={true}
-              showsHorizontalScrollIndicator={false}
-              showsVerticalScrollIndicator={false}
-              bouncesZoom={false}
-            >
-              <Image
-                source={{ uri: zoomUri }}
-                style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.75, alignSelf: 'center' }}
-                resizeMode="contain"
-              />
-            </ScrollView>
-
-            {/* Bottom Kapat button */}
-            <TouchableOpacity
-              style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20, zIndex: 30 }}
-              onPress={closeZoom}
-            >
-              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
-            </TouchableOpacity>
-          </View>
+      {zoomMounted && zoomUri ? (
+        <Modal visible={true} transparent animationType="fade" onRequestClose={closeZoom} statusBarTranslucent>
+          <ZoomablePhoto uri={zoomUri} accentColor={theme.accent} onClose={closeZoom} />
         </Modal>
-      )}
+      ) : null}
     </>
   )
 }

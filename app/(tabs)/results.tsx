@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useRef } from 'react'
 import {
   View,
   Text,
@@ -11,17 +11,91 @@ import {
   Alert,
   Modal,
   Dimensions,
+  Animated,
+  PanResponder,
 } from 'react-native'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import type { Post, Vote } from '../../lib/types'
 import { useFocusEffect } from '@react-navigation/native'
 
+const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
+
+function ZoomablePhoto({ uri, accentColor, onClose }: { uri: string; accentColor: string; onClose: () => void }) {
+  const scale = useRef(new Animated.Value(1)).current
+  const lastScale = useRef(1)
+  const initialDistance = useRef(0)
+
+  const getDistance = (touches: any[]) => {
+    const dx = touches[0].pageX - touches[1].pageX
+    const dy = touches[0].pageY - touches[1].pageY
+    return Math.sqrt(dx * dx + dy * dy)
+  }
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: (evt) => evt.nativeEvent.touches.length === 2,
+      onMoveShouldSetPanResponder: (evt) => evt.nativeEvent.touches.length === 2,
+      onPanResponderGrant: (evt) => {
+        if (evt.nativeEvent.touches.length === 2) {
+          initialDistance.current = getDistance(Array.from(evt.nativeEvent.touches))
+        }
+      },
+      onPanResponderMove: (evt) => {
+        const touches = Array.from(evt.nativeEvent.touches)
+        if (touches.length === 2 && initialDistance.current > 0) {
+          const dist = getDistance(touches)
+          const newScale = Math.max(1, Math.min(4, lastScale.current * (dist / initialDistance.current)))
+          scale.setValue(newScale)
+        }
+      },
+      onPanResponderRelease: () => {
+        lastScale.current = (scale as any)._value ?? 1
+        if (lastScale.current < 1) {
+          Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start()
+          lastScale.current = 1
+        }
+        initialDistance.current = 0
+      },
+    })
+  ).current
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
+      <Animated.View style={{ transform: [{ scale }] }} {...panResponder.panHandlers}>
+        <Image source={{ uri }} style={{ width: WIN_W, height: WIN_H * 0.80 }} resizeMode="contain" />
+      </Animated.View>
+      <TouchableOpacity
+        style={{ position: 'absolute', top: 55, right: 20, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+        onPress={onClose} activeOpacity={0.8}
+      >
+        <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{ position: 'absolute', bottom: 45, backgroundColor: accentColor, paddingHorizontal: 32, paddingVertical: 13, borderRadius: 25 }}
+        onPress={onClose} activeOpacity={0.8}
+      >
+        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Kapat</Text>
+      </TouchableOpacity>
+    </View>
+  )
+}
+
 export default function ResultsScreen() {
   const { theme, session } = useApp()
   const userId = session?.user.id
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [zoomUri, setZoomUri] = useState('')
+  const [zoomMounted, setZoomMounted] = useState(false)
+
+  const openZoom = (uri: string) => {
+    setZoomMounted(false)
+    setZoomUri('')
+    setTimeout(() => { setZoomUri(uri); setZoomMounted(true) }, 80)
+  }
+
+  const closeZoom = () => { setZoomMounted(false); setZoomUri('') }
 
   useFocusEffect(
     useCallback(() => {
@@ -160,11 +234,17 @@ export default function ResultsScreen() {
                 <View style={s.cardTop}>
                   {isAB ? (
                     <View style={s.thumbABContainer}>
-                      <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.thumbHalf} />
-                      <Image source={{ uri: post.image_b_url }} style={s.thumbHalf} />
+                      <TouchableOpacity onPress={() => openZoom(post.image_a_url || (post as any).image_url)} activeOpacity={0.85}>
+                        <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.thumbHalf} />
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => openZoom(post.image_b_url!)} activeOpacity={0.85}>
+                        <Image source={{ uri: post.image_b_url }} style={s.thumbHalf} />
+                      </TouchableOpacity>
                     </View>
                   ) : (
-                    <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.thumbSingle} />
+                    <TouchableOpacity onPress={() => openZoom(post.image_a_url || (post as any).image_url)} activeOpacity={0.85}>
+                      <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.thumbSingle} />
+                    </TouchableOpacity>
                   )}
                   <View style={{ flex: 1 }}>
                     <Text style={s.cardTitle}>{post.title}</Text>
@@ -221,6 +301,11 @@ export default function ResultsScreen() {
         )}
       </ScrollView>
 
+      {zoomMounted && zoomUri ? (
+        <Modal visible={true} transparent animationType="fade" onRequestClose={closeZoom} statusBarTranslucent>
+          <ZoomablePhoto uri={zoomUri} accentColor={theme.accent} onClose={closeZoom} />
+        </Modal>
+      ) : null}
     </SafeAreaView>
   )
 }
