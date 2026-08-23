@@ -348,8 +348,8 @@ export default function VoteScreen() {
             <Text style={s.emptyText}>
               {tab === 'friends' ? 'Arkadaşlarından henüz\noylama yok' : 'Şimdilik tüm oylamalar\ntamamlandı'}
             </Text>
-            <TouchableOpacity onPress={fetchPosts} style={{ paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.card, borderRadius: 16, marginTop: 10, borderWidth: 0.5, borderColor: theme.border }}>
-              <Text style={{ color: theme.text, fontSize: 12, fontWeight: '600' }}>Yenile 🔄</Text>
+            <TouchableOpacity onPress={fetchPosts} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: theme.card, borderRadius: 20, marginTop: 12, borderWidth: 0.5, borderColor: theme.border }}>
+              <Text style={{ color: theme.accent, fontSize: 13, fontWeight: '600' }}>Yenile</Text>
             </TouchableOpacity>
           </View>
         )}
