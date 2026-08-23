@@ -173,8 +173,12 @@ export default function ResultsScreen() {
                       {total} oy · {timeRemaining || (post.is_active ? '🟢 Aktif' : '🔴 Kapandı')}
                     </Text>
                   </View>
-                  <TouchableOpacity style={s.deleteBtn} onPress={() => deletePost(post.id)}>
-                    <Text style={{ color: '#c0605a', fontSize: 14 }}>✕</Text>
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(239, 68, 68, 0.12)', borderHeight: 1, borderWidth: 0.5, borderColor: 'rgba(239, 68, 68, 0.3)', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 6 }}
+                    onPress={() => deletePost(post.id)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={{ color: '#ef4444', fontSize: 12, fontWeight: '600' }}>🗑️ Sil</Text>
                   </TouchableOpacity>
                 </View>
 
