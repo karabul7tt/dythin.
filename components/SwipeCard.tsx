@@ -17,6 +17,13 @@ type Props = {
 export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown }: Props) {
   const { theme } = useApp()
   const [zoomUri, setZoomUri] = useState<string | null>(null)
+  const [zoomKey, setZoomKey] = useState<number>(0)
+
+  const openZoom = (uri: string) => {
+    setZoomKey(Date.now())
+    setZoomUri(uri)
+  }
+
   const position = useRef(new Animated.ValueXY()).current
 
   const rotate = position.x.interpolate({
@@ -48,12 +55,12 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
         const touchX = gesture.x0 || evt.nativeEvent.pageX || 0
         if (post.image_b_url) {
           if (touchX < SCREEN_WIDTH / 2) {
-            setZoomUri(post.image_a_url || (post as any).image_url)
+            openZoom(post.image_a_url || (post as any).image_url)
           } else {
-            setZoomUri(post.image_b_url)
+            openZoom(post.image_b_url)
           }
         } else {
-          setZoomUri(post.image_a_url || (post as any).image_url)
+          openZoom(post.image_a_url || (post as any).image_url)
         }
         Animated.spring(position, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start()
         return
@@ -206,7 +213,7 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
 
           {zoomUri && (
             <ScrollView
-              key={zoomUri}
+              key={zoomKey.toString()}
               style={{ width: '100%', height: '100%' }}
               contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}
               maximumZoomScale={4}

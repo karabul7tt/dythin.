@@ -23,6 +23,12 @@ export default function ResultsScreen() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [zoomUri, setZoomUri] = useState<string | null>(null)
+  const [zoomKey, setZoomKey] = useState<number>(0)
+
+  const openZoom = (uri: string) => {
+    setZoomKey(Date.now())
+    setZoomUri(uri)
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -161,15 +167,15 @@ export default function ResultsScreen() {
                 <View style={s.cardTop}>
                   {isAB ? (
                     <View style={s.thumbABContainer}>
-                      <TouchableOpacity onPress={() => setZoomUri(post.image_a_url || (post as any).image_url)} activeOpacity={0.8}>
+                      <TouchableOpacity onPress={() => openZoom(post.image_a_url || (post as any).image_url)} activeOpacity={0.8}>
                         <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.thumbHalf} />
                       </TouchableOpacity>
-                      <TouchableOpacity onPress={() => setZoomUri(post.image_b_url!)} activeOpacity={0.8}>
+                      <TouchableOpacity onPress={() => openZoom(post.image_b_url!)} activeOpacity={0.8}>
                         <Image source={{ uri: post.image_b_url }} style={s.thumbHalf} />
                       </TouchableOpacity>
                     </View>
                   ) : (
-                    <TouchableOpacity onPress={() => setZoomUri(post.image_a_url || (post as any).image_url)} activeOpacity={0.8}>
+                    <TouchableOpacity onPress={() => openZoom(post.image_a_url || (post as any).image_url)} activeOpacity={0.8}>
                       <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.thumbSingle} />
                     </TouchableOpacity>
                   )}
@@ -244,7 +250,7 @@ export default function ResultsScreen() {
 
           {zoomUri && (
             <ScrollView
-              key={zoomUri}
+              key={zoomKey.toString()}
               style={{ width: '100%', height: '100%' }}
               contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}
               maximumZoomScale={4}
