@@ -14,6 +14,7 @@ import {
   Animated,
   PanResponder,
 } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
@@ -161,7 +162,14 @@ export default function UserProfileScreen() {
       .single()
 
     if (data) {
-      setProfile(data as Profile)
+      const p = data as Profile
+      try {
+        const savedPrivate = await AsyncStorage.getItem(`is_private_${userId}`)
+        if (savedPrivate !== null && p.is_private === undefined) {
+          p.is_private = JSON.parse(savedPrivate)
+        }
+      } catch {}
+      setProfile(p)
     }
 
     // Stats

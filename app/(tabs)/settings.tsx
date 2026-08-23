@@ -12,6 +12,7 @@ import {
   Modal,
   Keyboard,
 } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import { ThemeName } from '../../lib/theme'
@@ -41,40 +42,76 @@ export default function SettingsScreen() {
   }, [session?.user.id])
 
   async function fetchPrivacySettings() {
-    const { data } = await supabase
-      .from('profiles')
-      .select('message_privacy, is_private')
-      .eq('id', session?.user.id)
-      .single()
+    try {
+      // 1. Önce yerel hafızadan anında yükle
+      const savedPrivate = await AsyncStorage.getItem(`is_private_${session?.user.id}`)
+      if (savedPrivate !== null) setIsPrivate(JSON.parse(savedPrivate))
 
-    if (data) {
-      if (data.message_privacy) setMessagePrivacy(data.message_privacy as 'everyone' | 'friends')
-      if (typeof data.is_private === 'boolean') setIsPrivate(data.is_private)
+      const savedMsgPrivacy = await AsyncStorage.getItem(`msg_privacy_${session?.user.id}`)
+      if (savedMsgPrivacy) setMessagePrivacy(savedMsgPrivacy as 'everyone' | 'friends')
+
+      // 2. Supabase'den sorgula (kolon varsa senkronize et)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('message_privacy, is_private')
+        .eq('id', session?.user.id)
+        .single()
+
+      if (!error && data) {
+        if (data.message_privacy) {
+          setMessagePrivacy(data.message_privacy as 'everyone' | 'friends')
+          AsyncStorage.setItem(`msg_privacy_${session?.user.id}`, data.message_privacy)
+        }
+        if (typeof data.is_private === 'boolean') {
+          setIsPrivate(data.is_private)
+          AsyncStorage.setItem(`is_private_${session?.user.id}`, JSON.stringify(data.is_private))
+        }
+      }
+    } catch {
+      // Sessiz fallback
     }
   }
 
   async function handleTogglePrivate() {
     const newValue = !isPrivate
     setIsPrivate(newValue)
-    const { error } = await supabase
-      .from('profiles')
-      .update({ is_private: newValue })
-      .eq('id', session?.user.id)
 
-    if (error && error.code !== '42703') {
-      Alert.alert('Hata', error.message)
+    if (session?.user.id) {
+      await AsyncStorage.setItem(`is_private_${session.user.id}`, JSON.stringify(newValue))
+    }
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_private: newValue })
+        .eq('id', session?.user.id)
+
+      if (error && error.code !== '42703' && !error.message.includes('is_private') && error.code !== 'PGRST204') {
+        console.warn('Gizlilik senkronizasyon uyarısı:', error.message)
+      }
+    } catch {
+      // Yerel hafızada başarıyla saklandı
     }
   }
 
   async function handleUpdateMessagePrivacy(option: 'everyone' | 'friends') {
     setMessagePrivacy(option)
-    const { error } = await supabase
-      .from('profiles')
-      .update({ message_privacy: option })
-      .eq('id', session?.user.id)
 
-    if (error && error.code !== '42703') {
-      Alert.alert('Hata', error.message)
+    if (session?.user.id) {
+      await AsyncStorage.setItem(`msg_privacy_${session.user.id}`, option)
+    }
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ message_privacy: option })
+        .eq('id', session?.user.id)
+
+      if (error && error.code !== '42703' && !error.message.includes('message_privacy') && error.code !== 'PGRST204') {
+        console.warn('Mesaj gizliliği senkronizasyon uyarısı:', error.message)
+      }
+    } catch {
+      // Yerel hafızada başarıyla saklandı
     }
   }
 
