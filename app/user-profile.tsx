@@ -403,8 +403,8 @@ export default function UserProfileScreen() {
                           <View style={[s.barFillB, { width: `${pctB}%` }]} />
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
-                          <Text style={s.barText}>Soldaki: %{pctA} ({countA} oy)</Text>
-                          <Text style={s.barText}>Sağdaki: %{pctB} ({countB} oy)</Text>
+                          <Text style={s.barText}>{p.image_b_url ? 'Soldaki' : 'Beğendim'}: %{pctA} ({countA} oy)</Text>
+                          <Text style={s.barText}>{p.image_b_url ? 'Sağdaki' : 'Geçtim'}: %{pctB} ({countB} oy)</Text>
                         </View>
                       </View>
                     ) : (
@@ -416,19 +416,17 @@ export default function UserProfileScreen() {
                           disabled={isVoting}
                           activeOpacity={0.8}
                         >
-                          {isVoting ? <ActivityIndicator size="small" color="#C9A84C" /> : <Text style={s.voteBtnTextA}>Soldaki</Text>}
+                          {isVoting ? <ActivityIndicator size="small" color="#C9A84C" /> : <Text style={s.voteBtnTextA}>{p.image_b_url ? 'Soldaki' : 'Beğendim'}</Text>}
                         </TouchableOpacity>
 
-                        {p.image_b_url && (
-                          <TouchableOpacity
-                            style={s.voteBtnB}
-                            onPress={() => handleVoteOnPost(p, 'B')}
-                            disabled={isVoting}
-                            activeOpacity={0.8}
-                          >
-                            {isVoting ? <ActivityIndicator size="small" color="#ffffff" /> : <Text style={s.voteBtnTextB}>Sağdaki</Text>}
-                          </TouchableOpacity>
-                        )}
+                        <TouchableOpacity
+                          style={s.voteBtnB}
+                          onPress={() => handleVoteOnPost(p, 'B')}
+                          disabled={isVoting}
+                          activeOpacity={0.8}
+                        >
+                          {isVoting ? <ActivityIndicator size="small" color="#ffffff" /> : <Text style={s.voteBtnTextB}>{p.image_b_url ? 'Sağdaki' : 'Geçtim'}</Text>}
+                        </TouchableOpacity>
                       </View>
                     )}
                   </View>
