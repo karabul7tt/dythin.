@@ -169,8 +169,8 @@ export default function ShareScreen() {
 
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.bg },
-    scroll: { padding: 20 },
-    logo: { fontSize: 24, fontWeight: '700', color: theme.text, marginBottom: 20 },
+    scroll: { paddingHorizontal: 20, paddingTop: 6, paddingBottom: 20 },
+    logo: { fontSize: 24, fontWeight: '700', color: theme.text, marginTop: 0, marginBottom: 14 },
     logoDot: { color: theme.accent },
     uploadZone: {
       borderWidth: 1,
