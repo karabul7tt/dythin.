@@ -34,9 +34,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (saved) setThemeNameState(saved as ThemeName)
     })
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session?.user) registerForPushNotificationsAsync(session.user.id)
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        supabase.auth.signOut()
+        setSession(null)
+      } else {
+        setSession(session)
+        if (session?.user) registerForPushNotificationsAsync(session.user.id)
+      }
+      setIsAuthLoading(false)
+    }).catch(() => {
+      supabase.auth.signOut()
+      setSession(null)
       setIsAuthLoading(false)
     })
 

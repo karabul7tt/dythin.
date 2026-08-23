@@ -342,12 +342,14 @@ export default function VoteScreen() {
           </>
         ) : (
           <View style={s.empty}>
-            <Text style={{ fontSize: 48 }}>🎉</Text>
-            <Text style={s.emptyText}>
-              {tab === 'friends' ? 'Arkadaşlarından\noylama yok!' : 'Tüm oylamaları\ntamamladın!'}
+            <Text style={{ fontSize: 44 }}>
+              {tab === 'friends' ? '👥' : '✨'}
             </Text>
-            <TouchableOpacity onPress={fetchPosts}>
-              <Text style={{ color: theme.accent, fontSize: 13, marginTop: 8 }}>Yenile</Text>
+            <Text style={s.emptyText}>
+              {tab === 'friends' ? 'Arkadaşlarından henüz\noylama yok' : 'Şimdilik tüm oylamalar\ntamamlandı'}
+            </Text>
+            <TouchableOpacity onPress={fetchPosts} style={{ paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.card, borderRadius: 16, marginTop: 10, borderWidth: 0.5, borderColor: theme.border }}>
+              <Text style={{ color: theme.text, fontSize: 12, fontWeight: '600' }}>Yenile 🔄</Text>
             </TouchableOpacity>
           </View>
         )}

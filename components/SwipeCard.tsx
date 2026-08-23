@@ -1,6 +1,6 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import * as Haptics from 'expo-haptics'
-import { View, Text, Image, StyleSheet, Dimensions, PanResponder, Animated } from 'react-native'
+import { View, Text, Image, StyleSheet, Dimensions, PanResponder, Animated, Modal, TouchableOpacity } from 'react-native'
 import { useApp } from '../context/AppContext'
 import type { Post } from '../lib/types'
 
@@ -15,6 +15,7 @@ type Props = {
 
 export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
   const { theme } = useApp()
+  const [zoomUri, setZoomUri] = useState<string | null>(null)
   const position = useRef(new Animated.ValueXY()).current
 
   const rotate = position.x.interpolate({
@@ -40,7 +41,24 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
     onPanResponderMove: (_, gesture) => {
       position.setValue({ x: gesture.dx, y: gesture.dy / 4 })
     },
-    onPanResponderRelease: (_, gesture) => {
+    onPanResponderRelease: (evt, gesture) => {
+      // Tap Detection (moved less than 8px)
+      if (Math.abs(gesture.dx) < 8 && Math.abs(gesture.dy) < 8) {
+        const tapX = evt.nativeEvent.locationX
+        const cardWidth = SCREEN_WIDTH - 20
+        if (post.image_b_url) {
+          if (tapX < cardWidth / 2) {
+            setZoomUri(post.image_a_url || (post as any).image_url)
+          } else {
+            setZoomUri(post.image_b_url)
+          }
+        } else {
+          setZoomUri(post.image_a_url || (post as any).image_url)
+        }
+        Animated.spring(position, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start()
+        return
+      }
+
       if (gesture.dx > SWIPE_THRESHOLD) {
         Animated.spring(position, { toValue: { x: SCREEN_WIDTH * 1.5, y: 0 }, useNativeDriver: false }).start()
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
@@ -87,16 +105,16 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
     },
     imageFull: {
       width: '100%',
-      height: 470,
+      height: '100%',
     },
     info: { padding: 14 },
-    title: { fontSize: 15, fontWeight: '700', color: theme.text, marginBottom: 2 },
-    desc: { fontSize: 12, color: theme.textSub, lineHeight: 16 },
+    title: { fontSize: 16, fontWeight: '700', color: theme.text },
+    desc: { fontSize: 13, color: theme.textSub, marginTop: 4 },
     badge: {
       position: 'absolute',
-      top: 24,
-      paddingHorizontal: 18,
-      paddingVertical: 10,
+      top: 20,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
       borderRadius: 14,
       borderWidth: 1.5,
       backgroundColor: 'rgba(14, 14, 26, 0.92)',
@@ -119,22 +137,16 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
     >
       {post.image_b_url ? (
         <View style={s.imageContainer}>
-          <View style={[s.imageHalfContainer, { backgroundColor: '#0a0a12', overflow: 'hidden' }]}>
-            <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.imageHalf} resizeMode="cover" />
-            <View style={{ position: 'absolute', top: 10, left: 10, backgroundColor: 'rgba(201, 168, 76, 0.85)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
-              <Text style={{ color: '#fff', fontSize: 10, fontWeight: '800' }}>SOLDAN</Text>
-            </View>
+          <View style={[s.imageHalfContainer, { backgroundColor: '#0a0a12', justifyContent: 'center', alignItems: 'center' }]}>
+            <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.imageHalf} resizeMode="contain" />
           </View>
 
-          <View style={[s.imageHalfContainer, { borderLeftWidth: 2, borderLeftColor: 'rgba(255,255,255,0.4)', backgroundColor: '#0a0a12', overflow: 'hidden' }]}>
-            <Image source={{ uri: post.image_b_url }} style={s.imageHalf} resizeMode="cover" />
-            <View style={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(127, 119, 221, 0.85)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
-              <Text style={{ color: '#fff', fontSize: 10, fontWeight: '800' }}>SAĞDAN</Text>
-            </View>
+          <View style={[s.imageHalfContainer, { borderLeftWidth: 1.5, borderLeftColor: 'rgba(255,255,255,0.2)', backgroundColor: '#0a0a12', justifyContent: 'center', alignItems: 'center' }]}>
+            <Image source={{ uri: post.image_b_url }} style={s.imageHalf} resizeMode="contain" />
           </View>
         </View>
       ) : (
-        <View style={{ width: '100%', height: 470, backgroundColor: '#0a0a12' }}>
+        <View style={{ width: '100%', height: 470, backgroundColor: '#0a0a12', position: 'relative', justifyContent: 'center', alignItems: 'center' }}>
           <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.imageFull} resizeMode="contain" />
         </View>
       )}
@@ -163,6 +175,27 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight }: Props) {
         <Text style={s.title}>{post.title}</Text>
         {post.description ? <Text style={s.desc}>{post.description}</Text> : null}
       </View>
+
+      {/* Full-Screen Zoom Lightbox Modal */}
+      <Modal visible={!!zoomUri} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center', padding: 10 }}>
+          <TouchableOpacity
+            style={{ position: 'absolute', top: 50, right: 20, zIndex: 10, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+            onPress={() => setZoomUri(null)}
+          >
+            <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
+          </TouchableOpacity>
+          {zoomUri && (
+            <Image source={{ uri: zoomUri }} style={{ width: '100%', height: '85%' }} resizeMode="contain" />
+          )}
+          <TouchableOpacity
+            style={{ marginTop: 16, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20 }}
+            onPress={() => setZoomUri(null)}
+          >
+            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </Animated.View>
   )
 }
