@@ -1,4 +1,6 @@
 {
+  "buildCommand": "echo 'Build successful'",
+  "outputDirectory": "website",
   "cleanUrls": true,
   "headers": [
     {
