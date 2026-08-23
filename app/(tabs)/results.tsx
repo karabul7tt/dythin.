@@ -294,22 +294,20 @@ export default function ResultsScreen() {
 
                 <View style={s.cardBody}>
                   <View style={s.barRow}>
-                    <Text style={[s.barLabel, { color: '#C9A84C' }]}>{isAB ? 'Sol' : 'Beğenildi'}</Text>
+                    <Text style={[s.barLabel, { color: theme.accent }]}>{isAB ? 'Sol' : 'Beğenildi'}</Text>
                     <View style={s.barTrack}>
-                      <View style={[s.barFill, { width: `${pctA}%`, backgroundColor: '#C9A84C' }]} />
+                      <View style={[s.barFill, { width: `${pctA}%`, backgroundColor: theme.accent }]} />
                     </View>
-                    <Text style={s.barNum}>%{pctA}</Text>
+                    <Text style={[s.barNum, { color: theme.accent }]}>%{pctA}</Text>
                   </View>
 
                   <View style={s.barRow}>
-                    <Text style={[s.barLabel, { color: '#7F77DD' }]}>{isAB ? 'Sağ' : 'Beğenilmedi'}</Text>
+                    <Text style={[s.barLabel, { color: theme.accentText }]}>{isAB ? 'Sağ' : 'Beğenilmedi'}</Text>
                     <View style={s.barTrack}>
-                      <View style={[s.barFill, { width: `${pctB}%`, backgroundColor: '#7F77DD' }]} />
+                      <View style={[s.barFill, { width: `${pctB}%`, backgroundColor: theme.accentText }]} />
                     </View>
-                    <Text style={s.barNum}>%{pctB}</Text>
+                    <Text style={[s.barNum, { color: theme.accentText }]}>%{pctB}</Text>
                   </View>
-
-
 
                   {/* Yorumlar Listesi */}
                   {comments.length > 0 && (
@@ -319,7 +317,7 @@ export default function ResultsScreen() {
                         <View key={c.id || Math.random().toString()} style={s.commentItem}>
                           <Text style={s.commentText}>"{c.comment}"</Text>
                           <Text style={s.commentMeta}>
-                            Oy: {c.selected_option === 'A' ? 'Foto A 🅰️' : c.selected_option === 'B' ? 'Foto B 🅱️' : 'Oy Verildi'}
+                            Oy: {c.selected_option === 'A' ? 'Sol (A)' : c.selected_option === 'B' ? 'Sağ (B)' : 'Oy Verildi'}
                           </Text>
                         </View>
                       ))}

@@ -226,15 +226,15 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
       borderWidth: 1.5,
       backgroundColor: 'rgba(14, 14, 26, 0.92)',
     },
-    rightBadge: { left: 20, borderColor: '#7F77DD' },
-    leftBadge: { right: 20, borderColor: '#C9A84C' },
-    singleLikeBadge: { left: 20, borderColor: '#4EBA6F' },
-    singleNopeBadge: { right: 20, borderColor: '#E55353' },
+    rightBadge: { left: 20, borderColor: theme.accent },
+    leftBadge: { right: 20, borderColor: theme.accentText },
+    singleLikeBadge: { left: 20, borderColor: theme.accent },
+    singleNopeBadge: { right: 20, borderColor: theme.textSub },
     badgeText: { fontSize: 15, fontWeight: '700', letterSpacing: 0.5 },
-    rightText: { color: '#7F77DD' },
-    leftText: { color: '#C9A84C' },
-    singleLikeText: { color: '#4EBA6F' },
-    singleNopeText: { color: '#E55353' },
+    rightText: { color: theme.accent },
+    leftText: { color: theme.accentText },
+    singleLikeText: { color: theme.accent },
+    singleNopeText: { color: theme.textSub },
   })
 
   return (

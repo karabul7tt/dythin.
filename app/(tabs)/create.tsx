@@ -259,29 +259,29 @@ export default function ShareScreen() {
         ) : (
           <View style={s.abRow}>
             <View style={s.abBox}>
-              <Text style={s.label}>FOTOĞRAF A</Text>
+              <Text style={s.label}>SOL FOTOĞRAF (A)</Text>
               {imageA ? (
                 <TouchableOpacity onPress={() => pickImage(setImageA)}>
                   <Image source={{ uri: imageA }} style={s.previewImg} />
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={s.uploadZone} onPress={() => pickImage(setImageA)}>
-                  <Text style={{ fontSize: 24 }}>🅰️</Text>
-                  <Text style={s.uploadText}>A Seç</Text>
+                  <Text style={{ fontSize: 24 }}>📷</Text>
+                  <Text style={s.uploadText}>Sol Fotoğrafı Seç</Text>
                 </TouchableOpacity>
               )}
             </View>
 
             <View style={s.abBox}>
-              <Text style={s.label}>FOTOĞRAF B</Text>
+              <Text style={s.label}>SAĞ FOTOĞRAF (B)</Text>
               {imageB ? (
                 <TouchableOpacity onPress={() => pickImage(setImageB)}>
                   <Image source={{ uri: imageB }} style={s.previewImg} />
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={s.uploadZone} onPress={() => pickImage(setImageB)}>
-                  <Text style={{ fontSize: 24 }}>🅱️</Text>
-                  <Text style={s.uploadText}>B Seç</Text>
+                  <Text style={{ fontSize: 24 }}>📷</Text>
+                  <Text style={s.uploadText}>Sağ Fotoğrafı Seç</Text>
                 </TouchableOpacity>
               )}
             </View>
