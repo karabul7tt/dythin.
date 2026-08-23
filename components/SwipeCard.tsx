@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react'
 import * as Haptics from 'expo-haptics'
-import { View, Text, Image, StyleSheet, Dimensions, PanResponder, Animated, Modal, TouchableOpacity } from 'react-native'
+import { View, Text, Image, StyleSheet, Dimensions, PanResponder, Animated, Modal, TouchableOpacity, ScrollView } from 'react-native'
 import { useApp } from '../context/AppContext'
 import type { Post } from '../lib/types'
 
@@ -200,10 +200,18 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
             <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
           </TouchableOpacity>
           {zoomUri && (
-            <Image source={{ uri: zoomUri }} style={{ width: '100%', height: '85%' }} resizeMode="contain" />
+            <ScrollView
+              maximumZoomScale={4}
+              minimumZoomScale={1}
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}
+            >
+              <Image source={{ uri: zoomUri }} style={{ width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.4 }} resizeMode="contain" />
+            </ScrollView>
           )}
           <TouchableOpacity
-            style={{ marginTop: 16, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20 }}
+            style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20 }}
             onPress={() => setZoomUri(null)}
           >
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>

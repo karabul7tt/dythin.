@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Modal,
+  Dimensions,
 } from 'react-native'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
@@ -20,6 +22,7 @@ export default function ResultsScreen() {
   const userId = session?.user.id
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [zoomUri, setZoomUri] = useState<string | null>(null)
 
   useFocusEffect(
     useCallback(() => {
@@ -158,11 +161,17 @@ export default function ResultsScreen() {
                 <View style={s.cardTop}>
                   {isAB ? (
                     <View style={s.thumbABContainer}>
-                      <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.thumbHalf} />
-                      <Image source={{ uri: post.image_b_url }} style={s.thumbHalf} />
+                      <TouchableOpacity onPress={() => setZoomUri(post.image_a_url || (post as any).image_url)} activeOpacity={0.8}>
+                        <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.thumbHalf} />
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => setZoomUri(post.image_b_url!)} activeOpacity={0.8}>
+                        <Image source={{ uri: post.image_b_url }} style={s.thumbHalf} />
+                      </TouchableOpacity>
                     </View>
                   ) : (
-                    <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.thumbSingle} />
+                    <TouchableOpacity onPress={() => setZoomUri(post.image_a_url || (post as any).image_url)} activeOpacity={0.8}>
+                      <Image source={{ uri: post.image_a_url || (post as any).image_url }} style={s.thumbSingle} />
+                    </TouchableOpacity>
                   )}
                   <View style={{ flex: 1 }}>
                     <Text style={s.cardTitle}>{post.title}</Text>
@@ -218,6 +227,35 @@ export default function ResultsScreen() {
           })
         )}
       </ScrollView>
+
+      {/* Full-Screen Pinch-to-Zoom Lightbox Modal */}
+      <Modal visible={!!zoomUri} transparent animationType="fade" onRequestClose={() => setZoomUri(null)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
+          <TouchableOpacity
+            style={{ position: 'absolute', top: 50, right: 20, zIndex: 10, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
+            onPress={() => setZoomUri(null)}
+          >
+            <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
+          </TouchableOpacity>
+          {zoomUri && (
+            <ScrollView
+              maximumZoomScale={4}
+              minimumZoomScale={1}
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}
+            >
+              <Image source={{ uri: zoomUri }} style={{ width: Dimensions.get('window').width, height: Dimensions.get('window').height * 0.8 }} resizeMode="contain" />
+            </ScrollView>
+          )}
+          <TouchableOpacity
+            style={{ position: 'absolute', bottom: 40, backgroundColor: theme.accent, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20 }}
+            onPress={() => setZoomUri(null)}
+          >
+            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </SafeAreaView>
   )
 }
