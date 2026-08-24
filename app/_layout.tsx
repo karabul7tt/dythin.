@@ -1,7 +1,10 @@
 import { Slot, usePathname, useRouter, useSegments } from 'expo-router'
-import { ActivityIndicator, View } from 'react-native'
+import { ActivityIndicator, View, LogBox } from 'react-native'
 import { useEffect } from 'react'
 import { AppProvider, useApp } from '../context/AppContext'
+
+// Alttan çıkan tüm sarı/turuncu geliştirici uyarı bildirimlerini kapat
+LogBox.ignoreAllLogs(true)
 
 function AuthGate() {
   const { session, isAuthLoading } = useApp()
