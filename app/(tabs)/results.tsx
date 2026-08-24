@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef } from 'react'
+import { useCallback, useState } from 'react'
 import {
   View,
   Text,
@@ -11,106 +11,15 @@ import {
   Alert,
   Modal,
   Dimensions,
-  Animated,
-  PanResponder,
+  RefreshControl,
 } from 'react-native'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import type { Post, Vote } from '../../lib/types'
 import { useFocusEffect } from '@react-navigation/native'
+import ZoomablePhoto from '../../components/ZoomablePhoto'
 
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
-
-function ZoomablePhoto({ uri, accentColor, onClose }: { uri: string; accentColor: string; onClose: () => void }) {
-  const scale = useRef(new Animated.Value(1)).current
-  const translateX = useRef(new Animated.Value(0)).current
-  const translateY = useRef(new Animated.Value(0)).current
-  const lastScale = useRef(1)
-  const lastTX = useRef(0)
-  const lastTY = useRef(0)
-  const initialDist = useRef(0)
-  const initialMidX = useRef(0)
-  const initialMidY = useRef(0)
-
-  const getDistance = (touches: any[]) => {
-    const dx = touches[0].pageX - touches[1].pageX
-    const dy = touches[0].pageY - touches[1].pageY
-    return Math.sqrt(dx * dx + dy * dy)
-  }
-
-  const getMid = (touches: any[]) => ({
-    x: (touches[0].pageX + touches[1].pageX) / 2,
-    y: (touches[0].pageY + touches[1].pageY) / 2,
-  })
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: (evt) => evt.nativeEvent.touches.length === 2,
-      onMoveShouldSetPanResponder: (evt) => evt.nativeEvent.touches.length === 2,
-      onPanResponderGrant: (evt) => {
-        const touches = Array.from(evt.nativeEvent.touches)
-        if (touches.length === 2) {
-          initialDist.current = getDistance(touches)
-          const mid = getMid(touches)
-          initialMidX.current = mid.x
-          initialMidY.current = mid.y
-        }
-      },
-      onPanResponderMove: (evt) => {
-        const touches = Array.from(evt.nativeEvent.touches)
-        if (touches.length === 2 && initialDist.current > 0) {
-          const dist = getDistance(touches)
-          const newScale = Math.max(1, Math.min(4, lastScale.current * (dist / initialDist.current)))
-          const mid = getMid(touches)
-          const cx = WIN_W / 2
-          const cy = WIN_H / 2
-          const focalX = initialMidX.current - cx
-          const focalY = initialMidY.current - cy
-          const scaleDelta = newScale / lastScale.current
-          const tx = lastTX.current * scaleDelta + focalX * (1 - scaleDelta) + (mid.x - initialMidX.current)
-          const ty = lastTY.current * scaleDelta + focalY * (1 - scaleDelta) + (mid.y - initialMidY.current)
-          scale.setValue(newScale)
-          translateX.setValue(tx)
-          translateY.setValue(ty)
-        }
-      },
-      onPanResponderRelease: () => {
-        lastScale.current = (scale as any)._value ?? 1
-        lastTX.current = (translateX as any)._value ?? 0
-        lastTY.current = (translateY as any)._value ?? 0
-        initialDist.current = 0
-        if (lastScale.current <= 1) {
-          Animated.parallel([
-            Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
-            Animated.spring(translateX, { toValue: 0, useNativeDriver: true }),
-            Animated.spring(translateY, { toValue: 0, useNativeDriver: true }),
-          ]).start()
-          lastScale.current = 1; lastTX.current = 0; lastTY.current = 0
-        }
-      },
-    })
-  ).current
-
-  return (
-    <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
-      <Animated.View style={{ transform: [{ translateX }, { translateY }, { scale }] }} {...panResponder.panHandlers}>
-        <Image source={{ uri }} style={{ width: WIN_W, height: WIN_H * 0.80 }} resizeMode="contain" />
-      </Animated.View>
-      <TouchableOpacity
-        style={{ position: 'absolute', top: 55, right: 20, backgroundColor: 'rgba(255,255,255,0.2)', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
-        onPress={onClose} activeOpacity={0.8}
-      >
-        <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>✕</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={{ position: 'absolute', bottom: 45, backgroundColor: accentColor, paddingHorizontal: 32, paddingVertical: 13, borderRadius: 25 }}
-        onPress={onClose} activeOpacity={0.8}
-      >
-        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Kapat</Text>
-      </TouchableOpacity>
-    </View>
-  )
-}
 
 export default function ResultsScreen() {
   const { theme, session } = useApp()
@@ -239,7 +148,18 @@ export default function ResultsScreen() {
 
   return (
     <SafeAreaView style={s.container}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={s.scroll}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={fetchResults}
+            tintColor={theme.accent}
+            colors={[theme.accent]}
+          />
+        }
+      >
         <View style={s.header}>
           <Text style={s.logo}>
             dythin<Text style={s.logoDot}>.</Text>

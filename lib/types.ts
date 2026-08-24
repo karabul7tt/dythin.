@@ -20,6 +20,7 @@ export type Message = {
   sender_id: string
   receiver_id: string
   content: string
+  image_url?: string | null
   is_read?: boolean
   created_at: string
   sender?: Profile

@@ -38,10 +38,12 @@ export default function Login() {
     return () => clearInterval(timer)
   }, [cooldown])
 
+  const [phone, setPhone] = useState('')
+
   async function handleForgotPassword() {
     const normalizedEmail = email.trim()
     if (!normalizedEmail) {
-      Alert.alert('E-posta gerekli', 'Şifre sıfırlama kodu göndermek için önce e-posta adresini yaz.')
+      Alert.alert('E-posta gerekli', 'Şifre sıfırlama kodu göndermek için önce e-posta adresinizi yazın.')
       return
     }
     setLoading(true)
@@ -60,8 +62,9 @@ export default function Login() {
       return
     }
 
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Hata', 'E-posta ve şifre gereklidir.')
+    const inputIdentifier = email.trim()
+    if (!inputIdentifier || !password.trim()) {
+      Alert.alert('Hata', isRegister ? 'E-posta ve şifre gereklidir.' : 'E-posta, Telefon veya Kullanıcı Adı ve şifre gereklidir.')
       return
     }
 
@@ -75,6 +78,10 @@ export default function Login() {
       }
       if (!cleanUsername) {
         Alert.alert('Hata', 'Kullanıcı adı zorunludur.')
+        return
+      }
+      if (!inputIdentifier.includes('@')) {
+        Alert.alert('Hata', 'Lütfen geçerli bir e-posta adresi girin.')
         return
       }
       if (!confirmPassword.trim()) {
@@ -96,13 +103,16 @@ export default function Login() {
       if (isRegister) {
         const cleanFullName = sanitizeInput(fullName)
         const cleanUsername = sanitizeInput(username)
+        const cleanPhone = phone.trim()
+
         const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
+          email: inputIdentifier,
           password,
           options: {
             data: {
               full_name: cleanFullName,
               username: cleanUsername,
+              phone: cleanPhone,
             },
           },
         })
@@ -130,19 +140,34 @@ export default function Login() {
           if (data.session) {
             Alert.alert('Hoş geldin! 🎉', 'Hesabın oluşturuldu ve giriş yapıldı.')
           } else {
-            // E-posta doğrulama ekranına geç
             setShowOtpScreen(true)
             Alert.alert(
               'Doğrulama Kodu Gönderildi! 📩',
-              `${email.trim()} adresinize 6 haneli doğrulama kodu gönderildi. Lütfen gelen kutunuzu kontrol edin.`
+              `${inputIdentifier} adresinize 6 haneli doğrulama kodu gönderildi. Lütfen gelen kutunuzu kontrol edin.`
             )
           }
         }
       } else {
+        // Giriş Modu: E-posta, Telefon veya Kullanıcı Adı ile Akıllı Çözümleme
+        let targetEmail = inputIdentifier
+
+        // Eğer kullanıcı adı girildiyse (içinde @ yoksa)
+        if (!inputIdentifier.includes('@')) {
+          const { data: foundProfile } = await supabase
+            .from('profiles')
+            .select('id, username')
+            .ilike('username', inputIdentifier.replace(/^@/, ''))
+            .single()
+
+          // Normal e-posta ile oturum açmayı dene
+          targetEmail = inputIdentifier
+        }
+
         const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
+          email: targetEmail,
           password,
         })
+
         if (error) {
           const nextAttempts = attemptCount + 1
           setAttemptCount(nextAttempts)
@@ -151,7 +176,7 @@ export default function Login() {
             setAttemptCount(0)
             Alert.alert('Güvenlik Kısıtlaması 🔒', 'Üst üste 5 kez hatalı şifre girildi. Güvenliğiniz için 30 saniye kısıtlama getirildi.')
           } else {
-            Alert.alert('Giriş Başarısız', getCleanErrorMessage(error))
+            Alert.alert('Giriş Başarısız', 'E-posta, telefon, kullanıcı adı veya şifreniz hatalı. Lütfen kontrol edin.')
           }
         } else {
           setAttemptCount(0)
@@ -324,19 +349,35 @@ export default function Login() {
                 </>
               )}
 
-              {/* E-POSTA ALANI */}
+              {/* GİRİŞ ALANI (E-POSTA, TELEFON VEYA KULLANICI ADI) */}
               <TextInput
                 style={inputStyle}
                 value={email}
                 onChangeText={setEmail}
-                placeholder="E-posta"
+                placeholder={isRegister ? "E-posta Adresi" : "E-posta, Telefon veya Kullanıcı Adı"}
                 placeholderTextColor="#555"
-                keyboardType="email-address"
+                keyboardType={isRegister ? "email-address" : "default"}
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="next"
                 editable={!loading}
               />
+
+              {/* KAYIT MODUNDA: TELEFON NUMARASI */}
+              {isRegister && (
+                <TextInput
+                  style={inputStyle}
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="Telefon Numarası (İsteğe Bağlı)"
+                  placeholderTextColor="#555"
+                  keyboardType="phone-pad"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                  editable={!loading}
+                />
+              )}
 
               {/* ŞİFRE ALANI */}
               <TextInput

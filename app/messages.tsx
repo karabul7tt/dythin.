@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  RefreshControl,
+  Alert,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useApp } from '../context/AppContext'
@@ -77,12 +79,40 @@ export default function MessagesInboxScreen() {
     })
 
     const chatItems: ChatItem[] = friendIds.map(fId => ({
-      friend: profileMap[fId] || { id: fId, username: 'Kullanıcı', avatar_url: null, created_at: '' },
+      friend: profileMap[fId] || { id: fId, username: 'Kullanıcı', avatar_url: null, push_token: null, created_at: '' },
       lastMessage: friendMap[fId],
     }))
 
     setChats(chatItems)
     setLoading(false)
+  }
+
+  function handleDeleteChat(friendId: string, friendName: string) {
+    Alert.alert(
+      'Sohbeti Sil',
+      `${friendName} ile olan tüm sohbet geçmişiniz kalıcı olarak silinecek. Emin misiniz?`,
+      [
+        { text: 'Vazgeç', style: 'cancel' },
+        {
+          text: 'Sil',
+          style: 'destructive',
+          onPress: async () => {
+            const userId = session?.user.id
+            if (!userId || !friendId) return
+            const { error } = await supabase
+              .from('messages')
+              .delete()
+              .or(`and(sender_id.eq.${userId},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${userId})`)
+
+            if (error) {
+              Alert.alert('Hata', 'Sohbet silinemedi.')
+            } else {
+              setChats(prev => prev.filter(c => c.friend.id !== friendId))
+            }
+          },
+        },
+      ]
+    )
   }
 
   function formatTime(iso: string) {
@@ -135,6 +165,7 @@ export default function MessagesInboxScreen() {
     friendName: { fontSize: 15, fontWeight: '700', color: theme.text },
     timeText: { fontSize: 11, color: theme.textSub },
     lastMsgText: { fontSize: 13, color: theme.textSub },
+    deleteChatBtn: { padding: 8, marginLeft: 6 },
     emptyText: { color: theme.textSub, fontSize: 14, textAlign: 'center', marginVertical: 60 },
   })
 
@@ -152,40 +183,64 @@ export default function MessagesInboxScreen() {
           <ActivityIndicator color={theme.accent} />
         </View>
       ) : (
-        <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={s.scroll}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={fetchConversations}
+              tintColor={theme.accent}
+              colors={[theme.accent]}
+            />
+          }
+        >
           {chats.length === 0 ? (
             <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
               <Text style={s.emptyText}>Henüz hiç mesajınız yok.{'\n'}Arkadaşlarınızın profilinden sohbet başlatabilirsiniz!</Text>
             </View>
           ) : (
-            chats.map(item => (
-              <TouchableOpacity
-                key={item.friend.id}
-                style={s.chatCard}
-                onPress={() => router.push({ pathname: '/chat/[friendId]', params: { friendId: item.friend.id } })}
-                activeOpacity={0.8}
-              >
-                {item.friend.avatar_url ? (
-                  <Image source={{ uri: item.friend.avatar_url }} style={s.avatar} />
-                ) : (
-                  <View style={s.avatarPlaceholder}>
-                    <Text style={{ fontSize: 18, fontWeight: '700', color: theme.textSub }}>
-                      {(item.friend.username || 'D')[0].toUpperCase()}
+            chats.map(item => {
+              const fName = item.friend.full_name || item.friend.username || 'Kullanıcı'
+              return (
+                <TouchableOpacity
+                  key={item.friend.id}
+                  style={s.chatCard}
+                  onPress={() => router.push({ pathname: '/chat/[friendId]', params: { friendId: item.friend.id } })}
+                  onLongPress={() => handleDeleteChat(item.friend.id, fName)}
+                  activeOpacity={0.8}
+                >
+                  {item.friend.avatar_url ? (
+                    <Image source={{ uri: item.friend.avatar_url }} style={s.avatar} />
+                  ) : (
+                    <View style={s.avatarPlaceholder}>
+                      <Text style={{ fontSize: 18, fontWeight: '700', color: theme.textSub }}>
+                        {(item.friend.username || 'D')[0].toUpperCase()}
+                      </Text>
+                    </View>
+                  )}
+
+                  <View style={s.chatInfo}>
+                    <View style={s.topRow}>
+                      <Text style={s.friendName}>{fName}</Text>
+                      <Text style={s.timeText}>{formatTime(item.lastMessage.created_at)}</Text>
+                    </View>
+                    <Text style={s.lastMsgText} numberOfLines={1}>
+                      {item.lastMessage.sender_id === session?.user.id ? 'Sen: ' : ''}
+                      {item.lastMessage.image_url ? '📷 Fotoğraf' : item.lastMessage.content}
                     </Text>
                   </View>
-                )}
 
-                <View style={s.chatInfo}>
-                  <View style={s.topRow}>
-                    <Text style={s.friendName}>{item.friend.full_name || item.friend.username || 'Kullanıcı'}</Text>
-                    <Text style={s.timeText}>{formatTime(item.lastMessage.created_at)}</Text>
-                  </View>
-                  <Text style={s.lastMsgText} numberOfLines={1}>
-                    {item.lastMessage.sender_id === session?.user.id ? 'Sen: ' : ''}{item.lastMessage.content}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))
+                  <TouchableOpacity
+                    style={s.deleteChatBtn}
+                    onPress={() => handleDeleteChat(item.friend.id, fName)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={{ fontSize: 16, color: '#f87171' }}>🗑️</Text>
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )
+            })
           )}
         </ScrollView>
       )}

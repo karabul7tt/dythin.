@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   View, Text, StyleSheet, SafeAreaView,
   ActivityIndicator, Dimensions, TouchableOpacity, Alert,
+  ScrollView, RefreshControl,
 } from 'react-native'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
@@ -350,17 +351,30 @@ export default function VoteScreen() {
             </View>
           </>
         ) : (
-          <View style={s.empty}>
+          <ScrollView
+            contentContainerStyle={[s.empty, { flex: 1, justifyContent: 'center' }]}
+            refreshControl={
+              <RefreshControl
+                refreshing={loading}
+                onRefresh={fetchPosts}
+                tintColor={theme.accent}
+                colors={[theme.accent]}
+              />
+            }
+          >
             <Text style={{ fontSize: 44 }}>
               {tab === 'friends' ? '👥' : '✨'}
             </Text>
             <Text style={s.emptyText}>
               {tab === 'friends' ? 'Arkadaşlarından henüz\noylama yok' : 'Şimdilik tüm oylamalar\ntamamlandı'}
             </Text>
+            <Text style={{ color: theme.textSub, fontSize: 11, marginTop: 4 }}>
+              Yenilemek için aşağı kaydırın
+            </Text>
             <TouchableOpacity onPress={fetchPosts} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: theme.card, borderRadius: 20, marginTop: 12, borderWidth: 0.5, borderColor: theme.border }}>
               <Text style={{ color: theme.accent, fontSize: 13, fontWeight: '600' }}>Yenile</Text>
             </TouchableOpacity>
-          </View>
+          </ScrollView>
         )}
       </View>
     </SafeAreaView>
