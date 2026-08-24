@@ -1,22 +1,39 @@
-import * as Notifications from 'expo-notifications'
-import * as Device from 'expo-device'
 import { Platform } from 'react-native'
+import * as Device from 'expo-device'
+import Constants from 'expo-constants'
 import { supabase } from './supabase'
 
-// Notification Handler behavior
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-})
+let Notifications: any = null
+
+try {
+  Notifications = require('expo-notifications')
+  if (Notifications && Notifications.setNotificationHandler) {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    })
+  }
+} catch (e) {
+  // Expo Go Android push notification compatibility guard
+}
 
 export async function registerForPushNotificationsAsync(userId?: string): Promise<string | null> {
-  let finalStatus = 'denied'
+  if (!Notifications || !Device.isDevice) {
+    return null
+  }
+
+  // On Android Expo Go, remote push notifications are disabled in SDK 53
+  if (Platform.OS === 'android' && Constants.appOwnership === 'expo') {
+    return null
+  }
+
   try {
+    let finalStatus = 'denied'
     const { status: existingStatus } = await Notifications.getPermissionsAsync()
     finalStatus = existingStatus
 
@@ -24,31 +41,23 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
       const { status } = await Notifications.requestPermissionsAsync()
       finalStatus = status
     }
-  } catch (e) {
-    // Permission request failed or not supported
-  }
 
-  if (finalStatus !== 'granted') {
-    return null
-  }
+    if (finalStatus !== 'granted') {
+      return null
+    }
 
-  if (!Device.isDevice) {
-    return null
-  }
-
-  try {
     const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID || 'f7bea319-3747-4543-8ef1-503ca5d49a12'
     const tokenData = await Notifications.getExpoPushTokenAsync({ projectId })
-    const pushToken = tokenData.data
+    const pushToken = tokenData?.data
 
     if (userId && pushToken) {
       await supabase.from('profiles').update({ push_token: pushToken }).eq('id', userId)
     }
 
-    if (Platform.OS === 'android') {
-      Notifications.setNotificationChannelAsync('default', {
+    if (Platform.OS === 'android' && Notifications.setNotificationChannelAsync) {
+      await Notifications.setNotificationChannelAsync('default', {
         name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
+        importance: Notifications.AndroidImportance?.MAX || 4,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#7F77DD',
       })
@@ -61,14 +70,17 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
 }
 
 export async function sendLocalNotification(title: string, body: string) {
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title,
-      body,
-      sound: true,
-    },
-    trigger: null, // Send immediately
-  })
+  if (!Notifications || !Notifications.scheduleNotificationAsync) return
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        sound: true,
+      },
+      trigger: null,
+    })
+  } catch {}
 }
 
 export async function sendPushNotificationToUser(userId: string, title: string, body: string) {
@@ -95,7 +107,5 @@ export async function sendPushNotificationToUser(userId: string, title: string, 
         body,
       }),
     })
-  } catch {
-    // Quiet error handling to prevent sensitive log leakage
-  }
+  } catch {}
 }
