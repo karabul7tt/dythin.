@@ -34,6 +34,12 @@ export default function ChatScreen() {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
+
+  // Instagram DM Style Photo Sending Preview State
+  const [pendingPhotoUri, setPendingPhotoUri] = useState<string | null>(null)
+  const [photoCaption, setPhotoCaption] = useState('')
+
+  // Fullscreen Zoom Photo
   const [selectedPhotoModal, setSelectedPhotoModal] = useState<string | null>(null)
   const scrollViewRef = useRef<ScrollView>(null)
 
@@ -124,7 +130,7 @@ export default function ChatScreen() {
     }
   }
 
-  // Fotoğraf Çıkarma Yardımcısı
+  // Fotoğraf URL'sini güvenle çıkarma
   function extractPhotoUrl(msg: Message): string | null {
     if (msg.image_url) return msg.image_url
     if (msg.content?.startsWith('[PHOTO]:')) {
@@ -137,7 +143,7 @@ export default function ChatScreen() {
     return null
   }
 
-  // Metin Çıkarma Yardımcısı
+  // Metin içeriğini çıkarma
   function extractTextContent(msg: Message): string {
     if (msg.content?.startsWith('[PHOTO]:')) {
       const parts = msg.content.split('\n')
@@ -149,7 +155,7 @@ export default function ChatScreen() {
     return msg.content || ''
   }
 
-  // Fotoğraf Seçme ve DM'de Güvenli Gönderme
+  // 1. Adım: Galeriden Fotoğraf Seçip Insta-DM Önizleme Ekranını Açma
   async function handlePickImage() {
     if (uploadingImage || sending || !session?.user.id || !friendId) return
 
@@ -161,21 +167,32 @@ export default function ChatScreen() {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 0.7,
+      allowsEditing: true,
+      quality: 0.8,
     })
 
     if (result.canceled || !result.assets[0]) return
 
+    setPendingPhotoUri(result.assets[0].uri)
+    setPhotoCaption('')
+  }
+
+  // 2. Adım: Önizleme Ekranından Fotoğrafı Gönderme
+  async function handleSendPendingPhoto() {
+    if (!pendingPhotoUri || !session?.user.id || !friendId || uploadingImage) return
+
     setUploadingImage(true)
+    const targetUri = pendingPhotoUri
+    const targetCaption = photoCaption.trim()
+    setPendingPhotoUri(null)
+    setPhotoCaption('')
+
     try {
-      const asset = result.assets[0]
-      const ext = asset.uri.split('?')[0].split('.').pop()?.toLowerCase() || 'jpg'
+      const ext = targetUri.split('?')[0].split('.').pop()?.toLowerCase() || 'jpg'
       const contentType = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`
       const fileName = `dm_${session.user.id}_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`
 
-      // Fetch as ArrayBuffer
-      const res = await fetch(asset.uri)
+      const res = await fetch(targetUri)
       const arrayBuffer = await res.arrayBuffer()
 
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -185,23 +202,19 @@ export default function ChatScreen() {
           upsert: false,
         })
 
-      if (uploadError) {
-        throw uploadError
-      }
+      if (uploadError) throw uploadError
 
       const { data: publicUrlData } = supabase.storage
         .from('posts')
         .getPublicUrl(uploadData.path)
 
       const imageUrl = publicUrlData.publicUrl
-      const optionalCaption = inputText.trim()
-      setInputText('')
 
-      // 1. Önce image_url ile kaydetmeyi dene
+      // 1. Normal image_url ile dene
       const newMsgPayload: any = {
         sender_id: session.user.id,
         receiver_id: friendId,
-        content: optionalCaption || 'Fotoğraf',
+        content: targetCaption || 'Fotoğraf',
         image_url: imageUrl,
       }
 
@@ -210,13 +223,12 @@ export default function ChatScreen() {
         .insert(newMsgPayload)
         .select()
 
-      // 2. Eğer image_url sütunu veritabanında henüz yoksa [PHOTO]: url formatında kaydet
+      // 2. image_url sütunu yoksa dual-mode fallback
       if (insertRes.error) {
         const fallbackPayload = {
           sender_id: session.user.id,
           receiver_id: friendId,
-          content: optionalCaption ? `[PHOTO]:${imageUrl}
-${optionalCaption}` : `[PHOTO]:${imageUrl}`,
+          content: targetCaption ? `[PHOTO]:${imageUrl}\n${targetCaption}` : `[PHOTO]:${imageUrl}`,
         }
         insertRes = await supabase
           .from('messages')
@@ -225,7 +237,7 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
       }
 
       if (insertRes.error) {
-        Alert.alert('Hata', 'Fotoğraf mesajı iletilemedi: ' + insertRes.error.message)
+        Alert.alert('Hata', 'Fotoğraf mesajı iletilemedi.')
       } else if (insertRes.data && insertRes.data[0]) {
         setMessages(prev => {
           if (prev.some(m => m.id === insertRes.data![0].id)) return prev
@@ -275,7 +287,6 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
     }
   }
 
-  // Tüm Sohbeti Silme
   function handleDeleteChat() {
     Alert.alert(
       'Sohbeti Sil',
@@ -306,7 +317,6 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
     )
   }
 
-  // Tek Mesajı Silme
   function handleLongPressMessage(msg: Message) {
     if (msg.sender_id !== session?.user.id) return
 
@@ -340,7 +350,10 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
     return `${hours}:${mins}`
   }
 
-  const readReceiptColor = theme.accentText || theme.accent || '#6EE7B7'
+  // Tik Mantığı:
+  // Okunduysa (is_read === true) => Aktif tema renginde parlayan çift tik ✓✓
+  // Okunmadıysa => Gri çift tik ✓✓ (İletildi)
+  const readReceiptColor = theme.accentText || theme.accent || '#38BDF8'
 
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.bg },
@@ -378,11 +391,13 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
       justifyContent: 'center',
     },
 
-    chatList: { flex: 1, paddingHorizontal: 16, paddingVertical: 12 },
+    chatList: { flex: 1, paddingHorizontal: 14, paddingVertical: 12 },
     
-    bubbleRowMine: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 12 },
-    bubbleRowOther: { flexDirection: 'row', justifyContent: 'flex-start', marginBottom: 12 },
+    // Bubble Row
+    bubbleRowMine: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10 },
+    bubbleRowOther: { flexDirection: 'row', justifyContent: 'flex-start', marginBottom: 10 },
     
+    // Text Bubble
     bubbleMine: {
       maxWidth: '82%',
       backgroundColor: theme.accent,
@@ -390,11 +405,6 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
       borderBottomRightRadius: 4,
       paddingHorizontal: 14,
       paddingVertical: 10,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.2,
-      shadowRadius: 2,
-      elevation: 2,
     },
     bubbleOther: {
       maxWidth: '82%',
@@ -407,16 +417,30 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
       paddingVertical: 10,
     },
 
-    msgImageContainer: {
-      borderRadius: 12,
+    // INSTAGRAM DM STYLE PHOTO BUBBLE (ETRAFINDA MORLUK OLMADAN, SAF FOTOĞRAF)
+    photoBubbleStandalone: {
+      borderRadius: 18,
       overflow: 'hidden',
-      marginBottom: 6,
-      backgroundColor: 'rgba(0,0,0,0.2)',
+      position: 'relative',
+      maxWidth: 240,
     },
-    msgImage: {
-      width: 220,
-      height: 220,
+    photoStandaloneImage: {
+      width: 240,
+      height: 290,
+      borderRadius: 18,
+      backgroundColor: '#1a1a24',
+    },
+    photoTimestampOverlay: {
+      position: 'absolute',
+      bottom: 8,
+      right: 8,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      paddingHorizontal: 8,
+      paddingVertical: 3,
       borderRadius: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
     },
 
     msgTextMine: { color: '#ffffff', fontSize: 14, lineHeight: 20 },
@@ -426,6 +450,7 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
 
     emptyText: { color: theme.textSub, fontSize: 13, textAlign: 'center', marginVertical: 40 },
 
+    // Input Bar
     inputRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -520,6 +545,44 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
                 const photoUrl = extractPhotoUrl(m)
                 const textContent = extractTextContent(m)
 
+                // 1. SAF FOTOĞRAF BALONU (INSTAGRAM DM GİBİ MORLUKSUZ)
+                if (photoUrl && !textContent) {
+                  return (
+                    <TouchableOpacity
+                      key={m.id || Math.random().toString()}
+                      style={isMine ? s.bubbleRowMine : s.bubbleRowOther}
+                      onLongPress={() => handleLongPressMessage(m)}
+                      activeOpacity={0.92}
+                    >
+                      <TouchableOpacity
+                        style={s.photoBubbleStandalone}
+                        onPress={() => setSelectedPhotoModal(photoUrl)}
+                        activeOpacity={0.88}
+                      >
+                        <Image
+                          source={{ uri: photoUrl }}
+                          style={s.photoStandaloneImage}
+                          resizeMode="cover"
+                        />
+                        {/* Sağ altta hafif cam zaman ve çift tik rozeti */}
+                        <View style={s.photoTimestampOverlay}>
+                          <Text style={{ color: '#fff', fontSize: 10, fontWeight: '600' }}>
+                            {formatTime(m.created_at)}
+                          </Text>
+                          {isMine && (
+                            m.is_read ? (
+                              <Text style={{ color: readReceiptColor, fontSize: 11, fontWeight: '900', letterSpacing: -1 }}>✓✓</Text>
+                            ) : (
+                              <Text style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 11, fontWeight: '700', letterSpacing: -1 }}>✓✓</Text>
+                            )
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    </TouchableOpacity>
+                  )
+                }
+
+                // 2. METİN VEYA AÇIKLAMALI FOTOĞRAF BALONU
                 return (
                   <TouchableOpacity
                     key={m.id || Math.random().toString()}
@@ -528,22 +591,20 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
                     activeOpacity={0.9}
                   >
                     <View style={isMine ? s.bubbleMine : s.bubbleOther}>
-                      {/* Fotoğraf Mesajı Varsa */}
                       {!!photoUrl && (
                         <TouchableOpacity
-                          style={s.msgImageContainer}
+                          style={{ borderRadius: 14, overflow: 'hidden', marginBottom: 8 }}
                           onPress={() => setSelectedPhotoModal(photoUrl)}
                           activeOpacity={0.85}
                         >
                           <Image
                             source={{ uri: photoUrl }}
-                            style={s.msgImage}
+                            style={{ width: 220, height: 220, borderRadius: 14 }}
                             resizeMode="cover"
                           />
                         </TouchableOpacity>
                       )}
 
-                      {/* Metin İçeriği */}
                       {!!textContent && (
                         <Text style={isMine ? s.msgTextMine : s.msgTextOther}>{textContent}</Text>
                       )}
@@ -608,7 +669,81 @@ ${optionalCaption}` : `[PHOTO]:${imageUrl}`,
         </View>
       </KeyboardAvoidingView>
 
-      {/* Fotoğraf Büyütme Modalı */}
+      {/* INSTAGRAM DM TARZI FOTOĞRAF SEÇME & GÖNDERME ÖNİZLEME MODALI */}
+      {pendingPhotoUri && (
+        <Modal visible transparent animationType="slide">
+          <SafeAreaView style={{ flex: 1, backgroundColor: '#000000' }}>
+            {/* Üst Kapat Butonu */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 }}>
+              <TouchableOpacity
+                onPress={() => setPendingPhotoUri(null)}
+                style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Ionicons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+              <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>Fotoğrafı Gönder</Text>
+              <View style={{ width: 40 }} />
+            </View>
+
+            {/* Fotoğraf Önizleme */}
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 }}>
+              <Image
+                source={{ uri: pendingPhotoUri }}
+                style={{ width: '100%', height: '80%', borderRadius: 20 }}
+                resizeMode="contain"
+              />
+            </View>
+
+            {/* Alt Açıklama ve Gönder Çubuğu (Insta DM Style) */}
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                padding: 12,
+                backgroundColor: 'rgba(25, 25, 35, 0.95)',
+                borderTopWidth: 0.5,
+                borderTopColor: 'rgba(255,255,255,0.1)',
+                gap: 10,
+              }}>
+                <TextInput
+                  style={{
+                    flex: 1,
+                    backgroundColor: 'rgba(255,255,255,0.08)',
+                    borderRadius: 22,
+                    paddingHorizontal: 18,
+                    paddingVertical: 12,
+                    color: '#fff',
+                    fontSize: 15,
+                  }}
+                  value={photoCaption}
+                  onChangeText={setPhotoCaption}
+                  placeholder="Mesaj ekleyin... (isteğe bağlı)"
+                  placeholderTextColor="rgba(255,255,255,0.4)"
+                  returnKeyType="send"
+                  onSubmitEditing={handleSendPendingPhoto}
+                />
+
+                <TouchableOpacity
+                  onPress={handleSendPendingPhoto}
+                  style={{
+                    backgroundColor: theme.accent,
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="send" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          </SafeAreaView>
+        </Modal>
+      )}
+
+      {/* Tam Ekran Fotoğraf Büyütme Modalı */}
       {selectedPhotoModal && (
         <Modal visible transparent animationType="fade">
           <ZoomablePhoto
