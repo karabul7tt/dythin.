@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   Platform,
 } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
 
@@ -43,7 +44,6 @@ export default function ZoomablePhoto({ uri, accentColor, onClose }: ZoomablePho
     y: (touches[0].pageY + touches[1].pageY) / 2,
   })
 
-  // Double-tap zoom handler (Works seamlessly on all Android and iOS devices)
   const handleDoubleTap = (evt: any) => {
     const now = Date.now()
     const DOUBLE_TAP_DELAY = 300
@@ -147,7 +147,7 @@ export default function ZoomablePhoto({ uri, accentColor, onClose }: ZoomablePho
           style={{
             transform: [{ translateX }, { translateY }, { scale }],
             width: WIN_W,
-            height: WIN_H * 0.82,
+            height: WIN_H * 0.84,
             justifyContent: 'center',
             alignItems: 'center',
           }}
@@ -155,41 +155,22 @@ export default function ZoomablePhoto({ uri, accentColor, onClose }: ZoomablePho
         >
           <Image
             source={{ uri }}
-            style={{ width: WIN_W, height: WIN_H * 0.82 }}
+            style={{ width: WIN_W, height: WIN_H * 0.84 }}
             resizeMode="contain"
           />
         </Animated.View>
       </TouchableWithoutFeedback>
 
-      {/* Info Tip Badge */}
-      <View
-        style={{
-          position: 'absolute',
-          top: Platform.OS === 'ios' ? 55 : 35,
-          left: 20,
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          paddingHorizontal: 12,
-          paddingVertical: 6,
-          borderRadius: 15,
-          borderWidth: 0.5,
-          borderColor: 'rgba(255,255,255,0.2)',
-        }}
-      >
-        <Text style={{ color: '#fff', fontSize: 11, fontWeight: '600' }}>
-          🔍 2 Parmakla veya Çift Dokunarak Yakınlaştır
-        </Text>
-      </View>
-
-      {/* Top Close Button (✕) */}
+      {/* Top Minimal Close Button */}
       <TouchableOpacity
         style={{
           position: 'absolute',
           top: Platform.OS === 'ios' ? 50 : 30,
           right: 20,
-          backgroundColor: 'rgba(255,255,255,0.25)',
-          width: 42,
-          height: 42,
-          borderRadius: 21,
+          backgroundColor: 'rgba(255,255,255,0.18)',
+          width: 38,
+          height: 38,
+          borderRadius: 19,
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 99,
@@ -197,21 +178,21 @@ export default function ZoomablePhoto({ uri, accentColor, onClose }: ZoomablePho
         onPress={onClose}
         activeOpacity={0.8}
       >
-        <Text style={{ color: '#fff', fontSize: 20, fontWeight: '700' }}>✕</Text>
+        <Ionicons name="close" size={22} color="#ffffff" />
       </TouchableOpacity>
 
-      {/* Bottom Close Button */}
+      {/* Bottom Minimal Close Pill */}
       <TouchableOpacity
         style={{
           position: 'absolute',
           bottom: Platform.OS === 'ios' ? 45 : 30,
           backgroundColor: accentColor,
-          paddingHorizontal: 36,
-          paddingVertical: 14,
-          borderRadius: 28,
+          paddingHorizontal: 32,
+          paddingVertical: 12,
+          borderRadius: 24,
           shadowColor: accentColor,
           shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
+          shadowOpacity: 0.35,
           shadowRadius: 8,
           elevation: 6,
           zIndex: 99,
@@ -219,7 +200,7 @@ export default function ZoomablePhoto({ uri, accentColor, onClose }: ZoomablePho
         onPress={onClose}
         activeOpacity={0.8}
       >
-        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Kapat</Text>
+        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>Kapat</Text>
       </TouchableOpacity>
     </View>
   )

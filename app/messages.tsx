@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native'
 import { useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import type { Profile, Message } from '../lib/types'
@@ -173,9 +174,9 @@ export default function MessagesInboxScreen() {
     <SafeAreaView style={s.container}>
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Text style={s.backText}>←</Text>
+          <Ionicons name="chevron-back" size={24} color={theme.text} />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Mesajlarım 💬</Text>
+        <Text style={s.headerTitle}>Mesajlar</Text>
       </View>
 
       {loading ? (
@@ -227,7 +228,7 @@ export default function MessagesInboxScreen() {
                     </View>
                     <Text style={s.lastMsgText} numberOfLines={1}>
                       {item.lastMessage.sender_id === session?.user.id ? 'Sen: ' : ''}
-                      {item.lastMessage.image_url ? '📷 Fotoğraf' : item.lastMessage.content}
+                      {item.lastMessage.image_url ? 'Fotoğraf' : item.lastMessage.content}
                     </Text>
                   </View>
 
@@ -236,7 +237,7 @@ export default function MessagesInboxScreen() {
                     onPress={() => handleDeleteChat(item.friend.id, fName)}
                     activeOpacity={0.7}
                   >
-                    <Text style={{ fontSize: 16, color: '#f87171' }}>🗑️</Text>
+                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
                   </TouchableOpacity>
                 </TouchableOpacity>
               )

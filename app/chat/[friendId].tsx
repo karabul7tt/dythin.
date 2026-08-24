@@ -16,6 +16,7 @@ import {
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import { sanitizeInput } from '../../lib/security'
@@ -123,7 +124,7 @@ export default function ChatScreen() {
     }
   }
 
-  // Fotoğraf Seçme ve DM'de Gönderme
+  // Fotoğraf Seçme ve DM'de Güvenli Gönderme
   async function handlePickImage() {
     if (uploadingImage || sending || !session?.user.id || !friendId) return
 
@@ -136,7 +137,7 @@ export default function ChatScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
-      quality: 0.8,
+      quality: 0.75,
     })
 
     if (result.canceled || !result.assets[0]) return
@@ -144,18 +145,19 @@ export default function ChatScreen() {
     setUploadingImage(true)
     try {
       const asset = result.assets[0]
-      const ext = asset.uri.split('.').pop()?.toLowerCase() || 'jpg'
-      const filePath = `chat/${session.user.id}_${Date.now()}.${ext}`
+      const ext = asset.uri.split('?')[0].split('.').pop()?.toLowerCase() || 'jpg'
+      const contentType = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`
+      const fileName = `dm_${session.user.id}_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`
 
-      // Fetch as blob
+      // Fetch as ArrayBuffer (React Native uyumlu)
       const res = await fetch(asset.uri)
-      const blob = await res.blob()
+      const arrayBuffer = await res.arrayBuffer()
 
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('post-images')
-        .upload(filePath, blob, {
-          contentType: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
-          upsert: true,
+        .from('posts')
+        .upload(fileName, arrayBuffer, {
+          contentType,
+          upsert: false,
         })
 
       if (uploadError) {
@@ -163,8 +165,8 @@ export default function ChatScreen() {
       }
 
       const { data: publicUrlData } = supabase.storage
-        .from('post-images')
-        .getPublicUrl(filePath)
+        .from('posts')
+        .getPublicUrl(uploadData.path)
 
       const imageUrl = publicUrlData.publicUrl
 
@@ -172,7 +174,7 @@ export default function ChatScreen() {
       const newMsgPayload = {
         sender_id: session.user.id,
         receiver_id: friendId,
-        content: inputText.trim() || '📷 Fotoğraf',
+        content: inputText.trim() || 'Fotoğraf',
         image_url: imageUrl,
       }
 
@@ -184,7 +186,7 @@ export default function ChatScreen() {
         .select()
 
       if (error) {
-        Alert.alert('Hata', 'Fotoğraf mesajı iletilemedi.')
+        Alert.alert('Hata', 'Fotoğraf mesajı kaydedilemedi.')
       } else if (data && data[0]) {
         setMessages(prev => {
           if (prev.some(m => m.id === data[0].id)) return prev
@@ -193,7 +195,7 @@ export default function ChatScreen() {
         setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100)
       }
     } catch (err: any) {
-      Alert.alert('Fotoğraf Yüklenemedi', err.message || 'Lütfen tekrar deneyin.')
+      Alert.alert('Fotoğraf Gönderilemedi', err.message || 'Lütfen tekrar deneyin.')
     } finally {
       setUploadingImage(false)
     }
@@ -313,13 +315,12 @@ export default function ChatScreen() {
       borderBottomColor: theme.border,
       backgroundColor: theme.card,
     },
-    backBtn: { paddingRight: 12, paddingVertical: 4 },
-    backText: { fontSize: 20, color: theme.text },
-    avatar: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
+    backBtn: { paddingRight: 10, paddingVertical: 4 },
+    avatar: { width: 38, height: 38, borderRadius: 19, marginRight: 10 },
     avatarPlaceholder: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 38,
+      height: 38,
+      borderRadius: 19,
       backgroundColor: theme.bg,
       borderWidth: 1,
       borderColor: theme.border,
@@ -330,7 +331,14 @@ export default function ChatScreen() {
     headerInfo: { flex: 1 },
     friendName: { fontSize: 15, fontWeight: '700', color: theme.text },
     handleText: { fontSize: 11, color: theme.textSub },
-    headerActionBtn: { padding: 8, borderRadius: 10 },
+    headerActionBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
     chatList: { flex: 1, paddingHorizontal: 16, paddingVertical: 12 },
     
@@ -417,12 +425,11 @@ export default function ChatScreen() {
     sendBtn: {
       backgroundColor: theme.accent,
       borderRadius: 20,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
+      width: 40,
+      height: 40,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    sendBtnText: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
   })
 
   return (
@@ -434,7 +441,7 @@ export default function ChatScreen() {
         {/* Header */}
         <View style={s.header}>
           <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-            <Text style={s.backText}>←</Text>
+            <Ionicons name="chevron-back" size={24} color={theme.text} />
           </TouchableOpacity>
 
           {friendProfile?.avatar_url ? (
@@ -452,9 +459,9 @@ export default function ChatScreen() {
             <Text style={s.handleText}>@{friendProfile?.username || 'kullanici'}</Text>
           </View>
 
-          {/* Sohbeti Sil / Temizle Butonu */}
+          {/* Sohbeti Sil / Temizle Butonu (Minimalist Vector Trash) */}
           <TouchableOpacity style={s.headerActionBtn} onPress={handleDeleteChat} activeOpacity={0.7}>
-            <Text style={{ fontSize: 18, color: '#f87171' }}>🗑️</Text>
+            <Ionicons name="trash-outline" size={18} color="#ef4444" />
           </TouchableOpacity>
         </View>
 
@@ -499,7 +506,7 @@ export default function ChatScreen() {
                       )}
 
                       {/* Metin İçeriği */}
-                      {(!m.image_url || (m.content && m.content !== '📷 Fotoğraf')) && (
+                      {(!m.image_url || (m.content && m.content !== 'Fotoğraf')) && (
                         <Text style={isMine ? s.msgTextMine : s.msgTextOther}>{m.content}</Text>
                       )}
 
@@ -507,9 +514,9 @@ export default function ChatScreen() {
                         <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-end', gap: 4, marginTop: 4 }}>
                           <Text style={s.timeMine}>{formatTime(m.created_at)}</Text>
                           {m.is_read ? (
-                            <Text style={{ color: readReceiptColor, fontSize: 12, fontWeight: '900' }}>✓✓</Text>
+                            <Text style={{ color: readReceiptColor, fontSize: 11, fontWeight: '900', letterSpacing: -1 }}>✓✓</Text>
                           ) : (
-                            <Text style={{ color: 'rgba(255, 255, 255, 0.65)', fontSize: 12, fontWeight: '700' }}>✓✓</Text>
+                            <Text style={{ color: 'rgba(255, 255, 255, 0.65)', fontSize: 11, fontWeight: '700', letterSpacing: -1 }}>✓✓</Text>
                           )}
                         </View>
                       ) : (
@@ -525,7 +532,7 @@ export default function ChatScreen() {
 
         {/* Input Bar */}
         <View style={s.inputRow}>
-          {/* Fotoğraf Ekleme Butonu */}
+          {/* Fotoğraf Ekleme Butonu (Sleek Vector Media Icon) */}
           <TouchableOpacity
             style={s.photoPickBtn}
             onPress={handlePickImage}
@@ -535,7 +542,7 @@ export default function ChatScreen() {
             {uploadingImage ? (
               <ActivityIndicator size="small" color={theme.accent} />
             ) : (
-              <Text style={{ fontSize: 18 }}>📷</Text>
+              <Ionicons name="image-outline" size={20} color={theme.text} />
             )}
           </TouchableOpacity>
 
@@ -558,7 +565,7 @@ export default function ChatScreen() {
             {sending ? (
               <ActivityIndicator color="#ffffff" size="small" />
             ) : (
-              <Text style={s.sendBtnText}>Gönder</Text>
+              <Ionicons name="send" size={18} color="#ffffff" />
             )}
           </TouchableOpacity>
         </View>

@@ -15,6 +15,7 @@ import {
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import type { Profile, Post, Vote } from '../lib/types'
@@ -321,7 +322,7 @@ export default function UserProfileScreen() {
       {/* Top Bar */}
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Text style={s.backText}>←</Text>
+          <Ionicons name="chevron-back" size={24} color={theme.text} />
         </TouchableOpacity>
         <Text style={s.headerTitle}>@{profile?.username || 'kullanici'}</Text>
       </View>
