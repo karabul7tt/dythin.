@@ -33,7 +33,8 @@
           "photosPermission": "Fotoğraf yükleyebilmek için fotoğraf arşivine erişim izni gerekir."
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-font"
     ],
     "extra": {
       "router": {},
