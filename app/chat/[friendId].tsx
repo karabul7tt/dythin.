@@ -124,6 +124,31 @@ export default function ChatScreen() {
     }
   }
 
+  // Fotoğraf Çıkarma Yardımcısı
+  function extractPhotoUrl(msg: Message): string | null {
+    if (msg.image_url) return msg.image_url
+    if (msg.content?.startsWith('[PHOTO]:')) {
+      const parts = msg.content.split('\n')
+      return parts[0].replace('[PHOTO]:', '').trim()
+    }
+    if (msg.content?.startsWith('https://') && msg.content?.includes('/storage/v1/object/public/posts/')) {
+      return msg.content.trim()
+    }
+    return null
+  }
+
+  // Metin Çıkarma Yardımcısı
+  function extractTextContent(msg: Message): string {
+    if (msg.content?.startsWith('[PHOTO]:')) {
+      const parts = msg.content.split('\n')
+      return parts.slice(1).join('\n').trim()
+    }
+    if (msg.content === 'Fotoğraf' && msg.image_url) {
+      return ''
+    }
+    return msg.content || ''
+  }
+
   // Fotoğraf Seçme ve DM'de Güvenli Gönderme
   async function handlePickImage() {
     if (uploadingImage || sending || !session?.user.id || !friendId) return
@@ -137,7 +162,7 @@ export default function ChatScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: false,
-      quality: 0.75,
+      quality: 0.7,
     })
 
     if (result.canceled || !result.assets[0]) return
@@ -149,7 +174,7 @@ export default function ChatScreen() {
       const contentType = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`
       const fileName = `dm_${session.user.id}_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`
 
-      // Fetch as ArrayBuffer (React Native uyumlu)
+      // Fetch as ArrayBuffer
       const res = await fetch(asset.uri)
       const arrayBuffer = await res.arrayBuffer()
 
@@ -169,28 +194,42 @@ export default function ChatScreen() {
         .getPublicUrl(uploadData.path)
 
       const imageUrl = publicUrlData.publicUrl
+      const optionalCaption = inputText.trim()
+      setInputText('')
 
-      // Send message with image_url
-      const newMsgPayload = {
+      // 1. Önce image_url ile kaydetmeyi dene
+      const newMsgPayload: any = {
         sender_id: session.user.id,
         receiver_id: friendId,
-        content: inputText.trim() || 'Fotoğraf',
+        content: optionalCaption || 'Fotoğraf',
         image_url: imageUrl,
       }
 
-      setInputText('')
-
-      const { data, error } = await supabase
+      let insertRes = await supabase
         .from('messages')
         .insert(newMsgPayload)
         .select()
 
-      if (error) {
-        Alert.alert('Hata', 'Fotoğraf mesajı kaydedilemedi.')
-      } else if (data && data[0]) {
+      // 2. Eğer image_url sütunu veritabanında henüz yoksa [PHOTO]: url formatında kaydet
+      if (insertRes.error) {
+        const fallbackPayload = {
+          sender_id: session.user.id,
+          receiver_id: friendId,
+          content: optionalCaption ? `[PHOTO]:${imageUrl}
+${optionalCaption}` : `[PHOTO]:${imageUrl}`,
+        }
+        insertRes = await supabase
+          .from('messages')
+          .insert(fallbackPayload)
+          .select()
+      }
+
+      if (insertRes.error) {
+        Alert.alert('Hata', 'Fotoğraf mesajı iletilemedi: ' + insertRes.error.message)
+      } else if (insertRes.data && insertRes.data[0]) {
         setMessages(prev => {
-          if (prev.some(m => m.id === data[0].id)) return prev
-          return [...prev, data[0] as Message]
+          if (prev.some(m => m.id === insertRes.data![0].id)) return prev
+          return [...prev, insertRes.data![0] as Message]
         })
         setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100)
       }
@@ -301,7 +340,6 @@ export default function ChatScreen() {
     return `${hours}:${mins}`
   }
 
-  // Aktif temaya göre okundu çift tik rengi
   const readReceiptColor = theme.accentText || theme.accent || '#6EE7B7'
 
   const s = StyleSheet.create({
@@ -342,7 +380,6 @@ export default function ChatScreen() {
 
     chatList: { flex: 1, paddingHorizontal: 16, paddingVertical: 12 },
     
-    // Bubble Styles
     bubbleRowMine: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 12 },
     bubbleRowOther: { flexDirection: 'row', justifyContent: 'flex-start', marginBottom: 12 },
     
@@ -389,7 +426,6 @@ export default function ChatScreen() {
 
     emptyText: { color: theme.textSub, fontSize: 13, textAlign: 'center', marginVertical: 40 },
 
-    // Input Bar
     inputRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -459,7 +495,6 @@ export default function ChatScreen() {
             <Text style={s.handleText}>@{friendProfile?.username || 'kullanici'}</Text>
           </View>
 
-          {/* Sohbeti Sil / Temizle Butonu (Minimalist Vector Trash) */}
           <TouchableOpacity style={s.headerActionBtn} onPress={handleDeleteChat} activeOpacity={0.7}>
             <Ionicons name="trash-outline" size={18} color="#ef4444" />
           </TouchableOpacity>
@@ -482,6 +517,9 @@ export default function ChatScreen() {
             ) : (
               messages.map(m => {
                 const isMine = m.sender_id === session?.user.id
+                const photoUrl = extractPhotoUrl(m)
+                const textContent = extractTextContent(m)
+
                 return (
                   <TouchableOpacity
                     key={m.id || Math.random().toString()}
@@ -491,14 +529,14 @@ export default function ChatScreen() {
                   >
                     <View style={isMine ? s.bubbleMine : s.bubbleOther}>
                       {/* Fotoğraf Mesajı Varsa */}
-                      {!!m.image_url && (
+                      {!!photoUrl && (
                         <TouchableOpacity
                           style={s.msgImageContainer}
-                          onPress={() => setSelectedPhotoModal(m.image_url!)}
+                          onPress={() => setSelectedPhotoModal(photoUrl)}
                           activeOpacity={0.85}
                         >
                           <Image
-                            source={{ uri: m.image_url }}
+                            source={{ uri: photoUrl }}
                             style={s.msgImage}
                             resizeMode="cover"
                           />
@@ -506,8 +544,8 @@ export default function ChatScreen() {
                       )}
 
                       {/* Metin İçeriği */}
-                      {(!m.image_url || (m.content && m.content !== 'Fotoğraf')) && (
-                        <Text style={isMine ? s.msgTextMine : s.msgTextOther}>{m.content}</Text>
+                      {!!textContent && (
+                        <Text style={isMine ? s.msgTextMine : s.msgTextOther}>{textContent}</Text>
                       )}
 
                       {isMine ? (
@@ -532,7 +570,6 @@ export default function ChatScreen() {
 
         {/* Input Bar */}
         <View style={s.inputRow}>
-          {/* Fotoğraf Ekleme Butonu (Sleek Vector Media Icon) */}
           <TouchableOpacity
             style={s.photoPickBtn}
             onPress={handlePickImage}

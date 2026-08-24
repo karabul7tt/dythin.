@@ -228,7 +228,7 @@ export default function MessagesInboxScreen() {
                     </View>
                     <Text style={s.lastMsgText} numberOfLines={1}>
                       {item.lastMessage.sender_id === session?.user.id ? 'Sen: ' : ''}
-                      {item.lastMessage.image_url ? 'Fotoğraf' : item.lastMessage.content}
+                      {(item.lastMessage.image_url || item.lastMessage.content?.startsWith('[PHOTO]:')) ? 'Fotoğraf' : item.lastMessage.content}
                     </Text>
                   </View>
 
