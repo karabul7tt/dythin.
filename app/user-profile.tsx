@@ -305,16 +305,6 @@ export default function UserProfileScreen() {
     emptyPosts: { color: theme.textSub, fontSize: 13, textAlign: 'center', marginVertical: 30 },
   })
 
-  if (loading) {
-    return (
-      <SafeAreaView style={s.container}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator color={theme.accent} />
-        </View>
-      </SafeAreaView>
-    )
-  }
-
   const isSelf = session?.user.id === userId
 
   return (

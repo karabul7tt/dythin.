@@ -179,25 +179,20 @@ export default function MessagesInboxScreen() {
         <Text style={s.headerTitle}>Mesajlar</Text>
       </View>
 
-      {loading ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator color={theme.accent} />
-        </View>
-      ) : (
-        <ScrollView
-          style={s.scroll}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={loading}
-              onRefresh={fetchConversations}
-              tintColor={theme.accent}
-              colors={[theme.accent]}
-            />
-          }
-        >
-          {chats.length === 0 ? (
-            <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+      <ScrollView
+        style={s.scroll}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={fetchConversations}
+            tintColor={theme.accent}
+            colors={[theme.accent]}
+          />
+        }
+      >
+        {chats.length === 0 && !loading ? (
+          <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, paddingTop: 60 }}>
               <Text style={s.emptyText}>Henüz hiç mesajınız yok.{'\n'}Arkadaşlarınızın profilinden sohbet başlatabilirsiniz!</Text>
             </View>
           ) : (
@@ -236,7 +231,6 @@ export default function MessagesInboxScreen() {
             })
           )}
         </ScrollView>
-      )}
     </SafeAreaView>
   )
 }

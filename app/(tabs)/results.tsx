@@ -141,15 +141,6 @@ export default function ResultsScreen() {
     emptyText: { color: theme.textSub, fontSize: 14, marginTop: 12 },
   })
 
-  if (initialLoading && posts.length === 0)
-    return (
-      <SafeAreaView style={s.container}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator color={theme.accent} />
-        </View>
-      </SafeAreaView>
-    )
-
   return (
     <SafeAreaView style={s.container}>
       <ScrollView
@@ -157,7 +148,7 @@ export default function ResultsScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={refreshing || (initialLoading && posts.length === 0)}
             onRefresh={() => fetchResults(true)}
             tintColor={theme.accent}
             colors={[theme.accent]}

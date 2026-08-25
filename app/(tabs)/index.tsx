@@ -34,12 +34,12 @@ export default function VoteScreen() {
 
   async function handleRefresh() {
     setRefreshing(true)
-    await fetchPosts()
+    await fetchPosts(true)
     setRefreshing(false)
   }
 
-  async function fetchPosts() {
-    setLoading(true)
+  async function fetchPosts(isPull = false) {
+    if (isPull) setRefreshing(true)
     const { data: votedIds } = await supabase
       .from('votes').select('post_id').eq('voter_id', session?.user.id)
     const voted: string[] = votedIds?.map(v => v.post_id) || []
@@ -247,14 +247,6 @@ export default function VoteScreen() {
     moderationBtn: { paddingHorizontal: 10, paddingVertical: 4 },
     moderationText: { fontSize: 11, color: theme.textSub },
   })
-
-  if (loading) return (
-    <SafeAreaView style={s.container}>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator color={theme.accent} />
-      </View>
-    </SafeAreaView>
-  )
 
   function handleSkip() {
     if (tab === 'public') {

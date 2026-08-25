@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Modal,
   Keyboard,
+  RefreshControl,
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useApp } from '../../context/AppContext'
@@ -28,6 +29,7 @@ export default function SettingsScreen() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [messagePrivacy, setMessagePrivacy] = useState<'everyone' | 'friends'>('everyone')
   const [isPrivate, setIsPrivate] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
 
   // Modals for legal compliance
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
@@ -40,6 +42,12 @@ export default function SettingsScreen() {
       fetchPrivacySettings()
     }
   }, [session?.user.id])
+
+  async function handleRefresh() {
+    setRefreshing(true)
+    await fetchPrivacySettings()
+    setRefreshing(false)
+  }
 
   async function fetchPrivacySettings() {
     try {
@@ -282,7 +290,18 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={s.container}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={s.scroll}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.accent}
+            colors={[theme.accent]}
+          />
+        }
+      >
         <Text style={s.logo}>
           dythin<Text style={s.logoDot}>.</Text>
         </Text>
