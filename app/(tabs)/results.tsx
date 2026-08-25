@@ -5,19 +5,18 @@ import {
   Image,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
   ActivityIndicator,
   TouchableOpacity,
   Alert,
   Modal,
   Dimensions,
-  RefreshControl,
 } from 'react-native'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import type { Post, Vote } from '../../lib/types'
 import { useFocusEffect } from '@react-navigation/native'
 import ZoomablePhoto from '../../components/ZoomablePhoto'
+import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
 
@@ -150,22 +149,11 @@ export default function ResultsScreen() {
 
   return (
     <SafeAreaView style={s.container}>
-      <ScrollView
+      <CustomRefreshContainer
         style={s.scroll}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
-        showsVerticalScrollIndicator={false}
-        bounces={true}
-        alwaysBounceVertical={true}
-        refreshControl={
-          <RefreshControl
-            key={`${theme.bg}-${refreshColor}`}
-            refreshing={refreshing || (initialLoading && posts.length === 0)}
-            onRefresh={() => fetchResults(true)}
-            tintColor={refreshColor}
-            colors={[refreshColor]}
-            progressBackgroundColor={theme.card}
-          />
-        }
+        refreshing={refreshing || (initialLoading && posts.length === 0)}
+        onRefresh={() => fetchResults(true)}
       >
         <View style={s.header}>
           <Text style={s.logo}>
@@ -255,7 +243,7 @@ export default function ResultsScreen() {
             )
           })
         )}
-      </ScrollView>
+      </CustomRefreshContainer>
 
       {zoomMounted && zoomUri ? (
         <Modal visible={true} transparent animationType="fade" onRequestClose={closeZoom} statusBarTranslucent>

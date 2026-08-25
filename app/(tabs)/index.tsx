@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   View, Text, StyleSheet, SafeAreaView,
   ActivityIndicator, Dimensions, TouchableOpacity, Alert,
-  ScrollView, RefreshControl, Platform,
+  Platform,
 } from 'react-native'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
@@ -11,6 +11,7 @@ import type { Post } from '../../lib/types'
 import CommentInput from '../../components/CommentInput'
 import { useFocusEffect } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
+import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -261,22 +262,11 @@ export default function VoteScreen() {
 
   return (
     <SafeAreaView style={s.container}>
-      <ScrollView
+      <CustomRefreshContainer
         style={{ flex: 1, width: '100%' }}
         contentContainerStyle={{ flexGrow: 1, alignItems: 'center', paddingBottom: 20 }}
-        showsVerticalScrollIndicator={false}
-        bounces={true}
-        alwaysBounceVertical={true}
-        refreshControl={
-          <RefreshControl
-            key={`${theme.bg}-${refreshColor}`}
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={refreshColor}
-            colors={[refreshColor]}
-            progressBackgroundColor={theme.card}
-          />
-        }
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: SCREEN_WIDTH - 24, marginVertical: 8 }}>
           <TouchableOpacity onPress={handleRefresh} activeOpacity={0.7}>
@@ -383,7 +373,7 @@ export default function VoteScreen() {
             </TouchableOpacity>
           </View>
         )}
-      </ScrollView>
+      </CustomRefreshContainer>
     </SafeAreaView>
   )
 }

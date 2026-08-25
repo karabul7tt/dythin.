@@ -6,14 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
   Image,
   Alert,
   ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  RefreshControl,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useApp } from '../../context/AppContext'
@@ -21,6 +19,7 @@ import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput } from '../../lib/security'
 import { useRouter } from 'expo-router'
+import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 
 export default function ShareScreen() {
   const { theme, session } = useApp()
@@ -279,24 +278,13 @@ export default function ShareScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
       >
-        <ScrollView
+        <CustomRefreshContainer
           style={s.scroll}
           contentContainerStyle={{ flexGrow: 1, paddingBottom: 180 }}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-          alwaysBounceVertical={true}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
-          refreshControl={
-            <RefreshControl
-              key={`${theme.bg}-${refreshColor}`}
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={refreshColor}
-              colors={[refreshColor]}
-              progressBackgroundColor={theme.card}
-            />
-          }
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
         >
           <Text style={s.logo}>
             dythin<Text style={s.logoDot}>.</Text>
@@ -408,7 +396,7 @@ export default function ShareScreen() {
             <Text style={s.btnText}>Paylaş ve Oylamaya Gönder →</Text>
           )}
         </TouchableOpacity>
-        </ScrollView>
+        </CustomRefreshContainer>
       </KeyboardAvoidingView>
     </SafeAreaView>
   )

@@ -6,14 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
   Image,
   Alert,
   ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  RefreshControl,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useApp } from '../../context/AppContext'
@@ -21,6 +19,7 @@ import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput } from '../../lib/security'
 import { useRouter } from 'expo-router'
+import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 import type { Profile, FriendRecord, FriendshipWithProfiles } from '../../lib/types'
 
 export default function ProfileScreen() {
@@ -417,22 +416,13 @@ export default function ProfileScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
       >
-        <ScrollView
+        <CustomRefreshContainer
           style={s.scroll}
           contentContainerStyle={{ paddingBottom: 320 }}
-          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
-          refreshControl={
-            <RefreshControl
-              key={`${theme.bg}-${refreshColor}`}
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={refreshColor}
-              colors={[refreshColor]}
-              progressBackgroundColor={theme.card}
-            />
-          }
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
         >
           <View style={s.topRow}>
             <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
@@ -640,7 +630,7 @@ export default function ProfileScreen() {
             ))}
           </>
         )}
-        </ScrollView>
+        </CustomRefreshContainer>
       </KeyboardAvoidingView>
     </SafeAreaView>
   )
