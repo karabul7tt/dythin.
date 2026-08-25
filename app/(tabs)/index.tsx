@@ -21,6 +21,7 @@ export default function VoteScreen() {
   const [posts, setPosts] = useState<Post[]>([])
   const [friendPosts, setFriendPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [tab, setTab] = useState<'public' | 'friends'>('public')
 
   useFocusEffect(
@@ -30,6 +31,12 @@ export default function VoteScreen() {
       }
     }, [userId])
   )
+
+  async function handleRefresh() {
+    setRefreshing(true)
+    await fetchPosts()
+    setRefreshing(false)
+  }
 
   async function fetchPosts() {
     setLoading(true)
@@ -259,9 +266,23 @@ export default function VoteScreen() {
 
   return (
     <SafeAreaView style={s.container}>
-      <View style={s.inner}>
+      <ScrollView
+        style={{ flex: 1, width: '100%' }}
+        contentContainerStyle={{ flexGrow: 1, alignItems: 'center', paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+        alwaysBounceVertical={true}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.accent}
+            colors={[theme.accent]}
+          />
+        }
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: SCREEN_WIDTH - 24, marginVertical: 8 }}>
-          <TouchableOpacity onPress={fetchPosts} activeOpacity={0.7}>
+          <TouchableOpacity onPress={handleRefresh} activeOpacity={0.7}>
             <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -353,17 +374,7 @@ export default function VoteScreen() {
             </View>
           </>
         ) : (
-          <ScrollView
-            contentContainerStyle={[s.empty, { flex: 1, justifyContent: 'center' }]}
-            refreshControl={
-              <RefreshControl
-                refreshing={loading}
-                onRefresh={fetchPosts}
-                tintColor={theme.accent}
-                colors={[theme.accent]}
-              />
-            }
-          >
+          <View style={[s.empty, { flex: 1, justifyContent: 'center', minHeight: 400 }]}>
             <Text style={{ fontSize: 44 }}>
               {tab === 'friends' ? '👥' : '✨'}
             </Text>
@@ -373,12 +384,12 @@ export default function VoteScreen() {
             <Text style={{ color: theme.textSub, fontSize: 11, marginTop: 4 }}>
               Yenilemek için aşağı kaydırın
             </Text>
-            <TouchableOpacity onPress={fetchPosts} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: theme.card, borderRadius: 20, marginTop: 12, borderWidth: 0.5, borderColor: theme.border }}>
+            <TouchableOpacity onPress={handleRefresh} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: theme.card, borderRadius: 20, marginTop: 12, borderWidth: 0.5, borderColor: theme.border }}>
               <Text style={{ color: theme.accent, fontSize: 13, fontWeight: '600' }}>Yenile</Text>
             </TouchableOpacity>
-          </ScrollView>
+          </View>
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   )
 }
