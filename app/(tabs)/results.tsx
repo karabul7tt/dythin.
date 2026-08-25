@@ -52,14 +52,19 @@ export default function ResultsScreen() {
     if (isPull) setRefreshing(true)
     else if (posts.length === 0) setInitialLoading(true)
 
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*, votes(*)')
-      .eq('user_id', session?.user.id)
-      .order('created_at', { ascending: false })
+    const minDelay = isPull ? new Promise(resolve => setTimeout(resolve, 600)) : Promise.resolve()
 
-    if (!error) {
-      setPosts((data as Post[]) || [])
+    const [res] = await Promise.all([
+      supabase
+        .from('posts')
+        .select('*, votes(*)')
+        .eq('user_id', session?.user.id)
+        .order('created_at', { ascending: false }),
+      minDelay,
+    ])
+
+    if (!res.error) {
+      setPosts((res.data as Post[]) || [])
     }
     setInitialLoading(false)
     setRefreshing(false)

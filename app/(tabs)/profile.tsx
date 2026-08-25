@@ -54,7 +54,8 @@ export default function ProfileScreen() {
 
   async function handleRefresh() {
     setRefreshing(true)
-    await Promise.all([fetchProfile(), fetchFriends()])
+    const minDelay = new Promise(resolve => setTimeout(resolve, 600))
+    await Promise.all([fetchProfile(), fetchFriends(), minDelay])
     setRefreshing(false)
   }
 

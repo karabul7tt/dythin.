@@ -43,7 +43,7 @@ export default function ShareScreen() {
     setImageA(null)
     setImageB(null)
     setIsAB(false)
-    setTimeout(() => setRefreshing(false), 500)
+    setTimeout(() => setRefreshing(false), 650)
   }
 
   const [lastPostTime, setLastPostTime] = useState<number>(0)

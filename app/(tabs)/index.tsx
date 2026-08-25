@@ -36,7 +36,8 @@ export default function VoteScreen() {
 
   async function handleRefresh() {
     setRefreshing(true)
-    await fetchPosts(true)
+    const minDelay = new Promise(resolve => setTimeout(resolve, 600))
+    await Promise.all([fetchPosts(true), minDelay])
     setRefreshing(false)
   }
 
