@@ -11,6 +11,8 @@ import {
   Alert,
   ActivityIndicator,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useApp } from '../../context/AppContext'
@@ -399,8 +401,19 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={s.container}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <View style={s.topRow}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+      >
+        <ScrollView
+          style={s.scroll}
+          contentContainerStyle={{ paddingBottom: 320 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          <View style={s.topRow}>
           <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
           <TouchableOpacity
             style={{
@@ -606,7 +619,8 @@ export default function ProfileScreen() {
             ))}
           </>
         )}
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
