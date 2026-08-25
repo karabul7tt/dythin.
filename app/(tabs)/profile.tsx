@@ -433,6 +433,9 @@ export default function ProfileScreen() {
         >
           <View style={s.topRow}>
             <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
+            {refreshing && (
+              <ActivityIndicator size="small" color={theme.accent} />
+            )}
             <TouchableOpacity
               style={{
                 width: 40,

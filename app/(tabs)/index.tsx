@@ -279,6 +279,9 @@ export default function VoteScreen() {
           <TouchableOpacity onPress={handleRefresh} activeOpacity={0.7}>
             <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
           </TouchableOpacity>
+          {refreshing && (
+            <ActivityIndicator size="small" color={theme.accent} style={{ marginHorizontal: 8 }} />
+          )}
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.card, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: theme.border }}
             onPress={() => router.push('/messages')}

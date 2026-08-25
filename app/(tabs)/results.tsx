@@ -164,6 +164,9 @@ export default function ResultsScreen() {
           <Text style={s.logo}>
             dythin<Text style={s.logoDot}>.</Text>
           </Text>
+          {(refreshing || (initialLoading && posts.length === 0)) && (
+            <ActivityIndicator size="small" color={theme.accent} />
+          )}
         </View>
 
         {posts.length === 0 ? (

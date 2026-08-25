@@ -296,9 +296,14 @@ export default function ShareScreen() {
             />
           }
         >
-          <Text style={s.logo}>
-            dythin<Text style={s.logoDot}>.</Text>
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <Text style={s.logo}>
+              dythin<Text style={s.logoDot}>.</Text>
+            </Text>
+            {refreshing && (
+              <ActivityIndicator size="small" color={theme.accent} />
+            )}
+          </View>
 
         <Text style={s.label}>FOTOĞRAF SEÇİMİ</Text>
 
