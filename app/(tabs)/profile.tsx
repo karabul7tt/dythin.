@@ -426,8 +426,6 @@ export default function ProfileScreen() {
               refreshing={refreshing}
               onRefresh={handleRefresh}
               tintColor={theme.accent}
-              titleColor={theme.accent}
-              title="Yenileniyor..."
               colors={[theme.accent]}
               progressBackgroundColor={theme.card}
             />
@@ -457,13 +455,6 @@ export default function ProfileScreen() {
               <Text style={{ fontSize: 16 }}>⚙️</Text>
             </TouchableOpacity>
           </View>
-
-          {refreshing && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 6, paddingHorizontal: 14, backgroundColor: theme.card, borderRadius: 20, alignSelf: 'center', marginBottom: 12, borderWidth: 1, borderColor: theme.accent }}>
-              <ActivityIndicator size="small" color={theme.accent} />
-              <Text style={{ fontSize: 12, fontWeight: '700', color: theme.accent }}>Yenileniyor...</Text>
-            </View>
-          )}
 
         {/* Profile Hero Header */}
         <View style={s.heroCard}>
