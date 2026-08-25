@@ -261,7 +261,9 @@ export default function VoteScreen() {
     <SafeAreaView style={s.container}>
       <View style={s.inner}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: SCREEN_WIDTH - 24, marginVertical: 8 }}>
-          <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
+          <TouchableOpacity onPress={fetchPosts} activeOpacity={0.7}>
+            <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.card, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 0.5, borderColor: theme.border }}
             onPress={() => router.push('/messages')}

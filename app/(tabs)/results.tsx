@@ -25,7 +25,8 @@ export default function ResultsScreen() {
   const { theme, session } = useApp()
   const userId = session?.user.id
   const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [zoomUri, setZoomUri] = useState('')
   const [zoomMounted, setZoomMounted] = useState(false)
 
@@ -45,8 +46,10 @@ export default function ResultsScreen() {
     }, [userId])
   )
 
-  async function fetchResults() {
-    setLoading(true)
+  async function fetchResults(isPull = false) {
+    if (isPull) setRefreshing(true)
+    else if (posts.length === 0) setInitialLoading(true)
+
     const { data, error } = await supabase
       .from('posts')
       .select('*, votes(*)')
@@ -56,7 +59,8 @@ export default function ResultsScreen() {
     if (!error) {
       setPosts((data as Post[]) || [])
     }
-    setLoading(false)
+    setInitialLoading(false)
+    setRefreshing(false)
   }
 
   async function deletePost(postId: string) {
@@ -137,7 +141,7 @@ export default function ResultsScreen() {
     emptyText: { color: theme.textSub, fontSize: 14, marginTop: 12 },
   })
 
-  if (loading)
+  if (initialLoading && posts.length === 0)
     return (
       <SafeAreaView style={s.container}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -153,8 +157,8 @@ export default function ResultsScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={loading}
-            onRefresh={fetchResults}
+            refreshing={refreshing}
+            onRefresh={() => fetchResults(true)}
             tintColor={theme.accent}
             colors={[theme.accent]}
           />

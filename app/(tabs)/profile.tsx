@@ -13,6 +13,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useApp } from '../../context/AppContext'
@@ -41,12 +42,19 @@ export default function ProfileScreen() {
   const [requests, setRequests] = useState<FriendRecord[]>([])
   const [searching, setSearching] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     if (!userId) return
     fetchProfile()
     fetchFriends()
   }, [userId])
+
+  async function handleRefresh() {
+    setRefreshing(true)
+    await Promise.all([fetchProfile(), fetchFriends()])
+    setRefreshing(false)
+  }
 
   async function fetchProfile() {
     const { data } = await supabase
@@ -412,6 +420,14 @@ export default function ProfileScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={theme.accent}
+              colors={[theme.accent]}
+            />
+          }
         >
           <View style={s.topRow}>
           <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
