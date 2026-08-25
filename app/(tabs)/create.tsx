@@ -13,6 +13,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useApp } from '../../context/AppContext'
@@ -31,6 +32,17 @@ export default function ShareScreen() {
   const [isAB, setIsAB] = useState(false)
   const [audience, setAudience] = useState<'public' | 'friends'>('public')
   const [loading, setLoading] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+
+  async function handleRefresh() {
+    setRefreshing(true)
+    setTitle('')
+    setDescription('')
+    setImageA(null)
+    setImageB(null)
+    setIsAB(false)
+    setTimeout(() => setRefreshing(false), 500)
+  }
 
   const [lastPostTime, setLastPostTime] = useState<number>(0)
 
@@ -273,10 +285,29 @@ export default function ShareScreen() {
           alwaysBounceVertical={true}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
+          refreshControl={
+            <RefreshControl
+              key={theme.accent}
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={theme.accent}
+              titleColor={theme.accent}
+              title="Yenileniyor..."
+              colors={[theme.accent]}
+              progressBackgroundColor={theme.card}
+            />
+          }
         >
           <Text style={s.logo}>
-          dythin<Text style={s.logoDot}>.</Text>
-        </Text>
+            dythin<Text style={s.logoDot}>.</Text>
+          </Text>
+
+          {refreshing && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 6, paddingHorizontal: 14, backgroundColor: theme.card, borderRadius: 20, alignSelf: 'center', marginBottom: 12, borderWidth: 1, borderColor: theme.accent }}>
+              <ActivityIndicator size="small" color={theme.accent} />
+              <Text style={{ fontSize: 12, fontWeight: '700', color: theme.accent }}>Yenileniyor...</Text>
+            </View>
+          )}
 
         <Text style={s.label}>FOTOĞRAF SEÇİMİ</Text>
 

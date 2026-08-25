@@ -270,6 +270,8 @@ export default function VoteScreen() {
             refreshing={refreshing}
             onRefresh={handleRefresh}
             tintColor={theme.accent}
+            titleColor={theme.accent}
+            title="Yenileniyor..."
             colors={[theme.accent]}
             progressBackgroundColor={theme.card}
           />
@@ -287,6 +289,13 @@ export default function VoteScreen() {
             <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }}>Mesajlar 💬</Text>
           </TouchableOpacity>
         </View>
+
+        {refreshing && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 6, paddingHorizontal: 14, backgroundColor: theme.card, borderRadius: 20, alignSelf: 'center', marginBottom: 8, borderWidth: 1, borderColor: theme.accent }}>
+            <ActivityIndicator size="small" color={theme.accent} />
+            <Text style={{ fontSize: 12, fontWeight: '700', color: theme.accent }}>Yenileniyor...</Text>
+          </View>
+        )}
 
         {/* Centered Tabs Row with Far-Right Moderation Icons */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: SCREEN_WIDTH - 24, position: 'relative', marginBottom: 8 }}>

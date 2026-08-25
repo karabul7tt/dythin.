@@ -426,35 +426,44 @@ export default function ProfileScreen() {
               refreshing={refreshing}
               onRefresh={handleRefresh}
               tintColor={theme.accent}
+              titleColor={theme.accent}
+              title="Yenileniyor..."
               colors={[theme.accent]}
               progressBackgroundColor={theme.card}
             />
           }
         >
           <View style={s.topRow}>
-          <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
-          <TouchableOpacity
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: theme.card,
-              borderWidth: 0.5,
-              borderColor: theme.border,
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 4,
-              elevation: 2,
-            }}
-            onPress={() => router.push('/(tabs)/settings')}
-            activeOpacity={0.75}
-          >
-            <Text style={{ fontSize: 16 }}>⚙️</Text>
-          </TouchableOpacity>
-        </View>
+            <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
+            <TouchableOpacity
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: theme.card,
+                borderWidth: 0.5,
+                borderColor: theme.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.15,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+              onPress={() => router.push('/(tabs)/settings')}
+              activeOpacity={0.75}
+            >
+              <Text style={{ fontSize: 16 }}>⚙️</Text>
+            </TouchableOpacity>
+          </View>
+
+          {refreshing && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 6, paddingHorizontal: 14, backgroundColor: theme.card, borderRadius: 20, alignSelf: 'center', marginBottom: 12, borderWidth: 1, borderColor: theme.accent }}>
+              <ActivityIndicator size="small" color={theme.accent} />
+              <Text style={{ fontSize: 12, fontWeight: '700', color: theme.accent }}>Yenileniyor...</Text>
+            </View>
+          )}
 
         {/* Profile Hero Header */}
         <View style={s.heroCard}>
