@@ -151,11 +151,11 @@ export default function ResultsScreen() {
         alwaysBounceVertical={true}
         refreshControl={
           <RefreshControl
-            key={theme.accent}
+            key={theme.spinnerColor || theme.accent}
             refreshing={refreshing || (initialLoading && posts.length === 0)}
             onRefresh={() => fetchResults(true)}
-            tintColor={theme.accent}
-            colors={[theme.accent]}
+            tintColor={theme.spinnerColor || theme.accent}
+            colors={[theme.spinnerColor || theme.accent]}
             progressBackgroundColor={theme.card}
           />
         }
