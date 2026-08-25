@@ -14,7 +14,7 @@ import {
 } from 'react-native'
 import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
-import { sanitizeInput } from '../../lib/security'
+import { sanitizeInput, validateInstagramUsername } from '../../lib/security'
 
 export default function Login() {
   const [fullName, setFullName] = useState('')
@@ -70,14 +70,14 @@ export default function Login() {
 
     if (isRegister) {
       const cleanFullName = sanitizeInput(fullName)
-      const cleanUsername = sanitizeInput(username)
+      const usernameValidation = validateInstagramUsername(username)
 
       if (!cleanFullName) {
         Alert.alert('Hata', 'Ad ve Soyad alanı zorunludur.')
         return
       }
-      if (!cleanUsername) {
-        Alert.alert('Hata', 'Kullanıcı adı zorunludur.')
+      if (!usernameValidation.valid) {
+        Alert.alert('Geçersiz Kullanıcı Adı', usernameValidation.error)
         return
       }
       if (!inputIdentifier.includes('@')) {
@@ -102,8 +102,23 @@ export default function Login() {
     try {
       if (isRegister) {
         const cleanFullName = sanitizeInput(fullName)
-        const cleanUsername = sanitizeInput(username)
+        const cleanUsername = validateInstagramUsername(username).cleanUsername
         const cleanPhone = phone.trim()
+
+        // Benzersiz Kullanıcı Adı Denetimi (Case-Insensitive)
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('id')
+          .ilike('username', cleanUsername)
+          .maybeSingle()
+
+        if (existingUser) {
+          setLoading(false)
+          return Alert.alert(
+            'Kullanıcı Adı Alınmış',
+            'Bu kullanıcı adı başka bir üye tarafından kullanılıyor. Lütfen farklı bir kullanıcı adı seçin.'
+          )
+        }
 
         const { data, error } = await supabase.auth.signUp({
           email: inputIdentifier,

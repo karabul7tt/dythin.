@@ -17,7 +17,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
-import { sanitizeInput } from '../../lib/security'
+import { sanitizeInput, validateInstagramUsername } from '../../lib/security'
 import { useRouter } from 'expo-router'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 import type { Profile, FriendRecord, FriendshipWithProfiles } from '../../lib/types'
@@ -184,10 +184,14 @@ export default function ProfileScreen() {
   }
 
   async function saveProfileInfo() {
-    const cleanUsername = sanitizeInput(username)
     const cleanFullName = sanitizeInput(fullName)
+    const usernameValidation = validateInstagramUsername(username)
 
-    if (!cleanUsername) return Alert.alert('Hata', 'Kullanıcı adı boş olamaz.')
+    if (!usernameValidation.valid) {
+      return Alert.alert('Geçersiz Kullanıcı Adı', usernameValidation.error)
+    }
+
+    const cleanUsername = usernameValidation.cleanUsername
 
     setLoading(true)
     try {
@@ -206,12 +210,12 @@ export default function ProfileScreen() {
           setLoading(false)
           return Alert.alert(
             'Kullanıcı Adı Değiştirilemez',
-            `Kullanıcı adınızı 14 günde bir değiştirebilirsiniz. Bir sonraki değiştirme hakkınız: ${remainingDays} gün sonra.`
+            `Kullanıcı adınızı 14 günde bir değiştirebilirsiniz. Bir sonraki değiştirme hakkınız için ${remainingDays} gün beklemeniz gerekiyor.`
           )
         }
       }
 
-      // 2. Benzersiz Kullanıcı Adı Denetimi
+      // 2. Benzersiz Kullanıcı Adı Denetimi (Case-Insensitive)
       if (isUsernameChanged) {
         const { data: existingUser } = await supabase
           .from('profiles')
@@ -231,14 +235,16 @@ export default function ProfileScreen() {
 
       const nowIso = new Date().toISOString()
 
+      const updateData: Record<string, any> = {
+        id: session.user.id,
+        username: cleanUsername,
+        full_name: cleanFullName,
+        updated_at: nowIso,
+      }
+
       let { error } = await supabase
         .from('profiles')
-        .upsert({
-          id: session.user.id,
-          username: cleanUsername,
-          full_name: cleanFullName,
-          updated_at: nowIso,
-        })
+        .upsert(updateData)
 
       if (error) {
         const res = await supabase
@@ -259,12 +265,13 @@ export default function ProfileScreen() {
           setLastUsernameUpdate(nowIso)
         }
         setIsEditing(false)
-        Alert.alert('Profil Güncellendi', 'Bilgileriniz başarıyla kaydedildi.')
+        Alert.alert('Başarılı ✨', 'Profil bilgileriniz başarıyla güncellendi.')
       }
     } catch (e: any) {
       Alert.alert('Hata', getCleanErrorMessage(e))
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   function cancelEdit() {

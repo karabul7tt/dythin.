@@ -38,3 +38,53 @@ export function sanitizeInput(input: string): string {
 
   return sanitized
 }
+
+/**
+ * Instagram tarzı standart kullanıcı adı doğrulama ve temizleme:
+ * - Yalnızca küçük harf (a-z), rakam (0-9), nokta (.) ve alt çizgi (_)
+ * - Minimum 3, maksimum 30 karakter
+ * - Nokta veya alt çizgi ile başlayamaz / bitemez
+ * - Ardışık nokta (..) veya ardışık alt çizgi (__) içeremez
+ * - Boşluk, emoji veya özel şekilli semboller yasak
+ */
+export function validateInstagramUsername(username: string): { valid: boolean; cleanUsername: string; error?: string } {
+  if (!username || typeof username !== 'string') {
+    return { valid: false, cleanUsername: '', error: 'Kullanıcı adı zorunludur.' }
+  }
+
+  const clean = username.trim().toLowerCase()
+
+  if (clean.length < 3) {
+    return { valid: false, cleanUsername: clean, error: 'Kullanıcı adı en az 3 karakter olmalıdır.' }
+  }
+
+  if (clean.length > 30) {
+    return { valid: false, cleanUsername: clean, error: 'Kullanıcı adı en fazla 30 karakter olabilir.' }
+  }
+
+  if (!/^[a-z0-9._]+$/.test(clean)) {
+    return {
+      valid: false,
+      cleanUsername: clean,
+      error: 'Kullanıcı adında yalnızca küçük harf, rakam, nokta (.) ve alt çizgi (_) kullanılabilir. Özel şekiller veya semboller kullanılamaz.',
+    }
+  }
+
+  if (/^[._]/.test(clean) || /[._]$/.test(clean)) {
+    return {
+      valid: false,
+      cleanUsername: clean,
+      error: 'Kullanıcı adı nokta (.) veya alt çizgi (_) ile başlayamaz ve bitemez.',
+    }
+  }
+
+  if (/\.\.|\_\_|\._|_\./.test(clean)) {
+    return {
+      valid: false,
+      cleanUsername: clean,
+      error: 'Kullanıcı adı üst üste birden fazla nokta veya alt çizgi içeremez.',
+    }
+  }
+
+  return { valid: true, cleanUsername: clean }
+}
