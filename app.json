@@ -16,7 +16,9 @@
       "bundleIdentifier": "com.dythin.app",
       "buildNumber": "1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Dythin, oylama oluştururken ve mesajlaşmada fotoğraf paylaşabilmeniz için galerinize erişim izni ister.",
+        "NSCameraUsageDescription": "Dythin, anlık fotoğraf çekip oylama oluşturabilmeniz için kameranıza erişim izni ister."
       }
     },
     "android": {
