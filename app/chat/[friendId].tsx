@@ -519,10 +519,6 @@ export default function ChatScreen() {
             <Text style={s.friendName}>{friendProfile?.full_name || friendProfile?.username || 'Kullanıcı'}</Text>
             <Text style={s.handleText}>@{friendProfile?.username || 'kullanici'}</Text>
           </View>
-
-          <TouchableOpacity style={s.headerActionBtn} onPress={handleDeleteChat} activeOpacity={0.7}>
-            <Ionicons name="trash-outline" size={18} color="#ef4444" />
-          </TouchableOpacity>
         </View>
 
         {/* Message List */}

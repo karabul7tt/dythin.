@@ -231,14 +231,6 @@ export default function MessagesInboxScreen() {
                       {(item.lastMessage.image_url || item.lastMessage.content?.startsWith('[PHOTO]:')) ? 'Fotoğraf' : item.lastMessage.content}
                     </Text>
                   </View>
-
-                  <TouchableOpacity
-                    style={s.deleteChatBtn}
-                    onPress={() => handleDeleteChat(item.friend.id, fName)}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
-                  </TouchableOpacity>
                 </TouchableOpacity>
               )
             })
