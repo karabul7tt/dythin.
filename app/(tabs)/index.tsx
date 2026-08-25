@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   View, Text, StyleSheet, SafeAreaView,
   ActivityIndicator, Dimensions, TouchableOpacity, Alert,
-  ScrollView, RefreshControl,
+  ScrollView, RefreshControl, Platform,
 } from 'react-native'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
@@ -18,6 +18,8 @@ export default function VoteScreen() {
   const { theme, session } = useApp()
   const router = useRouter()
   const userId = session?.user.id
+  const isDark = theme.bg === '#0e0e1a' || theme.bg === '#111108'
+  const refreshColor = isDark ? '#ffffff' : '#555555'
   const [posts, setPosts] = useState<Post[]>([])
   const [friendPosts, setFriendPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
@@ -266,10 +268,11 @@ export default function VoteScreen() {
         alwaysBounceVertical={true}
         refreshControl={
           <RefreshControl
+            key={`${theme.bg}-${refreshColor}`}
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor="#8e8e93"
-            colors={['#8e8e93']}
+            tintColor={refreshColor}
+            colors={[refreshColor]}
             progressBackgroundColor={theme.card}
           />
         }

@@ -25,6 +25,8 @@ type ChatItem = {
 export default function MessagesInboxScreen() {
   const { theme, session } = useApp()
   const router = useRouter()
+  const isDark = theme.bg === '#0e0e1a' || theme.bg === '#111108'
+  const refreshColor = isDark ? '#ffffff' : '#555555'
   const [chats, setChats] = useState<ChatItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -187,10 +189,11 @@ export default function MessagesInboxScreen() {
         alwaysBounceVertical={true}
         refreshControl={
           <RefreshControl
+            key={`${theme.bg}-${refreshColor}`}
             refreshing={loading}
             onRefresh={fetchConversations}
-            tintColor="#8e8e93"
-            colors={['#8e8e93']}
+            tintColor={refreshColor}
+            colors={[refreshColor]}
             progressBackgroundColor={theme.card}
           />
         }

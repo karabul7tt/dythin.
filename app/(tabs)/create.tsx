@@ -25,6 +25,8 @@ import { useRouter } from 'expo-router'
 export default function ShareScreen() {
   const { theme, session } = useApp()
   const router = useRouter()
+  const isDark = theme.bg === '#0e0e1a' || theme.bg === '#111108'
+  const refreshColor = isDark ? '#ffffff' : '#555555'
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [imageA, setImageA] = useState<string | null>(null)
@@ -287,10 +289,11 @@ export default function ShareScreen() {
           keyboardDismissMode="on-drag"
           refreshControl={
             <RefreshControl
+              key={`${theme.bg}-${refreshColor}`}
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor="#8e8e93"
-              colors={['#8e8e93']}
+              tintColor={refreshColor}
+              colors={[refreshColor]}
               progressBackgroundColor={theme.card}
             />
           }

@@ -27,6 +27,8 @@ export default function ProfileScreen() {
   const { theme, session } = useApp()
   const userId = session?.user?.id
   const router = useRouter()
+  const isDark = theme.bg === '#0e0e1a' || theme.bg === '#111108'
+  const refreshColor = isDark ? '#ffffff' : '#555555'
   const [tab, setTab] = useState<'profile' | 'friends'>('profile')
   const [fullName, setFullName] = useState('')
   const [username, setUsername] = useState('')
@@ -422,10 +424,11 @@ export default function ProfileScreen() {
           keyboardDismissMode="on-drag"
           refreshControl={
             <RefreshControl
+              key={`${theme.bg}-${refreshColor}`}
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor="#8e8e93"
-              colors={['#8e8e93']}
+              tintColor={refreshColor}
+              colors={[refreshColor]}
               progressBackgroundColor={theme.card}
             />
           }

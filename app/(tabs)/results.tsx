@@ -24,6 +24,8 @@ const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
 export default function ResultsScreen() {
   const { theme, session } = useApp()
   const userId = session?.user.id
+  const isDark = theme.bg === '#0e0e1a' || theme.bg === '#111108'
+  const refreshColor = isDark ? '#ffffff' : '#555555'
   const [posts, setPosts] = useState<Post[]>([])
   const [initialLoading, setInitialLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -151,10 +153,11 @@ export default function ResultsScreen() {
         alwaysBounceVertical={true}
         refreshControl={
           <RefreshControl
+            key={`${theme.bg}-${refreshColor}`}
             refreshing={refreshing || (initialLoading && posts.length === 0)}
             onRefresh={() => fetchResults(true)}
-            tintColor="#8e8e93"
-            colors={['#8e8e93']}
+            tintColor={refreshColor}
+            colors={[refreshColor]}
             progressBackgroundColor={theme.card}
           />
         }
