@@ -32,19 +32,48 @@ export default function ShareScreen() {
 
   const [lastPostTime, setLastPostTime] = useState<number>(0)
 
-  async function pickImage(setImage: (uri: string | null) => void) {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (!permission.granted) {
-      Alert.alert('Fotoğraf İzni Gerekli', 'Fotoğraf seçebilmek için galeriye izin vermeniz gerekmektedir.')
-      return
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    })
-    if (!result.canceled) setImage(result.assets[0].uri)
+  function pickImage(setImage: (uri: string | null) => void) {
+    Alert.alert(
+      'Fotoğraf Ekle',
+      'Bir yöntem seçin',
+      [
+        {
+          text: 'Fotoğraf Çek (Kamera)',
+          onPress: async () => {
+            const permission = await ImagePicker.requestCameraPermissionsAsync()
+            if (!permission.granted) {
+              Alert.alert('Kamera İzni Gerekli', 'Fotoğraf çekebilmek için kameraya izin vermeniz gerekmektedir.')
+              return
+            }
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ['images'],
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.7,
+            })
+            if (!result.canceled && result.assets[0]) setImage(result.assets[0].uri)
+          },
+        },
+        {
+          text: 'Galeriden Seç',
+          onPress: async () => {
+            const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
+            if (!permission.granted) {
+              Alert.alert('Fotoğraf İzni Gerekli', 'Fotoğraf seçebilmek için galeriye izin vermeniz gerekmektedir.')
+              return
+            }
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images'],
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.7,
+            })
+            if (!result.canceled && result.assets[0]) setImage(result.assets[0].uri)
+          },
+        },
+        { text: 'Vazgeç', style: 'cancel' },
+      ]
+    )
   }
 
   async function uploadImage(uri: string) {

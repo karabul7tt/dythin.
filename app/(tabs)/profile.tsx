@@ -98,39 +98,77 @@ export default function ProfileScreen() {
     setStats(prev => ({ ...prev, friends: accepted.length }))
   }
 
-  async function pickAvatar() {
+  async function uploadAvatarUri(uri: string) {
+    setLoading(true)
+    try {
+      if (!session?.user.id) throw new Error('Giriş yapmalısınız.')
+      const response = await fetch(uri)
+      const file = await response.arrayBuffer()
+      const ext = uri.split('?')[0].split('.').pop()?.toLowerCase() || 'jpg'
+      const contentType = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`
+      const fileName = `${session.user.id}/avatar.${ext}`
+      const { data, error } = await supabase.storage.from('posts').upload(fileName, file, { contentType, upsert: true })
+      if (error) throw error
+      const { data: urlData } = supabase.storage.from('posts').getPublicUrl(data.path)
+      setAvatar(urlData.publicUrl)
+      await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', session?.user.id)
+    } catch (e: unknown) {
+      Alert.alert('Hata', e instanceof Error ? e.message : 'Fotoğraf yüklenemedi.')
+    }
+    setLoading(false)
+  }
+
+  function pickAvatar() {
     if (!isEditing) {
       Alert.alert('Bilgi', 'Profil fotoğrafınızı değiştirmek için önce "Düzenle" butonuna basın.')
       return
     }
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (!permission.granted) {
-      Alert.alert('Fotoğraf İzni Gerekli', 'Profil fotoğrafı seçebilmek için fotoğraf erişimine izin verin.')
-      return
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.8,
-    })
-    if (!result.canceled) {
-      const uri = result.assets[0].uri
-      setLoading(true)
-      try {
-        if (!session?.user.id) throw new Error('Giriş yapmalısınız.')
-        const response = await fetch(uri)
-        const file = await response.arrayBuffer()
-        const ext = uri.split('?')[0].split('.').pop()?.toLowerCase() || 'jpg'
-        const contentType = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`
-        const fileName = `${session.user.id}/avatar.${ext}`
-        const { data, error } = await supabase.storage.from('posts').upload(fileName, file, { contentType, upsert: true })
-        if (error) throw error
-        const { data: urlData } = supabase.storage.from('posts').getPublicUrl(data.path)
-        setAvatar(urlData.publicUrl)
-        await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', session?.user.id)
-      } catch (e: unknown) {
-        Alert.alert('Hata', e instanceof Error ? e.message : 'Fotoğraf yüklenemedi.')
-      }
-      setLoading(false)
-    }
+
+    Alert.alert(
+      'Profil Fotoğrafı Seç',
+      'Bir yöntem seçin',
+      [
+        {
+          text: 'Fotoğraf Çek (Kamera)',
+          onPress: async () => {
+            const permission = await ImagePicker.requestCameraPermissionsAsync()
+            if (!permission.granted) {
+              Alert.alert('Kamera İzni Gerekli', 'Fotoğraf çekebilmek için kameraya izin vermelisiniz.')
+              return
+            }
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ['images'],
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.8,
+            })
+            if (!result.canceled && result.assets[0]) {
+              await uploadAvatarUri(result.assets[0].uri)
+            }
+          },
+        },
+        {
+          text: 'Galeriden Seç',
+          onPress: async () => {
+            const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
+            if (!permission.granted) {
+              Alert.alert('Fotoğraf İzni Gerekli', 'Profil fotoğrafı seçebilmek için galeri erişimine izin verin.')
+              return
+            }
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images'],
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.8,
+            })
+            if (!result.canceled && result.assets[0]) {
+              await uploadAvatarUri(result.assets[0].uri)
+            }
+          },
+        },
+        { text: 'Vazgeç', style: 'cancel' },
+      ]
+    )
   }
 
   async function saveProfileInfo() {

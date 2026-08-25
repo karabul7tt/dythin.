@@ -155,26 +155,55 @@ export default function ChatScreen() {
     return msg.content || ''
   }
 
-  // 1. Adım: Galeriden Fotoğraf Seçip Insta-DM Önizleme Ekranını Açma
-  async function handlePickImage() {
+  // 1. Adım: Fotoğraf Çekme veya Galeriden Seçme Menüsü
+  function handlePickImage() {
     if (uploadingImage || sending || !session?.user.id || !friendId) return
 
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (status !== 'granted') {
-      Alert.alert('İzin Gerekli', 'Fotoğraf gönderebilmek için galeri erişim izni vermelisiniz.')
-      return
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      quality: 0.8,
-    })
-
-    if (result.canceled || !result.assets[0]) return
-
-    setPendingPhotoUri(result.assets[0].uri)
-    setPhotoCaption('')
+    Alert.alert(
+      'Fotoğraf Gönder',
+      'Bir yöntem seçin',
+      [
+        {
+          text: 'Fotoğraf Çek (Kamera)',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestCameraPermissionsAsync()
+            if (status !== 'granted') {
+              Alert.alert('İzin Gerekli', 'Fotoğraf çekebilmek için kamera erişim izni vermelisiniz.')
+              return
+            }
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ['images'],
+              allowsEditing: true,
+              quality: 0.8,
+            })
+            if (!result.canceled && result.assets[0]) {
+              setPendingPhotoUri(result.assets[0].uri)
+              setPhotoCaption('')
+            }
+          },
+        },
+        {
+          text: 'Galeriden Seç',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+            if (status !== 'granted') {
+              Alert.alert('İzin Gerekli', 'Fotoğraf seçebilmek için galeri erişim izni vermelisiniz.')
+              return
+            }
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images'],
+              allowsEditing: true,
+              quality: 0.8,
+            })
+            if (!result.canceled && result.assets[0]) {
+              setPendingPhotoUri(result.assets[0].uri)
+              setPhotoCaption('')
+            }
+          },
+        },
+        { text: 'Vazgeç', style: 'cancel' },
+      ]
+    )
   }
 
   // 2. Adım: Önizleme Ekranından Fotoğrafı Gönderme
