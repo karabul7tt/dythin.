@@ -145,13 +145,18 @@ export default function ResultsScreen() {
     <SafeAreaView style={s.container}>
       <ScrollView
         style={s.scroll}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
         showsVerticalScrollIndicator={false}
+        bounces={true}
+        alwaysBounceVertical={true}
         refreshControl={
           <RefreshControl
+            key={theme.accent}
             refreshing={refreshing || (initialLoading && posts.length === 0)}
             onRefresh={() => fetchResults(true)}
             tintColor={theme.accent}
             colors={[theme.accent]}
+            progressBackgroundColor={theme.card}
           />
         }
       >

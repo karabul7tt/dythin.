@@ -292,13 +292,18 @@ export default function SettingsScreen() {
     <SafeAreaView style={s.container}>
       <ScrollView
         style={s.scroll}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
         showsVerticalScrollIndicator={false}
+        bounces={true}
+        alwaysBounceVertical={true}
         refreshControl={
           <RefreshControl
+            key={theme.accent}
             refreshing={refreshing}
             onRefresh={handleRefresh}
             tintColor={theme.accent}
             colors={[theme.accent]}
+            progressBackgroundColor={theme.card}
           />
         }
       >

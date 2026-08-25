@@ -11,6 +11,8 @@ import {
   Alert,
   ActivityIndicator,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useApp } from '../../context/AppContext'
@@ -258,8 +260,21 @@ export default function ShareScreen() {
 
   return (
     <SafeAreaView style={s.container}>
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <Text style={s.logo}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+      >
+        <ScrollView
+          style={s.scroll}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 180 }}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+          alwaysBounceVertical={true}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          <Text style={s.logo}>
           dythin<Text style={s.logoDot}>.</Text>
         </Text>
 
@@ -369,7 +384,8 @@ export default function ShareScreen() {
             <Text style={s.btnText}>Paylaş ve Oylamaya Gönder →</Text>
           )}
         </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }

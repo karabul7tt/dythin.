@@ -181,13 +181,18 @@ export default function MessagesInboxScreen() {
 
       <ScrollView
         style={s.scroll}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
         showsVerticalScrollIndicator={false}
+        bounces={true}
+        alwaysBounceVertical={true}
         refreshControl={
           <RefreshControl
+            key={theme.accent}
             refreshing={loading}
             onRefresh={fetchConversations}
             tintColor={theme.accent}
             colors={[theme.accent]}
+            progressBackgroundColor={theme.card}
           />
         }
       >

@@ -422,10 +422,12 @@ export default function ProfileScreen() {
           keyboardDismissMode="on-drag"
           refreshControl={
             <RefreshControl
+              key={theme.accent}
               refreshing={refreshing}
               onRefresh={handleRefresh}
               tintColor={theme.accent}
               colors={[theme.accent]}
+              progressBackgroundColor={theme.card}
             />
           }
         >

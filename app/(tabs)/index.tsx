@@ -266,10 +266,12 @@ export default function VoteScreen() {
         alwaysBounceVertical={true}
         refreshControl={
           <RefreshControl
+            key={theme.accent}
             refreshing={refreshing}
             onRefresh={handleRefresh}
             tintColor={theme.accent}
             colors={[theme.accent]}
+            progressBackgroundColor={theme.card}
           />
         }
       >
@@ -373,10 +375,7 @@ export default function VoteScreen() {
             <Text style={s.emptyText}>
               {tab === 'friends' ? 'Arkadaşlarından henüz\noylama yok' : 'Şimdilik tüm oylamalar\ntamamlandı'}
             </Text>
-            <Text style={{ color: theme.textSub, fontSize: 11, marginTop: 4 }}>
-              Yenilemek için aşağı kaydırın
-            </Text>
-            <TouchableOpacity onPress={handleRefresh} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: theme.card, borderRadius: 20, marginTop: 12, borderWidth: 0.5, borderColor: theme.border }}>
+            <TouchableOpacity onPress={handleRefresh} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: theme.card, borderRadius: 20, marginTop: 16, borderWidth: 0.5, borderColor: theme.border }}>
               <Text style={{ color: theme.accent, fontSize: 13, fontWeight: '600' }}>Yenile</Text>
             </TouchableOpacity>
           </View>
