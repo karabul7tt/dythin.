@@ -422,20 +422,16 @@ export default function ProfileScreen() {
           keyboardDismissMode="on-drag"
           refreshControl={
             <RefreshControl
-              key={theme.spinnerColor || theme.accent}
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor={theme.spinnerColor || theme.accent}
-              colors={[theme.spinnerColor || theme.accent]}
+              tintColor="#8e8e93"
+              colors={['#8e8e93']}
               progressBackgroundColor={theme.card}
             />
           }
         >
           <View style={s.topRow}>
             <Text style={s.logo}>dythin<Text style={s.logoDot}>.</Text></Text>
-            {refreshing && (
-              <ActivityIndicator size="small" color={theme.accent} />
-            )}
             <TouchableOpacity
               style={{
                 width: 40,

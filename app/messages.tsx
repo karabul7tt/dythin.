@@ -187,11 +187,10 @@ export default function MessagesInboxScreen() {
         alwaysBounceVertical={true}
         refreshControl={
           <RefreshControl
-            key={theme.spinnerColor || theme.accent}
             refreshing={loading}
             onRefresh={fetchConversations}
-            tintColor={theme.spinnerColor || theme.accent}
-            colors={[theme.spinnerColor || theme.accent]}
+            tintColor="#8e8e93"
+            colors={['#8e8e93']}
             progressBackgroundColor={theme.card}
           />
         }

@@ -151,11 +151,10 @@ export default function ResultsScreen() {
         alwaysBounceVertical={true}
         refreshControl={
           <RefreshControl
-            key={theme.spinnerColor || theme.accent}
             refreshing={refreshing || (initialLoading && posts.length === 0)}
             onRefresh={() => fetchResults(true)}
-            tintColor={theme.spinnerColor || theme.accent}
-            colors={[theme.spinnerColor || theme.accent]}
+            tintColor="#8e8e93"
+            colors={['#8e8e93']}
             progressBackgroundColor={theme.card}
           />
         }
@@ -164,9 +163,6 @@ export default function ResultsScreen() {
           <Text style={s.logo}>
             dythin<Text style={s.logoDot}>.</Text>
           </Text>
-          {(refreshing || (initialLoading && posts.length === 0)) && (
-            <ActivityIndicator size="small" color={theme.accent} />
-          )}
         </View>
 
         {posts.length === 0 ? (

@@ -287,23 +287,17 @@ export default function ShareScreen() {
           keyboardDismissMode="on-drag"
           refreshControl={
             <RefreshControl
-              key={theme.spinnerColor || theme.accent}
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor={theme.spinnerColor || theme.accent}
-              colors={[theme.spinnerColor || theme.accent]}
+              tintColor="#8e8e93"
+              colors={['#8e8e93']}
               progressBackgroundColor={theme.card}
             />
           }
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <Text style={s.logo}>
-              dythin<Text style={s.logoDot}>.</Text>
-            </Text>
-            {refreshing && (
-              <ActivityIndicator size="small" color={theme.accent} />
-            )}
-          </View>
+          <Text style={s.logo}>
+            dythin<Text style={s.logoDot}>.</Text>
+          </Text>
 
         <Text style={s.label}>FOTOĞRAF SEÇİMİ</Text>
 
