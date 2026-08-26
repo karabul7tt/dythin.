@@ -1,6 +1,6 @@
 import 'react-native-url-polyfill/auto'
 import { Slot, usePathname, useRouter, useSegments } from 'expo-router'
-import { ActivityIndicator, View, LogBox } from 'react-native'
+import { ActivityIndicator, View, LogBox, Image, StatusBar } from 'react-native'
 import { useEffect } from 'react'
 import { AppProvider, useApp } from '../context/AppContext'
 
@@ -24,8 +24,16 @@ function AuthGate() {
 
   if (isAuthLoading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0e0e1a' }}>
-        <ActivityIndicator color="#7F77DD" />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a12' }}>
+        <StatusBar barStyle="light-content" backgroundColor="#0a0a12" />
+        <Image
+          source={require('../assets/splash.png')}
+          style={{ width: '100%', height: '100%', position: 'absolute' }}
+          resizeMode="contain"
+        />
+        <View style={{ position: 'absolute', bottom: 90, alignItems: 'center' }}>
+          <ActivityIndicator size="small" color="#7F77DD" />
+        </View>
       </View>
     )
   }
