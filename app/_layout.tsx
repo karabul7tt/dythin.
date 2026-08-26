@@ -17,7 +17,7 @@ function AuthGate() {
     if (isAuthLoading) return
 
     const isAuthRoute = segments[0] === '(auth)'
-    const isPasswordResetRoute = pathname === '/reset-password'
+    const isPasswordResetRoute = pathname.includes('reset-password') || segments.includes('reset-password')
     if (!session && !isAuthRoute) router.replace('/(auth)/login')
     if (session && isAuthRoute && !isPasswordResetRoute) router.replace('/(tabs)')
   }, [isAuthLoading, pathname, router, segments, session])

@@ -13,11 +13,13 @@ import {
   Keyboard,
   Modal,
 } from 'react-native'
+import { useRouter } from 'expo-router'
 import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput, validateInstagramUsername } from '../../lib/security'
 
 export default function Login() {
+  const router = useRouter()
   const [fullName, setFullName] = useState('')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -43,20 +45,11 @@ export default function Login() {
 
   const [phone, setPhone] = useState('')
 
-  async function handleForgotPassword() {
-    const normalizedEmail = email.trim()
-    if (!normalizedEmail) {
-      Alert.alert('E-posta gerekli', 'Şifre sıfırlama kodu göndermek için önce e-posta adresinizi yazın.')
-      return
-    }
-    setLoading(true)
-    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail)
-    setLoading(false)
-    if (error) {
-      Alert.alert('Kod gönderilemedi', error.message)
-      return
-    }
-    Alert.alert('Kod gönderildi!', `${normalizedEmail} adresine 6 haneli doğrulama kodu gönderildi.`)
+  function handleForgotPassword() {
+    router.push({
+      pathname: '/(auth)/reset-password',
+      params: { identifier: email.trim() },
+    })
   }
 
   async function handleAuth() {
