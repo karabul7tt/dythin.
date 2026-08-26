@@ -1,0 +1,12 @@
+# EAS Ignore
+node_modules/
+.pnpm-store/
+.expo/
+dist/
+web-build/
+*.apk
+*.aab
+*.ipa
+backups/
+.DS_Store
+*.log

@@ -32,6 +32,8 @@ function AuthGate() {
   return <Slot />
 }
 
+export { ErrorBoundary } from 'expo-router'
+
 export default function RootLayout() {
   return (
     <AppProvider>
@@ -39,3 +41,4 @@ export default function RootLayout() {
     </AppProvider>
   )
 }
+

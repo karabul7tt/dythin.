@@ -7,16 +7,18 @@ let Notifications: any = null
 
 try {
   Notifications = require('expo-notifications')
-  if (Notifications && Notifications.setNotificationHandler) {
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: true,
-        shouldShowBanner: true,
-        shouldShowList: true,
-      }),
-    })
+  if (Notifications && typeof Notifications.setNotificationHandler === 'function') {
+    try {
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
+          shouldShowBanner: true,
+          shouldShowList: true,
+        }),
+      })
+    } catch {}
   }
 } catch (e) {
   // Expo Go Android push notification compatibility guard
@@ -33,13 +35,18 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
   }
 
   try {
+    if (!Notifications.getPermissionsAsync || !Notifications.requestPermissionsAsync || !Notifications.getExpoPushTokenAsync) {
+      return null
+    }
+
     let finalStatus = 'denied'
-    const { status: existingStatus } = await Notifications.getPermissionsAsync()
+    const permResult = await Notifications.getPermissionsAsync().catch(() => null)
+    const existingStatus = permResult?.status || 'denied'
     finalStatus = existingStatus
 
     if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync()
-      finalStatus = status
+      const reqResult = await Notifications.requestPermissionsAsync().catch(() => null)
+      finalStatus = reqResult?.status || 'denied'
     }
 
     if (finalStatus !== 'granted') {
@@ -47,11 +54,11 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
     }
 
     const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID || 'f7bea319-3747-4543-8ef1-503ca5d49a12'
-    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId })
+    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId }).catch(() => null)
     const pushToken = tokenData?.data
 
     if (userId && pushToken) {
-      await supabase.from('profiles').update({ push_token: pushToken }).eq('id', userId)
+      await supabase.from('profiles').update({ push_token: pushToken }).eq('id', userId).catch(() => null)
     }
 
     if (Platform.OS === 'android' && Notifications.setNotificationChannelAsync) {
@@ -60,10 +67,10 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
         importance: Notifications.AndroidImportance?.MAX || 4,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#7F77DD',
-      })
+      }).catch(() => null)
     }
 
-    return pushToken
+    return pushToken || null
   } catch (error) {
     return null
   }

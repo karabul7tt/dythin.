@@ -40,7 +40,13 @@
           "photosPermission": "Fotoğraf yükleyebilmek için fotoğraf arşivine erişim izni gerekir."
         }
       ],
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#7F77DD"
+        }
+      ],
       "expo-font"
     ],
     "extra": {
