@@ -1,3 +1,4 @@
+import 'react-native-url-polyfill/auto'
 import { Slot, usePathname, useRouter, useSegments } from 'expo-router'
 import { ActivityIndicator, View, LogBox } from 'react-native'
 import { useEffect } from 'react'
