@@ -58,7 +58,9 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
     const pushToken = tokenData?.data
 
     if (userId && pushToken) {
-      await supabase.from('profiles').update({ push_token: pushToken }).eq('id', userId).catch(() => null)
+      try {
+        await supabase.from('profiles').update({ push_token: pushToken }).eq('id', userId)
+      } catch {}
     }
 
     if (Platform.OS === 'android' && Notifications.setNotificationChannelAsync) {

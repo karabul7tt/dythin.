@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Keyboard,
+  Modal,
 } from 'react-native'
 import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
@@ -28,6 +29,8 @@ export default function Login() {
   const [showOtpScreen, setShowOtpScreen] = useState(false)
   const [attemptCount, setAttemptCount] = useState(0)
   const [cooldown, setCooldown] = useState(0)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
 
   // Rate Limiting Cooldown Timer (Giriş Deneme Sınırlayıcı)
   useEffect(() => {
@@ -150,6 +153,7 @@ export default function Login() {
                 id: data.user.id,
                 username: cleanUsername,
                 full_name: cleanFullName,
+                email: inputIdentifier,
               })
           }
           if (data.session) {
@@ -170,12 +174,16 @@ export default function Login() {
         if (!inputIdentifier.includes('@')) {
           const { data: foundProfile } = await supabase
             .from('profiles')
-            .select('id, username')
+            .select('id, username, email')
             .ilike('username', inputIdentifier.replace(/^@/, ''))
             .single()
 
-          // Normal e-posta ile oturum açmayı dene
-          targetEmail = inputIdentifier
+          if (foundProfile?.email) {
+            targetEmail = foundProfile.email
+          } else {
+            setLoading(false)
+            return Alert.alert('Kullanıcı Bulunamadı', 'Bu kullanıcı adıyla kayıtlı bir hesap bulunamadı. Lütfen e-posta adresinizle giriş yapın.')
+          }
         }
 
         const { error } = await supabase.auth.signInWithPassword({
@@ -436,6 +444,20 @@ export default function Login() {
                 }
               </TouchableOpacity>
 
+              {isRegister && (
+                <Text style={{ color: '#888', fontSize: 11, textAlign: 'center', marginTop: 4, marginBottom: 8, lineHeight: 16 }}>
+                  Kayıt olarak{' '}
+                  <Text style={{ color: '#7F77DD', textDecorationLine: 'underline' }} onPress={() => setShowTermsModal(true)}>
+                    Kullanım Koşulları
+                  </Text>
+                  {' '}ve{' '}
+                  <Text style={{ color: '#7F77DD', textDecorationLine: 'underline' }} onPress={() => setShowPrivacyModal(true)}>
+                    Gizlilik Politikası
+                  </Text>
+                  {"'"}nı kabul etmiş olursunuz.
+                </Text>
+              )}
+
               {!isRegister && (
                 <TouchableOpacity
                   style={{ marginBottom: 8, alignItems: 'center' }}
@@ -465,6 +487,48 @@ export default function Login() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Gizlilik Politikası Modal */}
+      <Modal visible={showPrivacyModal} transparent animationType="slide" onRequestClose={() => setShowPrivacyModal(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: '#1a1a2e', borderRadius: 16, padding: 20, width: '100%', maxHeight: '80%', borderWidth: 0.5, borderColor: '#333' }}>
+            <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 12 }}>Gizlilik Politikası</Text>
+            <ScrollView style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 12, color: '#aaa', lineHeight: 18 }}>
+                Dythin uygulaması olarak kişisel verilerinizin güvenliğine önem veriyoruz.{'\n\n'}
+                1. Toplanan Veriler: Kayıt sırasında e-posta adresiniz, profil adınız ve yüklediğiniz fotoğraflar güvenli veri sunucularında saklanır.{'\n\n'}
+                2. Fotoğraflar ve İçerik: Yüklenen görseller yalnızca oylama ve topluluk etkileşimi amacıyla kullanılır. Üçüncü taraflarla satılmaz veya paylaşılmaz.{'\n\n'}
+                3. Veri Güvenliği: Şifreleriniz ve yetkilendirmeleriniz endüstri standardı şifreleme yöntemleri (Supabase Auth) ile korunmaktadır.{'\n\n'}
+                4. Kullanıcı Hakları: Dilediğiniz an Ayarlar menüsünden tüm hesabınızı ve verilerinizi kalıcı olarak silme hakkına sahipsiniz.
+              </Text>
+            </ScrollView>
+            <TouchableOpacity style={{ backgroundColor: '#7F77DD', padding: 12, borderRadius: 10, alignItems: 'center' }} onPress={() => setShowPrivacyModal(false)}>
+              <Text style={{ color: '#fff', fontWeight: '600', fontSize: 13 }}>Kapat</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Kullanım Koşulları & EULA Modal */}
+      <Modal visible={showTermsModal} transparent animationType="slide" onRequestClose={() => setShowTermsModal(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: '#1a1a2e', borderRadius: 16, padding: 20, width: '100%', maxHeight: '80%', borderWidth: 0.5, borderColor: '#333' }}>
+            <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 12 }}>Kullanım Koşulları & EULA</Text>
+            <ScrollView style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 12, color: '#aaa', lineHeight: 18 }}>
+                Dythin uygulamasını kullanarak aşağıdaki kuralları kabul etmiş olursunuz:{'\n\n'}
+                1. Uygunsuz İçerik Yasağı: Çıplaklık, şiddet, nefret söylemi, telif hakkı ihlali veya taciz içeren görseller ve yorumlar kesinlikle yasaktır.{'\n\n'}
+                2. Topluluk Denetimi (Moderasyon): Uygunsuz içerikleri veya kullanıcıları gönderi üzerindeki 'Bildir' ve 'Engelle' butonları ile raporlayabilirsiniz.{'\n\n'}
+                3. Sıfır Tolerans Politikası: Raporlanan sakıncalı içerikler ve kuralları ihlal eden kullanıcı hesapları 24 saat içerisinde incelenerek kalıcı olarak engellenir.{'\n\n'}
+                4. Hizmet Şartları: Dythin kurallara uymayan paylaşımları kaldırma hakkını saklı tutar.
+              </Text>
+            </ScrollView>
+            <TouchableOpacity style={{ backgroundColor: '#7F77DD', padding: 12, borderRadius: 10, alignItems: 'center' }} onPress={() => setShowTermsModal(false)}>
+              <Text style={{ color: '#fff', fontWeight: '600', fontSize: 13 }}>Kapat</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   )
 }
