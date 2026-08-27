@@ -1,7 +1,7 @@
 import 'react-native-url-polyfill/auto'
 import { Slot, usePathname, useRouter, useSegments } from 'expo-router'
-import { ActivityIndicator, View, LogBox, Image, StatusBar } from 'react-native'
-import { useEffect } from 'react'
+import { ActivityIndicator, View, LogBox, StatusBar } from 'react-native'
+import { useEffect, useState } from 'react'
 import { AppProvider, useApp } from '../context/AppContext'
 
 // Alttan çıkan tüm sarı/turuncu geliştirici uyarı bildirimlerini kapat
@@ -12,28 +12,37 @@ function AuthGate() {
   const router = useRouter()
   const segments = useSegments()
   const pathname = usePathname()
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    if (isAuthLoading) return
+    setIsReady(true)
+  }, [])
 
-    const isAuthRoute = segments[0] === '(auth)'
-    const isPasswordResetRoute = pathname.includes('reset-password') || segments.includes('reset-password')
-    if (!session && !isAuthRoute) router.replace('/(auth)/login')
-    if (session && isAuthRoute && !isPasswordResetRoute) router.replace('/(tabs)')
-  }, [isAuthLoading, pathname, router, segments, session])
+  useEffect(() => {
+    if (!isReady || isAuthLoading) return
+
+    try {
+      const segs = Array.isArray(segments) ? segments : []
+      const currentPath = typeof pathname === 'string' ? pathname : ''
+
+      const isAuthRoute = segs[0] === '(auth)'
+      const isPasswordResetRoute = currentPath.includes('reset-password') || segs.includes('reset-password')
+
+      if (!session && !isAuthRoute) {
+        router.replace('/(auth)/login')
+      } else if (session && isAuthRoute && !isPasswordResetRoute) {
+        router.replace('/(tabs)')
+      }
+    } catch (e) {
+      console.warn('Navigation guard error:', e)
+    }
+  }, [isReady, isAuthLoading, pathname, segments, session, router])
 
   if (isAuthLoading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a12' }}>
         <StatusBar barStyle="light-content" backgroundColor="#0a0a12" />
-        <Image
-          source={require('../assets/splash.png')}
-          style={{ width: '100%', height: '100%', position: 'absolute' }}
-          resizeMode="contain"
-        />
-        <View style={{ position: 'absolute', bottom: 90, alignItems: 'center' }}>
-          <ActivityIndicator size="small" color="#7F77DD" />
-        </View>
+        <ActivityIndicator size="large" color="#7F77DD" />
       </View>
     )
   }
