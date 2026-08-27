@@ -27,11 +27,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [themeName, setThemeNameState] = useState<ThemeName>('purple')
 
   useEffect(() => {
-    // Uygulama ilk açıldığında bildirim iznini güvenli gecikmeyle sor (iOS cold start kilitlenmesini önler)
-    const notifTimer = setTimeout(() => {
-      registerForPushNotificationsAsync().catch(() => null)
-    }, 1500)
-
     AsyncStorage.getItem('themeName').then((saved) => {
       if (saved) setThemeNameState(saved as ThemeName)
     })
@@ -66,7 +61,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     })
 
     return () => {
-      clearTimeout(notifTimer)
       subscription.unsubscribe()
     }
   }, [])

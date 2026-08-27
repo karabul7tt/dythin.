@@ -4,11 +4,17 @@ import Constants from 'expo-constants'
 import { supabase } from './supabase'
 
 let Notifications: any = null
+let notificationHandlerConfigured = false
 
-try {
-  Notifications = require('expo-notifications')
-  if (Notifications && typeof Notifications.setNotificationHandler === 'function') {
-    try {
+function getNotifications() {
+  // Do not initialize the native notifications module while the app's root
+  // navigator is mounting. A failed native initialization must never prevent
+  // the application from opening.
+  if (Notifications) return Notifications
+
+  try {
+    Notifications = require('expo-notifications')
+    if (!notificationHandlerConfigured && typeof Notifications.setNotificationHandler === 'function') {
       Notifications.setNotificationHandler({
         handleNotification: async () => ({
           shouldShowAlert: true,
@@ -16,14 +22,18 @@ try {
           shouldSetBadge: true,
         }),
       })
-    } catch {}
+      notificationHandlerConfigured = true
+    }
+  } catch {
+    Notifications = null
   }
-} catch (e) {
-  // Expo Go Android push notification compatibility guard
+
+  return Notifications
 }
 
 export async function registerForPushNotificationsAsync(userId?: string): Promise<string | null> {
-  if (!Notifications || !Device.isDevice) {
+  const notifications = getNotifications()
+  if (!notifications || !Device.isDevice) {
     return null
   }
 
@@ -33,17 +43,17 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
   }
 
   try {
-    if (!Notifications.getPermissionsAsync || !Notifications.requestPermissionsAsync || !Notifications.getExpoPushTokenAsync) {
+    if (!notifications.getPermissionsAsync || !notifications.requestPermissionsAsync || !notifications.getExpoPushTokenAsync) {
       return null
     }
 
     let finalStatus = 'denied'
-    const permResult = await Notifications.getPermissionsAsync().catch(() => null)
+    const permResult = await notifications.getPermissionsAsync().catch(() => null)
     const existingStatus = permResult?.status || 'denied'
     finalStatus = existingStatus
 
     if (existingStatus !== 'granted') {
-      const reqResult = await Notifications.requestPermissionsAsync().catch(() => null)
+      const reqResult = await notifications.requestPermissionsAsync().catch(() => null)
       finalStatus = reqResult?.status || 'denied'
     }
 
@@ -52,7 +62,7 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
     }
 
     const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID || 'f7bea319-3747-4543-8ef1-503ca5d49a12'
-    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId }).catch(() => null)
+    const tokenData = await notifications.getExpoPushTokenAsync({ projectId }).catch(() => null)
     const pushToken = tokenData?.data
 
     if (userId && pushToken) {
@@ -61,10 +71,10 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
       } catch {}
     }
 
-    if (Platform.OS === 'android' && Notifications.setNotificationChannelAsync) {
-      await Notifications.setNotificationChannelAsync('default', {
+    if (Platform.OS === 'android' && notifications.setNotificationChannelAsync) {
+      await notifications.setNotificationChannelAsync('default', {
         name: 'default',
-        importance: Notifications.AndroidImportance?.MAX || 4,
+        importance: notifications.AndroidImportance?.MAX || 4,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: '#7F77DD',
       }).catch(() => null)
@@ -77,9 +87,10 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
 }
 
 export async function sendLocalNotification(title: string, body: string) {
-  if (!Notifications || !Notifications.scheduleNotificationAsync) return
+  const notifications = getNotifications()
+  if (!notifications?.scheduleNotificationAsync) return
   try {
-    await Notifications.scheduleNotificationAsync({
+    await notifications.scheduleNotificationAsync({
       content: {
         title,
         body,
