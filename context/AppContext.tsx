@@ -27,8 +27,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [themeName, setThemeNameState] = useState<ThemeName>('purple')
 
   useEffect(() => {
-    // Uygulama ilk açıldığında bildirim iznini sor
-    registerForPushNotificationsAsync()
+    // Uygulama ilk açıldığında bildirim iznini güvenli gecikmeyle sor (iOS cold start kilitlenmesini önler)
+    const notifTimer = setTimeout(() => {
+      registerForPushNotificationsAsync().catch(() => null)
+    }, 1500)
 
     AsyncStorage.getItem('themeName').then((saved) => {
       if (saved) setThemeNameState(saved as ThemeName)
@@ -40,7 +42,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setSession(null)
       } else {
         setSession(session)
-        if (session?.user) registerForPushNotificationsAsync(session.user.id)
+        if (session?.user) {
+          setTimeout(() => {
+            registerForPushNotificationsAsync(session.user.id).catch(() => null)
+          }, 2000)
+        }
       }
       setIsAuthLoading(false)
     }).catch(() => {
@@ -51,11 +57,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
-      if (session?.user) registerForPushNotificationsAsync(session.user.id)
+      if (session?.user) {
+        setTimeout(() => {
+          registerForPushNotificationsAsync(session.user.id).catch(() => null)
+        }, 1000)
+      }
       setIsAuthLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      clearTimeout(notifTimer)
+      subscription.unsubscribe()
+    }
   }, [])
 
   async function setThemeName(name: ThemeName) {
