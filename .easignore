@@ -10,3 +10,5 @@ web-build/
 backups/
 .DS_Store
 *.log
+ios/
+android/
