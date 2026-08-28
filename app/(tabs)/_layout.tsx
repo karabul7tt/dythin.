@@ -1,15 +1,19 @@
-import { Tabs, Redirect } from 'expo-router'
+import React, { useEffect } from 'react'
+import { Tabs, useRouter } from 'expo-router'
 import { useApp } from '../../context/AppContext'
 import { Ionicons } from '@expo/vector-icons'
 import { Platform } from 'react-native'
 
 export default function TabLayout() {
   const { theme, session, isAuthLoading } = useApp()
+  const router = useRouter()
 
-  // Oturum yoksa ve yükleme bittiyse, login sayfasına yönlendir
-  if (!isAuthLoading && !session) {
-    return <Redirect href="/(auth)/login" />
-  }
+  useEffect(() => {
+    if (!isAuthLoading && !session) {
+      router.replace('/(auth)/login')
+    }
+  }, [isAuthLoading, session])
+
 
   return (
     <Tabs

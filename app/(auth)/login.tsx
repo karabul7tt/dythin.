@@ -13,7 +13,7 @@ import {
   Keyboard,
   Modal,
 } from 'react-native'
-import { useRouter, Redirect } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput, validateInstagramUsername } from '../../lib/security'
@@ -23,9 +23,12 @@ export default function Login() {
   const router = useRouter()
   const { session, isAuthLoading } = useApp()
 
-  if (!isAuthLoading && session) {
-    return <Redirect href="/(tabs)" />
-  }
+  useEffect(() => {
+    if (!isAuthLoading && session) {
+      router.replace('/(tabs)')
+    }
+  }, [isAuthLoading, session])
+
   const [fullName, setFullName] = useState('')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
