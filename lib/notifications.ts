@@ -32,20 +32,36 @@ function getNotifications() {
 }
 
 export async function registerForPushNotificationsAsync(userId?: string): Promise<string | null> {
-  const notifications = getNotifications()
-  if (!notifications || !Device.isDevice) {
-    return null
-  }
-
-  // On Android Expo Go, remote push notifications are disabled in SDK 53
-  if (Platform.OS === 'android' && Constants.appOwnership === 'expo') {
-    return null
-  }
-
   try {
+    const notifications = getNotifications()
+    if (!notifications) {
+      return null
+    }
+
+    let isDevice = true
+    try {
+      if (Device && typeof Device.isDevice === 'boolean') {
+        isDevice = Device.isDevice
+      }
+    } catch {
+      isDevice = true
+    }
+
+    if (!isDevice) {
+      return null
+    }
+
+    // On Android Expo Go, remote push notifications are disabled in SDK 53
+    try {
+      if (Platform.OS === 'android' && Constants && Constants.appOwnership === 'expo') {
+        return null
+      }
+    } catch {}
+
     if (!notifications.getPermissionsAsync || !notifications.requestPermissionsAsync || !notifications.getExpoPushTokenAsync) {
       return null
     }
+
 
     let finalStatus = 'denied'
     const permResult = await notifications.getPermissionsAsync().catch(() => null)

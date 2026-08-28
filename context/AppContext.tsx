@@ -28,24 +28,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     AsyncStorage.getItem('themeName').then((saved) => {
-      if (saved) setThemeNameState(saved as ThemeName)
-    })
+      if (saved && saved in themes) setThemeNameState(saved as ThemeName)
+    }).catch(() => null)
 
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
-        supabase.auth.signOut()
+        supabase.auth.signOut().catch(() => null)
         setSession(null)
       } else {
         setSession(session)
         if (session?.user) {
           setTimeout(() => {
             registerForPushNotificationsAsync(session.user.id).catch(() => null)
-          }, 2000)
+          }, 3000)
         }
       }
       setIsAuthLoading(false)
     }).catch(() => {
-      supabase.auth.signOut()
+      supabase.auth.signOut().catch(() => null)
       setSession(null)
       setIsAuthLoading(false)
     })
@@ -55,26 +55,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         setTimeout(() => {
           registerForPushNotificationsAsync(session.user.id).catch(() => null)
-        }, 1000)
+        }, 3000)
       }
       setIsAuthLoading(false)
     })
 
     return () => {
-      subscription.unsubscribe()
+      try {
+        subscription?.unsubscribe()
+      } catch {}
     }
   }, [])
 
   async function setThemeName(name: ThemeName) {
     setThemeNameState(name)
-    await AsyncStorage.setItem('themeName', name)
+    try {
+      await AsyncStorage.setItem('themeName', name)
+    } catch {}
   }
+
+  const activeTheme = themes[themeName] || themes.purple
 
   return (
     <AppContext.Provider value={{
       session,
       isAuthLoading,
-      theme: themes[themeName],
+      theme: activeTheme,
       themeName,
       setThemeName,
     }}>

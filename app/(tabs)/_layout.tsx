@@ -16,13 +16,13 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: theme.tabBar,
-          borderTopColor: theme.border,
+          backgroundColor: theme?.tabBar || '#0e0e1a',
+          borderTopColor: theme?.border || '#1e1e2e',
           height: Platform.OS === 'ios' ? 80 : 54,
           paddingBottom: Platform.OS === 'ios' ? 24 : 6,
           paddingTop: 6,
         },
-        tabBarActiveTintColor: theme.accent,
+        tabBarActiveTintColor: theme?.accent || '#7F77DD',
         tabBarInactiveTintColor: '#666',
         tabBarLabelStyle: {
           fontSize: 10,
