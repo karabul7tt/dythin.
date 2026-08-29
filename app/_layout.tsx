@@ -13,7 +13,13 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AppProvider>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: '#0e0e1a' },
+            animation: 'none',
+          }}
+        />
       </AppProvider>
     </SafeAreaProvider>
   )
