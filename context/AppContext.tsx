@@ -61,7 +61,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsAuthLoading(false)
     })
 
+    const safetyTimer = setTimeout(() => {
+      setIsAuthLoading(false)
+    }, 1000)
+
     return () => {
+      clearTimeout(safetyTimer)
       try {
         authListener?.data?.subscription?.unsubscribe()
       } catch {}
