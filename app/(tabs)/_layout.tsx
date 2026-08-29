@@ -3,17 +3,21 @@ import { Tabs, useRouter } from 'expo-router'
 import { useApp } from '../../context/AppContext'
 import { Ionicons } from '@expo/vector-icons'
 import { Platform } from 'react-native'
+import { useFonts } from 'expo-font'
 
 export default function TabLayout() {
   const { theme, session, isAuthLoading } = useApp()
   const router = useRouter()
+
+  const [fontsLoaded] = useFonts({
+    ...Ionicons.font,
+  })
 
   useEffect(() => {
     if (!isAuthLoading && !session) {
       router.replace('/(auth)/login')
     }
   }, [isAuthLoading, session])
-
 
   return (
     <Tabs
@@ -22,16 +26,18 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: theme?.tabBar || '#0e0e1a',
           borderTopColor: theme?.border || '#1e1e2e',
-          height: Platform.OS === 'ios' ? 80 : 54,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 6,
+          height: Platform.OS === 'ios' ? 84 : 62,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 8,
           paddingTop: 6,
         },
         tabBarActiveTintColor: theme?.accent || '#7F77DD',
-        tabBarInactiveTintColor: '#666',
+        tabBarInactiveTintColor: '#8E8E93',
         tabBarLabelStyle: {
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: '600',
+          marginTop: 2,
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tabs.Screen
@@ -41,7 +47,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? 'sparkles' : 'sparkles-outline'}
-              size={20}
+              size={22}
               color={color}
             />
           ),
@@ -54,7 +60,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? 'add-circle' : 'add-circle-outline'}
-              size={22}
+              size={24}
               color={color}
             />
           ),
@@ -67,7 +73,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? 'stats-chart' : 'stats-chart-outline'}
-              size={19}
+              size={22}
               color={color}
             />
           ),
@@ -80,7 +86,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? 'person' : 'person-outline'}
-              size={20}
+              size={22}
               color={color}
             />
           ),
@@ -90,3 +96,4 @@ export default function TabLayout() {
     </Tabs>
   )
 }
+
