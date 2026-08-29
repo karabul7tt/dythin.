@@ -13,14 +13,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AppProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="messages" />
-          <Stack.Screen name="chat/[friendId]" />
-          <Stack.Screen name="user-profile" />
-        </Stack>
+        <Stack screenOptions={{ headerShown: false }} />
       </AppProvider>
     </SafeAreaProvider>
   )
