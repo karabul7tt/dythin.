@@ -31,15 +31,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (saved && saved in themes) setThemeNameState(saved as ThemeName)
     }).catch(() => null)
 
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
+    supabase.auth.getSession().then((res) => {
+      const currentSession = res?.data?.session
+      if (res?.error) {
         supabase.auth.signOut().catch(() => null)
         setSession(null)
       } else {
-        setSession(session)
-        if (session?.user) {
+        setSession(currentSession || null)
+        if (currentSession?.user) {
           setTimeout(() => {
-            registerForPushNotificationsAsync(session.user.id).catch(() => null)
+            registerForPushNotificationsAsync(currentSession.user.id).catch(() => null)
           }, 3000)
         }
       }
@@ -50,11 +51,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsAuthLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      if (session?.user) {
+    const authListener = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession || null)
+      if (newSession?.user) {
         setTimeout(() => {
-          registerForPushNotificationsAsync(session.user.id).catch(() => null)
+          registerForPushNotificationsAsync(newSession.user.id).catch(() => null)
         }, 3000)
       }
       setIsAuthLoading(false)
@@ -62,7 +63,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       try {
-        subscription?.unsubscribe()
+        authListener?.data?.subscription?.unsubscribe()
       } catch {}
     }
   }, [])
