@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -13,6 +12,7 @@ import {
   Keyboard,
   Modal,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
@@ -446,19 +446,17 @@ export default function Login() {
                 }
               </TouchableOpacity>
 
-              {isRegister && (
-                <Text style={{ color: '#888', fontSize: 11, textAlign: 'center', marginTop: 4, marginBottom: 8, lineHeight: 16 }}>
-                  Kayıt olarak{' '}
-                  <Text style={{ color: '#7F77DD', textDecorationLine: 'underline' }} onPress={() => setShowTermsModal(true)}>
-                    Kullanım Koşulları
-                  </Text>
-                  {' '}ve{' '}
-                  <Text style={{ color: '#7F77DD', textDecorationLine: 'underline' }} onPress={() => setShowPrivacyModal(true)}>
-                    Gizlilik Politikası
-                  </Text>
-                  {"'"}nı kabul etmiş olursunuz.
+              <Text style={{ color: '#888', fontSize: 11, textAlign: 'center', marginTop: 4, marginBottom: 12, lineHeight: 16 }}>
+                Uygulamayı kullanarak{' '}
+                <Text style={{ color: '#7F77DD', textDecorationLine: 'underline', fontWeight: '600' }} onPress={() => setShowTermsModal(true)}>
+                  Kullanım Koşulları (EULA)
                 </Text>
-              )}
+                {' '}ve{' '}
+                <Text style={{ color: '#7F77DD', textDecorationLine: 'underline', fontWeight: '600' }} onPress={() => setShowPrivacyModal(true)}>
+                  Gizlilik Politikası
+                </Text>
+                {"'"}nı kabul etmiş olursunuz.
+              </Text>
 
               {!isRegister && (
                 <TouchableOpacity
@@ -517,12 +515,19 @@ export default function Login() {
           <View style={{ backgroundColor: '#1a1a2e', borderRadius: 16, padding: 20, width: '100%', maxHeight: '80%', borderWidth: 0.5, borderColor: '#333' }}>
             <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 12 }}>Kullanım Koşulları & EULA</Text>
             <ScrollView style={{ marginBottom: 16 }}>
-              <Text style={{ fontSize: 12, color: '#aaa', lineHeight: 18 }}>
-                Dythin uygulamasını kullanarak aşağıdaki kuralları kabul etmiş olursunuz:{'\n\n'}
-                1. Uygunsuz İçerik Yasağı: Çıplaklık, şiddet, nefret söylemi, telif hakkı ihlali veya taciz içeren görseller ve yorumlar kesinlikle yasaktır.{'\n\n'}
-                2. Topluluk Denetimi (Moderasyon): Uygunsuz içerikleri veya kullanıcıları gönderi üzerindeki 'Bildir' ve 'Engelle' butonları ile raporlayabilirsiniz.{'\n\n'}
-                3. Sıfır Tolerans Politikası: Raporlanan sakıncalı içerikler ve kuralları ihlal eden kullanıcı hesapları 24 saat içerisinde incelenerek kalıcı olarak engellenir.{'\n\n'}
-                4. Hizmet Şartları: Dythin kurallara uymayan paylaşımları kaldırma hakkını saklı tutar.
+              <Text style={{ fontSize: 12, color: '#bbb', lineHeight: 19 }}>
+                Dythin uygulamasını kullanarak aşağıdaki Son Kullanıcı Lisans Sözleşmesi (EULA) ve kullanım şartlarını kabul etmiş olursunuz:{'\n\n'}
+                <Text style={{ fontWeight: '700', color: '#fff' }}>1. SIFIR TOLERANS POLİTİKASI (ZERO TOLERANCE POLICY):{'\n'}</Text>
+                Dythin, sakıncalı içeriklere (müstehcenlik, şiddet, nefret söylemi, hakaret, telif hakkı ihlali veya taciz) ve kötü niyetli kullanıcılara karşı kesinlikle SIFIR TOLERANS politikası uygulamaktadır.{'\n\n'}
+                Dythin has a strict zero-tolerance policy for objectionable content and abusive users. Any inappropriate, offensive, or harassing behavior will not be tolerated.{'\n\n'}
+                <Text style={{ fontWeight: '700', color: '#fff' }}>2. TOPLULUK GÜVENLİĞİ: BİLDİR VE ENGELLE (FLAG & BLOCK):{'\n'}</Text>
+                Kullanıcılar akışta karşılaştıkları herhangi bir uygunsuz içeriği 'Bildir' butonu ile anında şikayet edebilir ve sakıncalı kullanıcıları 'Engelle' butonu ile tek dokunuşla engelleyebilir. Engellenen kullanıcının tüm içerikleri akışınızdan anında silinir ve geliştiriciye otomatik olarak bildirilir.{'\n\n'}
+                Users can flag any objectionable content immediately using the Report button and block abusive users. Blocked users and their content are instantly removed from your feed.{'\n\n'}
+                <Text style={{ fontWeight: '700', color: '#fff' }}>3. 24 SAAT İÇİNDE MÜDAHALE (24-HOUR ACTION):{'\n'}</Text>
+                Şikayet edilen tüm sakıncalı içerikler moderasyon ekibimiz tarafından en geç 24 saat içerisinde incelenir. Kural ihlali tespit edilen gönderiler kalıcı olarak yayından kaldırılır ve bu içeriği paylaşan kullanıcının hesabı kalıcı olarak sonlandırılır.{'\n\n'}
+                All reports are investigated within 24 hours. Violating content will be removed immediately and offending users will be permanently ejected and banned.{'\n\n'}
+                <Text style={{ fontWeight: '700', color: '#fff' }}>4. HİZMET ŞARTLARI:{'\n'}</Text>
+                Dythin, topluluk kurallarını ihlal eden tüm gönderileri önceden haber vermeksizin silme ve hesapları kapatma hakkını saklı tutar.
               </Text>
             </ScrollView>
             <TouchableOpacity style={{ backgroundColor: '#7F77DD', padding: 12, borderRadius: 10, alignItems: 'center' }} onPress={() => setShowTermsModal(false)}>

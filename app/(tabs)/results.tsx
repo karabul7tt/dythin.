@@ -203,7 +203,7 @@ export default function ResultsScreen() {
                     onPress={() => deletePost(post.id)}
                     activeOpacity={0.8}
                   >
-                    <Text style={{ color: theme.textSub, fontSize: 12, fontWeight: '600' }}>🗑️ Sil</Text>
+                    <Text style={{ color: theme.textSub, fontSize: 12, fontWeight: '600' }}>Sil</Text>
                   </TouchableOpacity>
                 </View>
 

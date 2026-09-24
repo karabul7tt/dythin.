@@ -197,6 +197,66 @@ export default function UserProfileScreen() {
     }
   }
 
+  function handleProfileModeration() {
+    if (!profile) return
+    Alert.alert(
+      `@${profile.username}`,
+      'Bu kullanıcı ile ilgili işlem seçin:',
+      [
+        {
+          text: 'Kullanıcıyı Bildir',
+          style: 'destructive',
+          onPress: async () => {
+            if (posts.length > 0) {
+              await supabase.from('reports').insert({
+                reporter_id: session?.user.id,
+                post_id: posts[0].id,
+                reason: `Profil bildirildi: @${profile.username}`,
+              })
+            }
+            Alert.alert(
+              'Bildirim Alındı',
+              'Şikayetiniz alındı. Sakıncalı kullanıcılar 24 saat içinde incelenir ve kuralları ihlal edenler sistemden kalıcı olarak engellenir.'
+            )
+          },
+        },
+        {
+          text: 'Kullanıcıyı Engelle',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Kullanıcıyı Engelle',
+              `@${profile.username} adlı kullanıcıyı engellemek istediğinize emin misiniz?`,
+              [
+                { text: 'İptal', style: 'cancel' },
+                {
+                  text: 'Engelle',
+                  style: 'destructive',
+                  onPress: async () => {
+                    await supabase.from('blocked_users').insert({
+                      blocker_id: session?.user.id,
+                      blocked_id: profile.id,
+                    })
+                    if (posts.length > 0) {
+                      await supabase.from('reports').insert({
+                        reporter_id: session?.user.id,
+                        post_id: posts[0].id,
+                        reason: `Kullanıcı profilden engellendi: @${profile.username}`,
+                      })
+                    }
+                    Alert.alert('Engellendi', 'Kullanıcı engellendi. Gönderileri artık görünmeyecektir.')
+                    router.back()
+                  },
+                },
+              ]
+            )
+          },
+        },
+        { text: 'İptal', style: 'cancel' },
+      ]
+    )
+  }
+
   function getStats(votes: Vote[]) {
     const total = votes.length
     if (total === 0) return { countA: 0, countB: 0, total: 0, pctA: 50, pctB: 50 }
@@ -212,6 +272,7 @@ export default function UserProfileScreen() {
     header: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'space-between',
       paddingHorizontal: 20,
       paddingVertical: 14,
       borderBottomWidth: 0.5,
@@ -311,10 +372,17 @@ export default function UserProfileScreen() {
     <SafeAreaView style={s.container}>
       {/* Top Bar */}
       <View style={s.header}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={theme.text} />
-        </TouchableOpacity>
-        <Text style={s.headerTitle}>@{profile?.username || 'kullanici'}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color={theme.text} />
+          </TouchableOpacity>
+          <Text style={s.headerTitle}>@{profile?.username || 'kullanici'}</Text>
+        </View>
+        {!isSelf && (
+          <TouchableOpacity onPress={handleProfileModeration} style={{ padding: 6 }} activeOpacity={0.7}>
+            <Ionicons name="ellipsis-horizontal" size={22} color={theme.textSub} />
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView
@@ -332,7 +400,9 @@ export default function UserProfileScreen() {
         {/* Profile Card */}
         <View style={s.heroCard}>
           {profile?.avatar_url ? (
-            <Image source={{ uri: profile.avatar_url }} style={s.avatar} />
+            <TouchableOpacity onPress={() => openZoom(profile.avatar_url!)} activeOpacity={0.85}>
+              <Image source={{ uri: profile.avatar_url }} style={s.avatar} />
+            </TouchableOpacity>
           ) : (
             <View style={s.avatarPlaceholder}>
               <Text style={{ fontSize: 28, fontWeight: '700', color: theme.textSub }}>

@@ -78,8 +78,12 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
     }
 
     const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID || 'f7bea319-3747-4543-8ef1-503ca5d49a12'
-    const tokenData = await notifications.getExpoPushTokenAsync({ projectId }).catch(() => null)
-    const pushToken = tokenData?.data
+    const tokenTimeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000))
+    const tokenData = await Promise.race([
+      notifications.getExpoPushTokenAsync({ projectId }).catch(() => null),
+      tokenTimeout,
+    ])
+    const pushToken = (tokenData as any)?.data
 
     if (userId && pushToken) {
       try {

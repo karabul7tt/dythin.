@@ -12,6 +12,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useApp } from '../../context/AppContext'
@@ -20,6 +21,7 @@ import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput, validateInstagramUsername } from '../../lib/security'
 import { useRouter } from 'expo-router'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
+import ZoomablePhoto from '../../components/ZoomablePhoto'
 import type { Profile, FriendRecord, FriendshipWithProfiles } from '../../lib/types'
 
 export default function ProfileScreen() {
@@ -44,6 +46,39 @@ export default function ProfileScreen() {
   const [searching, setSearching] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [zoomUri, setZoomUri] = useState<string>('')
+  const [zoomMounted, setZoomMounted] = useState(false)
+
+  const openZoom = (uri: string) => {
+    setZoomMounted(false)
+    setZoomUri('')
+    setTimeout(() => {
+      setZoomUri(uri)
+      setZoomMounted(true)
+    }, 80)
+  }
+
+  const closeZoom = () => {
+    setZoomMounted(false)
+    setZoomUri('')
+  }
+
+  function handleAvatarPress() {
+    if (isEditing) {
+      pickAvatar()
+    } else if (avatar) {
+      openZoom(avatar)
+    } else {
+      Alert.alert(
+        'Profil Fotoğrafı Yok',
+        'Profil fotoğrafı eklemek için düzenleme moduna geçebilirsiniz.',
+        [
+          { text: 'İptal', style: 'cancel' },
+          { text: 'Düzenle', onPress: () => setIsEditing(true) },
+        ]
+      )
+    }
+  }
 
   useEffect(() => {
     if (!userId) return
@@ -458,16 +493,36 @@ export default function ProfileScreen() {
 
         {/* Profile Hero Header */}
         <View style={s.heroCard}>
-          <TouchableOpacity style={s.avatarContainer} onPress={pickAvatar} activeOpacity={0.8}>
+          <TouchableOpacity style={s.avatarContainer} onPress={handleAvatarPress} activeOpacity={0.8}>
             {avatar
               ? <Image source={{ uri: avatar }} style={s.avatar} />
               : <View style={s.avatarPlaceholder}><Text style={{ fontSize: 24, fontWeight: '700', color: theme.textSub }}>{(username || 'D')[0].toUpperCase()}</Text></View>}
             {isEditing && (
               <View style={s.cameraBadge}>
-                <Text style={{ fontSize: 13, fontWeight: '700', color: theme.bg }}>+</Text>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: theme.bg }}>📷</Text>
               </View>
             )}
           </TouchableOpacity>
+          {isEditing && (
+            <TouchableOpacity
+              style={{
+                marginTop: 8,
+                paddingHorizontal: 14,
+                paddingVertical: 6,
+                borderRadius: 14,
+                backgroundColor: theme.card,
+                borderWidth: 0.5,
+                borderColor: theme.accent,
+                alignSelf: 'center',
+              }}
+              onPress={pickAvatar}
+              activeOpacity={0.8}
+            >
+              <Text style={{ fontSize: 12, fontWeight: '600', color: theme.accent }}>
+                Fotoğrafı Değiştir 📷
+              </Text>
+            </TouchableOpacity>
+          )}
           <Text style={s.displayName}>{fullName || username || 'Kullanıcı'}</Text>
           <Text style={s.handleText}>@{username || 'kullanici'}</Text>
         </View>
@@ -639,6 +694,22 @@ export default function ProfileScreen() {
         )}
         </CustomRefreshContainer>
       </KeyboardAvoidingView>
+
+      {/* Full-Screen Zoomable Profile Photo Modal */}
+      <Modal
+        visible={zoomMounted}
+        transparent={false}
+        animationType="fade"
+        onRequestClose={closeZoom}
+      >
+        {zoomMounted && zoomUri ? (
+          <ZoomablePhoto
+            uri={zoomUri}
+            accentColor={theme.accent}
+            onClose={closeZoom}
+          />
+        ) : null}
+      </Modal>
     </SafeAreaView>
   )
 }

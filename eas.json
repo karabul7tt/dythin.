@@ -1,7 +1,7 @@
 {
   "cli": {
     "version": ">= 10.0.0",
-    "appVersionSource": "remote"
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
@@ -15,6 +15,9 @@
     },
     "preview": {
       "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://eguivjrxxgomrfmfqjax.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVndWl2anJ4eGdvbXJmbWZxamF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNDc4ODMsImV4cCI6MjA5MzYyMzg4M30.UhwFk8MbGYuW420qZjIWb0QnlCfv9BxVdoSfYHPoCOY",

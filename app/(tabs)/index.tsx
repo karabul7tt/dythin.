@@ -139,8 +139,8 @@ export default function VoteScreen() {
     const current = tab === 'public' ? posts[0] : friendPosts[0]
     if (!current) return
     Alert.alert(
-      'Gönderiyi bildir',
-      'Bu gönderiyi uygunsuz içerik nedeniyle bildirmek istediğine emin misin?',
+      'Gönderiyi Bildir',
+      'Bu gönderiyi sakıncalı veya uygunsuz içerik nedeniyle bildirmek istiyor musunuz? Şikayet edilen içerikler 24 saat içinde incelenir ve kaldırılır.',
       [
         { text: 'İptal', style: 'cancel' },
         {
@@ -150,13 +150,16 @@ export default function VoteScreen() {
             const { error } = await supabase.from('reports').insert({
               reporter_id: session?.user.id,
               post_id: current.id,
-              reason: 'Uygunsuz içerik',
+              reason: 'Uygunsuz/Sakıncalı içerik',
             })
             if (error && error.code !== '23505') {
-              Alert.alert('Hata', 'Bildirim gönderilemedi, tekrar dene.')
+              Alert.alert('Hata', 'Bildirim gönderilemedi, lütfen tekrar deneyin.')
               return
             }
-            Alert.alert('Teşekkürler', 'Bildirimin alındı, inceleyeceğiz.')
+            Alert.alert(
+              'Bildiriminiz Alındı',
+              'Teşekkürler. Gönderi inceleme için bildirildi ve akışınızdan kaldırıldı. Sakıncalı içerikler 24 saat içinde incelenip kalıcı olarak silinir.'
+            )
             if (tab === 'public') setPosts(prev => prev.slice(1))
             else setFriendPosts(prev => prev.slice(1))
           },
@@ -169,23 +172,33 @@ export default function VoteScreen() {
     const current = tab === 'public' ? posts[0] : friendPosts[0]
     if (!current) return
     Alert.alert(
-      'Kullanıcıyı engelle',
-      'Bu kullanıcının gönderilerini bir daha görmek istemiyor musun?',
+      'Kullanıcıyı Engelle',
+      'Bu kullanıcıyı engellemek istediğinize emin misiniz? Bu kullanıcının tüm gönderileri akışınızdan anında kaldırılacak ve geliştiriciye bildirilecektir.',
       [
         { text: 'İptal', style: 'cancel' },
         {
           text: 'Engelle',
           style: 'destructive',
           onPress: async () => {
+            // 1. Engellenen kullanıcılar tablosuna ekle
             const { error } = await supabase.from('blocked_users').insert({
               blocker_id: session?.user.id,
               blocked_id: current.user_id,
             })
+            // 2. Geliştiriciye otomatik rapor gönder (Apple Guideline 1.2 gereksinimi)
+            await supabase.from('reports').insert({
+              reporter_id: session?.user.id,
+              post_id: current.id,
+              reason: 'Kullanıcı engellendi (Uygunsuz içerik / Otomatik moderasyon bildirimi)',
+            })
             if (error && error.code !== '23505') {
-              Alert.alert('Hata', 'Engelleme yapılamadı, tekrar dene.')
+              Alert.alert('Hata', 'Engelleme yapılamadı, lütfen tekrar deneyin.')
               return
             }
-            Alert.alert('Engellendi', 'Bu kullanıcının gönderileri artık görünmeyecek.')
+            Alert.alert(
+              'Kullanıcı Engellendi',
+              'Kullanıcı engellendi. Gönderileri akışınızdan anında temizlendi ve moderasyon ekibine bildirildi.'
+            )
             setPosts(prev => prev.filter(p => p.user_id !== current.user_id))
             setFriendPosts(prev => prev.filter(p => p.user_id !== current.user_id))
           },
@@ -202,7 +215,7 @@ export default function VoteScreen() {
     inner: { flex: 1, alignItems: 'center' },
     logo: { fontSize: 24, fontWeight: '700', color: theme.text, alignSelf: 'flex-start', margin: 20 },
     logoDot: { color: theme.accent },
-    tabRow: { flexDirection: 'row', backgroundColor: theme.card, borderRadius: 20, padding: 3, marginBottom: 12, borderWidth: 0.5, borderColor: theme.border },
+    tabRow: { flexDirection: 'row', backgroundColor: theme.card, borderRadius: 20, padding: 3, marginBottom: 0, borderWidth: 0.5, borderColor: theme.border },
     tabBtn: { paddingHorizontal: 20, paddingVertical: 7, borderRadius: 16 },
     tabBtnActive: { backgroundColor: theme.accent },
     tabText: { fontSize: 12, color: theme.textSub, fontWeight: '500' },
@@ -281,8 +294,8 @@ export default function VoteScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Centered Tabs Row with Far-Right Moderation Icons */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: SCREEN_WIDTH - 24, position: 'relative', marginBottom: 8 }}>
+        {/* Centered Tabs Row */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: SCREEN_WIDTH - 24, marginBottom: 8 }}>
           <View style={s.tabRow}>
             <TouchableOpacity style={[s.tabBtn, tab === 'public' && s.tabBtnActive]} onPress={() => setTab('public')}>
               <Text style={[s.tabText, tab === 'public' && s.tabTextActive]}>🌍 Genel</Text>
@@ -291,18 +304,41 @@ export default function VoteScreen() {
               <Text style={[s.tabText, tab === 'friends' && s.tabTextActive]}>👥 Arkadaşlar</Text>
             </TouchableOpacity>
           </View>
-
-          {current && (
-            <View style={{ position: 'absolute', right: 4, flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-              <TouchableOpacity onPress={handleReport} style={{ padding: 4 }}>
-                <Text style={{ fontSize: 14 }}>🚩</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleBlock} style={{ padding: 4 }}>
-                <Text style={{ fontSize: 14 }}>🚫</Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
+
+        {/* Moderation Controls (Pulled down cleanly below the tabs) */}
+        {current && (
+          <View style={{ width: SCREEN_WIDTH - 24, flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginBottom: 8 }}>
+            <TouchableOpacity
+              onPress={handleReport}
+              style={{
+                backgroundColor: theme.card,
+                paddingHorizontal: 12,
+                paddingVertical: 5,
+                borderRadius: 14,
+                borderWidth: 0.5,
+                borderColor: theme.border,
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '600' }}>Bildir</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleBlock}
+              style={{
+                backgroundColor: theme.card,
+                paddingHorizontal: 12,
+                paddingVertical: 5,
+                borderRadius: 14,
+                borderWidth: 0.5,
+                borderColor: theme.border,
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '600' }}>Engelle</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {current ? (
           <>

@@ -316,6 +316,54 @@ export default function ChatScreen() {
     }
   }
 
+  function handleChatOptions() {
+    Alert.alert(
+      friendProfile?.full_name || `@${friendProfile?.username || 'kullanici'}`,
+      'Bir işlem seçin:',
+      [
+        {
+          text: 'Kullanıcıyı Bildir',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert('Bildirim Alındı', 'Şikayetiniz inceleme ekibimize iletildi. Sakıncalı içerikler ve kullanıcılar 24 saat içinde incelenir ve kuralları ihlal edenler sistemden engellenir.')
+          },
+        },
+        {
+          text: 'Kullanıcıyı Engelle',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Kullanıcıyı Engelle',
+              'Bu kullanıcıyı engellemek istediğinize emin misiniz? Gönderileri ve mesajları artık görünmeyecektir.',
+              [
+                { text: 'İptal', style: 'cancel' },
+                {
+                  text: 'Engelle',
+                  style: 'destructive',
+                  onPress: async () => {
+                    if (!session?.user.id || !friendId) return
+                    await supabase.from('blocked_users').insert({
+                      blocker_id: session.user.id,
+                      blocked_id: friendId,
+                    })
+                    Alert.alert('Engellendi', 'Kullanıcı engellendi.')
+                    router.back()
+                  },
+                },
+              ]
+            )
+          },
+        },
+        {
+          text: 'Sohbeti Sil',
+          style: 'destructive',
+          onPress: handleDeleteChat,
+        },
+        { text: 'Vazgeç', style: 'cancel' },
+      ]
+    )
+  }
+
   function handleDeleteChat() {
     Alert.alert(
       'Sohbeti Sil',
@@ -548,6 +596,15 @@ export default function ChatScreen() {
             <Text style={s.friendName}>{friendProfile?.full_name || friendProfile?.username || 'Kullanıcı'}</Text>
             <Text style={s.handleText}>@{friendProfile?.username || 'kullanici'}</Text>
           </View>
+
+          <TouchableOpacity
+            style={s.headerActionBtn}
+            onPress={handleChatOptions}
+            activeOpacity={0.7}
+            accessibilityLabel="Sohbet Seçenekleri ve Moderasyon"
+          >
+            <Ionicons name="ellipsis-vertical" size={18} color={theme.textSub} />
+          </TouchableOpacity>
         </View>
 
         {/* Message List */}

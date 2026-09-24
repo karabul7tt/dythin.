@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext'
 import type { Post } from '../lib/types'
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.22
 
 import ZoomablePhoto from './ZoomablePhoto'
 
@@ -49,47 +49,91 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
     extrapolate: 'clamp',
   })
 
-  const panResponder = useRef(PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onPanResponderMove: (_, gesture) => {
-      position.setValue({ x: gesture.dx, y: gesture.dy })
-    },
-    onPanResponderRelease: (evt, gesture) => {
-      // Tap Detection (moved less than 8px)
-      if (Math.abs(gesture.dx) < 8 && Math.abs(gesture.dy) < 8) {
-        const touchX = gesture.x0 || evt.nativeEvent.pageX || 0
-        if (post.image_b_url) {
-          if (touchX < SCREEN_WIDTH / 2) {
-            openZoom(post.image_a_url || (post as any).image_url)
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 3 || Math.abs(gesture.dy) > 3,
+      onPanResponderGrant: () => {
+        position.stopAnimation()
+      },
+      onPanResponderMove: (_, gesture) => {
+        position.setValue({ x: gesture.dx, y: gesture.dy })
+      },
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderTerminate: () => {
+        Animated.spring(position, {
+          toValue: { x: 0, y: 0 },
+          friction: 6,
+          tension: 50,
+          useNativeDriver: false,
+        }).start()
+      },
+      onPanResponderRelease: (evt, gesture) => {
+        // Tıklama tespiti (8px'den az hareket)
+        if (Math.abs(gesture.dx) < 8 && Math.abs(gesture.dy) < 8) {
+          const touchX = gesture.x0 || evt.nativeEvent.pageX || 0
+          if (post.image_b_url) {
+            if (touchX < SCREEN_WIDTH / 2) {
+              openZoom(post.image_a_url || (post as any).image_url)
+            } else {
+              openZoom(post.image_b_url)
+            }
           } else {
-            openZoom(post.image_b_url)
+            openZoom(post.image_a_url || (post as any).image_url)
           }
-        } else {
-          openZoom(post.image_a_url || (post as any).image_url)
+          Animated.spring(position, {
+            toValue: { x: 0, y: 0 },
+            friction: 6,
+            tension: 50,
+            useNativeDriver: false,
+          }).start()
+          return
         }
-        Animated.spring(position, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start()
-        return
-      }
 
-      // Vertical Swipe Down (Reels / TikTok next poll skip)
-      if (gesture.dy > SWIPE_THRESHOLD && Math.abs(gesture.dy) > Math.abs(gesture.dx)) {
-        Animated.spring(position, { toValue: { x: 0, y: SCREEN_WIDTH * 1.5 }, useNativeDriver: false }).start()
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-        if (onSwipeDown) setTimeout(onSwipeDown, 200)
-        else setTimeout(onSwipeLeft, 200)
-      } else if (gesture.dx > SWIPE_THRESHOLD) {
-        Animated.spring(position, { toValue: { x: SCREEN_WIDTH * 1.5, y: 0 }, useNativeDriver: false }).start()
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-        setTimeout(onSwipeRight, 200)
-      } else if (gesture.dx < -SWIPE_THRESHOLD) {
-        Animated.spring(position, { toValue: { x: -SCREEN_WIDTH * 1.5, y: 0 }, useNativeDriver: false }).start()
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-        setTimeout(onSwipeLeft, 200)
-      } else {
-        Animated.spring(position, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start()
-      }
-    },
-  })).current
+        const isRight = gesture.dx > SWIPE_THRESHOLD || (gesture.dx > 35 && gesture.vx > 0.35)
+        const isLeft = gesture.dx < -SWIPE_THRESHOLD || (gesture.dx < -35 && gesture.vx < -0.35)
+        const isDown = gesture.dy > SWIPE_THRESHOLD && Math.abs(gesture.dy) > Math.abs(gesture.dx)
+
+        if (isDown) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+          Animated.timing(position, {
+            toValue: { x: gesture.dx, y: SCREEN_HEIGHT },
+            duration: 220,
+            useNativeDriver: false,
+          }).start(() => {
+            if (onSwipeDown) onSwipeDown()
+            else onSwipeLeft()
+          })
+        } else if (isRight) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+          Animated.timing(position, {
+            toValue: { x: SCREEN_WIDTH * 1.5, y: gesture.dy },
+            duration: 220,
+            useNativeDriver: false,
+          }).start(() => {
+            onSwipeRight()
+          })
+        } else if (isLeft) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+          Animated.timing(position, {
+            toValue: { x: -SCREEN_WIDTH * 1.5, y: gesture.dy },
+            duration: 220,
+            useNativeDriver: false,
+          }).start(() => {
+            onSwipeLeft()
+          })
+        } else {
+          // Yeterince çekilmediyse akıcı ve esnek bir yayla tam ortaya geri dönsün
+          Animated.spring(position, {
+            toValue: { x: 0, y: 0 },
+            friction: 6,
+            tension: 50,
+            useNativeDriver: false,
+          }).start()
+        }
+      },
+    })
+  ).current
 
   const s = StyleSheet.create({
     card: {

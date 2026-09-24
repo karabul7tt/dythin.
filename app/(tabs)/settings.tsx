@@ -498,11 +498,18 @@ export default function SettingsScreen() {
             <Text style={s.modalTitle}>Kullanım Koşulları & EULA</Text>
             <ScrollView style={s.modalScroll}>
               <Text style={s.modalText}>
-                Dythin uygulamasını kullanarak aşağıdaki kuralları kabul etmiş olursunuz:{'\n\n'}
-                1. Uygunsuz İçerik Yasağı: Çıplaklık, şiddet, nefret söylemi, telif hakkı ihlali veya taciz içeren görseller ve yorumlar kesinlikle yasaktır.{'\n\n'}
-                2. Topluluk Denetimi (Moderasyon): Uygunsuz içerikleri veya kullanıcıları gönderi üzerindeki 'Bildir' ve 'Engelle' butonları ile raporlayabilirsiniz.{'\n\n'}
-                3. Sıfır Tolerans Politikası: Raporlanan sakıncalı içerikler ve kuralları ihlal eden kullanıcı hesapları 24 saat içerisinde incelenerek kalıcı olarak engellenir.{'\n\n'}
-                4. Hizmet Şartları: Dythin kurallara uymayan paylaşımları kaldırma hakkını saklı tutar.
+                Dythin uygulamasını kullanarak aşağıdaki Son Kullanıcı Lisans Sözleşmesi (EULA) ve kullanım şartlarını kabul etmiş olursunuz:{'\n\n'}
+                <Text style={{ fontWeight: '700', color: theme.text }}>1. SIFIR TOLERANS POLİTİKASI (ZERO TOLERANCE POLICY):{'\n'}</Text>
+                Dythin, sakıncalı içeriklere (müstehcenlik, şiddet, nefret söylemi, hakaret, telif hakkı ihlali veya taciz) ve kötü niyetli kullanıcılara karşı kesinlikle SIFIR TOLERANS politikası uygulamaktadır.{'\n\n'}
+                Dythin has a strict zero-tolerance policy for objectionable content and abusive users. Any inappropriate, offensive, or harassing behavior will not be tolerated.{'\n\n'}
+                <Text style={{ fontWeight: '700', color: theme.text }}>2. TOPLULUK GÜVENLİĞİ: BİLDİR VE ENGELLE (FLAG & BLOCK):{'\n'}</Text>
+                Kullanıcılar akışta karşılaştıkları herhangi bir uygunsuz içeriği 'Bildir' butonu ile anında şikayet edebilir ve sakıncalı kullanıcıları 'Engelle' butonu ile tek dokunuşla engelleyebilir. Engellenen kullanıcının tüm içerikleri akışınızdan anında silinir ve geliştiriciye otomatik olarak bildirilir.{'\n\n'}
+                Users can flag any objectionable content immediately using the Report button and block abusive users. Blocked users and their content are instantly removed from your feed.{'\n\n'}
+                <Text style={{ fontWeight: '700', color: theme.text }}>3. 24 SAAT İÇİNDE MÜDAHALE (24-HOUR ACTION):{'\n'}</Text>
+                Şikayet edilen tüm sakıncalı içerikler moderasyon ekibimiz tarafından en geç 24 saat içerisinde incelenir. Kural ihlali tespit edilen gönderiler kalıcı olarak yayından kaldırılır ve bu içeriği paylaşan kullanıcının hesabı kalıcı olarak sonlandırılır.{'\n\n'}
+                All reports are investigated within 24 hours. Violating content will be removed immediately and offending users will be permanently ejected and banned.{'\n\n'}
+                <Text style={{ fontWeight: '700', color: theme.text }}>4. HİZMET ŞARTLARI:{'\n'}</Text>
+                Dythin, topluluk kurallarını ihlal eden tüm gönderileri önceden haber vermeksizin silme ve hesapları kapatma hakkını saklı tutar.
               </Text>
             </ScrollView>
             <TouchableOpacity style={s.modalCloseBtn} onPress={() => setShowTermsModal(false)}>
