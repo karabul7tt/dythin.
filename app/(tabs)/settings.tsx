@@ -152,33 +152,47 @@ export default function SettingsScreen() {
   }
 
   async function handleChangeEmail() {
-    if (!newEmail.trim()) {
+    Keyboard.dismiss()
+    const targetEmail = newEmail.trim().toLowerCase()
+    if (!targetEmail) {
       return Alert.alert('Eksik bilgi', 'Lütfen yeni e-posta adresinizi girin.')
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(newEmail.trim())) {
+    if (!emailRegex.test(targetEmail)) {
       return Alert.alert('Geçersiz e-posta', 'Lütfen geçerli bir e-posta adresi girin.')
     }
-    if (newEmail.trim().toLowerCase() === session?.user?.email?.toLowerCase()) {
+    if (targetEmail === session?.user?.email?.toLowerCase()) {
       return Alert.alert('Aynı e-posta', 'Yeni e-posta adresi mevcut adresinizle aynı olamaz.')
     }
 
     setLoading(true)
     try {
-      const { error } = await supabase.auth.updateUser(
-        { email: newEmail.trim().toLowerCase() },
+      const updatePromise = supabase.auth.updateUser(
+        { email: targetEmail },
         { emailRedirectTo: 'dythin://' }
       )
+      const timeoutPromise = new Promise<{ error: Error }>((_, reject) =>
+        setTimeout(() => reject(new Error('İşlem zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.')), 12000)
+      )
+
+      const { error } = (await Promise.race([updatePromise, timeoutPromise])) as any
       if (error) throw error
 
       setNewEmail('')
       setShowEmailForm(false)
-      Alert.alert(
-        'Onay E-postası Gönderildi',
-        'ÖNEMLİ: Güvenlik gereği hem YENİ e-posta adresinize hem de MEVCUT e-posta adresinize birer onay bağlantısı gönderilmiş olabilir.\n\nDeğişikliğin tamamlanması için her iki gelen kutunuzdaki bağlantılara tıklamanız gerekir. Onayladıktan sonra ayarlar sayfasını yenileyebilirsiniz.'
-      )
+      setTimeout(() => {
+        Alert.alert(
+          'Onay E-postası Gönderildi',
+          'ÖNEMLİ: Güvenlik gereği hem YENİ e-posta adresinize hem de MEVCUT e-posta adresinize birer onay bağlantısı gönderilmiş olabilir.\n\nDeğişikliğin tamamlanması için her iki gelen kutunuzdaki bağlantılara tıklamanız gerekir. Onayladıktan sonra ayarlar sayfasını yenileyebilirsiniz.'
+        )
+      }, 150)
     } catch (error: any) {
-      Alert.alert('E-posta değiştirilemedi', error.message || 'Lütfen tekrar deneyin.')
+      const msg = error?.message?.includes('rate limit') || error?.message?.includes('security purposes')
+        ? 'Çok sık deneme yapıldı. Lütfen 60 saniye bekleyip tekrar deneyin.'
+        : error?.message || 'Lütfen tekrar deneyin.'
+      setTimeout(() => {
+        Alert.alert('E-posta değiştirilemedi', msg)
+      }, 150)
     } finally {
       setLoading(false)
     }
