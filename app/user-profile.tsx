@@ -145,6 +145,21 @@ export default function UserProfileScreen() {
       if (!error) {
         setFriendshipStatus('pending')
         Alert.alert('İstek Gönderildi', 'Arkadaşlık isteği başarıyla iletildi.')
+
+        // Karşı tarafa push bildirimi gönder
+        try {
+          const { data: myProfile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', session.user.id)
+            .single()
+          const senderName = myProfile?.username ? `@${myProfile.username}` : 'Biri'
+          sendPushNotificationToUser(
+            userId,
+            'Arkadaşlık İsteği!',
+            `${senderName} sana arkadaşlık isteği gönderdi.`
+          )
+        } catch {}
       }
     } else if (friendshipStatus === 'accepted') {
       Alert.alert('Arkadaşı Çıkar', 'Bu kişiyi arkadaş listenizden çıkarmak istediğinize emin misiniz?', [

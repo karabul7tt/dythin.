@@ -24,6 +24,8 @@ import { registerForPushNotificationsAsync } from '../../lib/notifications'
 export default function SettingsScreen() {
   const { theme, themeName, setThemeName, session } = useApp()
   const [loading, setLoading] = useState(false)
+  const [showEmailForm, setShowEmailForm] = useState(false)
+  const [newEmail, setNewEmail] = useState('')
   const [showPasswordForm, setShowPasswordForm] = useState(false)
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -146,6 +148,38 @@ export default function SettingsScreen() {
 
     if (error) return Alert.alert('Kod gönderilemedi', error.message)
     router.push({ pathname: '/(auth)/reset-password', params: { email } })
+  }
+
+  async function handleChangeEmail() {
+    if (!newEmail.trim()) {
+      return Alert.alert('Eksik bilgi', 'Lütfen yeni e-posta adresinizi girin.')
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(newEmail.trim())) {
+      return Alert.alert('Geçersiz e-posta', 'Lütfen geçerli bir e-posta adresi girin.')
+    }
+    if (newEmail.trim().toLowerCase() === session?.user?.email?.toLowerCase()) {
+      return Alert.alert('Aynı e-posta', 'Yeni e-posta adresi mevcut adresinizle aynı olamaz.')
+    }
+
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: newEmail.trim().toLowerCase(),
+      })
+      if (error) throw error
+
+      setNewEmail('')
+      setShowEmailForm(false)
+      Alert.alert(
+        'Onay E-postası Gönderildi',
+        'Yeni e-posta adresinize bir onay bağlantısı gönderildi. Değişikliğin tamamlanması için lütfen gelen kutunuzu kontrol edip bağlantıya tıklayın.'
+      )
+    } catch (error: any) {
+      Alert.alert('E-posta değiştirilemedi', error.message || 'Lütfen tekrar deneyin.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function handleChangePassword() {
@@ -378,6 +412,34 @@ export default function SettingsScreen() {
               <Text style={s.emailText}>{session?.user.email}</Text>
             </View>
           </View>
+          <TouchableOpacity style={s.row} onPress={() => setShowEmailForm(value => !value)}>
+            <Text style={s.rowLabel}>E-posta değiştir</Text>
+            <Text style={s.arrow}>{showEmailForm ? '⌃' : '›'}</Text>
+          </TouchableOpacity>
+          {showEmailForm && (
+            <View style={[s.passwordForm, { borderBottomWidth: 0.5, borderBottomColor: theme.border }]}>
+              <TextInput
+                style={s.passwordInput}
+                value={newEmail}
+                onChangeText={setNewEmail}
+                placeholder="Yeni e-posta adresi"
+                placeholderTextColor={theme.textSub}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="done"
+                blurOnSubmit={true}
+                onSubmitEditing={Keyboard.dismiss}
+                editable={!loading}
+              />
+              <TouchableOpacity style={s.passwordSave} onPress={handleChangeEmail} disabled={loading}>
+                {loading ? <ActivityIndicator color={theme.bg} /> : <Text style={s.passwordSaveText}>E-postayı güncelle</Text>}
+              </TouchableOpacity>
+              <Text style={{ fontSize: 11, color: theme.textSub, marginTop: 8, textAlign: 'center' }}>
+                Onay bağlantısı yeni e-posta adresinize gönderilecektir.
+              </Text>
+            </View>
+          )}
           <TouchableOpacity style={s.rowLast} onPress={() => setShowPasswordForm(value => !value)}>
             <Text style={s.rowLabel}>Şifre değiştir</Text>
             <Text style={s.arrow}>{showPasswordForm ? '⌃' : '›'}</Text>

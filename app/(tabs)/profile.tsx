@@ -23,6 +23,7 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 import ZoomablePhoto from '../../components/ZoomablePhoto'
+import { sendPushNotificationToUser } from '../../lib/notifications'
 import type { Profile, FriendRecord, FriendshipWithProfiles } from '../../lib/types'
 
 export default function ProfileScreen() {
@@ -335,13 +336,40 @@ export default function ProfileScreen() {
       requester_id: session?.user.id,
       receiver_id: receiverId,
     })
-    if (error) Alert.alert('Bilgi', 'İstek zaten gönderilmiş veya mevcut.')
-    else { Alert.alert('İstek Gönderildi'); setSearchResult(null); setSearch('') }
+    if (error) {
+      Alert.alert('Bilgi', 'İstek zaten gönderilmiş veya mevcut.')
+    } else {
+      Alert.alert('İstek Gönderildi')
+      setSearchResult(null)
+      setSearch('')
+
+      // Karşı tarafa push bildirimi gönder
+      if (receiverId) {
+        try {
+          const senderName = username ? `@${username}` : 'Biri'
+          sendPushNotificationToUser(
+            receiverId,
+            'Arkadaşlık İsteği!',
+            `${senderName} sana arkadaşlık isteği gönderdi.`
+          )
+        } catch {}
+      }
+    }
   }
 
-  async function acceptRequest(friendshipId: string) {
+  async function acceptRequest(friendshipId: string, requesterId?: string) {
     await supabase.from('friendships').update({ status: 'accepted' }).eq('id', friendshipId)
     fetchFriends()
+    if (requesterId) {
+      try {
+        const senderName = username ? `@${username}` : 'Biri'
+        sendPushNotificationToUser(
+          requesterId,
+          'Arkadaşlık İsteği Kabul Edildi!',
+          `${senderName} arkadaşlık isteğini kabul etti.`
+        )
+      } catch {}
+    }
   }
 
   async function rejectRequest(friendshipId: string) {
@@ -661,7 +689,7 @@ export default function ProfileScreen() {
                     <TouchableOpacity style={s.rejectBtn} onPress={() => rejectRequest(r.friendship_id)}>
                       <Text style={s.rejectBtnText}>Reddet</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={s.acceptBtn} onPress={() => acceptRequest(r.friendship_id)}>
+                    <TouchableOpacity style={s.acceptBtn} onPress={() => acceptRequest(r.friendship_id, r.id)}>
                       <Text style={s.acceptBtnText}>Kabul Et</Text>
                     </TouchableOpacity>
                   </TouchableOpacity>
