@@ -56,21 +56,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const handleOAuthUrl = async (url: string) => {
       if (!url) return
       try {
-        if (url.includes('#access_token')) {
-          const fragment = url.split('#')[1]
+        if (url.includes('#access_token') || url.includes('&access_token')) {
+          const fragment = url.includes('#') ? url.split('#')[1] : url.split('?')[1]
           if (fragment) {
             const params = new URLSearchParams(fragment)
             const access_token = params.get('access_token')
             const refresh_token = params.get('refresh_token')
             if (access_token && refresh_token) {
-              await supabase.auth.setSession({ access_token, refresh_token })
+              const { data } = await supabase.auth.setSession({ access_token, refresh_token })
+              if (data?.session) setSession(data.session)
             }
           }
         } else if (url.includes('code=')) {
-          const codeMatch = url.match(/[?&]code=([^&]+)/)
-          const code = codeMatch ? codeMatch[1] : null
+          const codeMatch = url.match(/[?&]code=([^&#]+)/)
+          const code = codeMatch ? decodeURIComponent(codeMatch[1]) : null
           if (code) {
-            await supabase.auth.exchangeCodeForSession(code)
+            const { data } = await supabase.auth.exchangeCodeForSession(code)
+            if (data?.session) setSession(data.session)
           }
         }
       } catch (err) {
