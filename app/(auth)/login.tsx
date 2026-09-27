@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import * as Linking from 'expo-linking'
+import * as AppleAuthentication from 'expo-apple-authentication'
 import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput, validateInstagramUsername } from '../../lib/security'
@@ -78,6 +79,76 @@ export default function Login() {
       )
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleAppleSignIn() {
+    if (Platform.OS === 'ios') {
+      try {
+        const isAvailable = await AppleAuthentication.isAvailableAsync()
+        if (!isAvailable) {
+          return handleOAuth('apple')
+        }
+
+        setLoading(true)
+        const credential = await AppleAuthentication.signInAsync({
+          requestedScopes: [
+            AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+            AppleAuthentication.AppleAuthenticationScope.EMAIL,
+          ],
+        })
+
+        if (credential.identityToken) {
+          const { data, error } = await supabase.auth.signInWithIdToken({
+            provider: 'apple',
+            token: credential.identityToken,
+          })
+
+          if (error) throw error
+
+          if (data.user) {
+            const appleName = credential.fullName
+              ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
+              : null
+
+            const { data: existingProfile } = await supabase
+              .from('profiles')
+              .select('id, full_name, username')
+              .eq('id', data.user.id)
+              .maybeSingle()
+
+            if (!existingProfile) {
+              const rawEmail = data.user.email || ''
+              const baseUsername = rawEmail
+                ? rawEmail.split('@')[0].replace(/[^a-zA-Z0-9_.]/g, '')
+                : `user_${Date.now().toString(36)}`
+              await supabase.from('profiles').insert({
+                id: data.user.id,
+                email: rawEmail,
+                full_name: appleName || data.user.user_metadata?.full_name || 'Dythin Kullanıcısı',
+                username: baseUsername,
+              })
+            } else if (appleName && !existingProfile.full_name) {
+              await supabase.from('profiles').update({ full_name: appleName }).eq('id', data.user.id)
+            }
+          }
+        } else {
+          throw new Error('Apple kimlik doğrulama belirteci alınamadı.')
+        }
+      } catch (e: any) {
+        if (e.code === 'ERR_REQUEST_CANCELED') {
+          // Kullanıcı kendisi iptal etti, uyarı gösterme
+        } else {
+          Alert.alert(
+            'Apple Girişi Başarısız',
+            getCleanErrorMessage(e, 'Apple ile giriş yapılamadı. Supabase panelinde Apple sağlayıcısının açık olduğunu doğrulayın.')
+          )
+        }
+      } finally {
+        setLoading(false)
+      }
+    } else {
+      handleOAuth('apple')
     }
   }
 
@@ -492,7 +563,7 @@ export default function Login() {
                   gap: 10,
                   marginBottom: 10,
                 }}
-                onPress={() => handleOAuth('apple')}
+                onPress={handleAppleSignIn}
                 disabled={loading}
                 activeOpacity={0.85}
               >
