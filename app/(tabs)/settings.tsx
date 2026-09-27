@@ -23,8 +23,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { registerForPushNotificationsAsync } from '../../lib/notifications'
 
 export default function SettingsScreen() {
-  const { theme, themeName, setThemeName, session, refreshSession } = useApp()
+  const { theme, themeName, setThemeName, session, refreshSession, isAuthLoading, signOut } = useApp()
   const [loading, setLoading] = useState(false)
+  const [emailLoading, setEmailLoading] = useState(false)
+  const [signOutLoading, setSignOutLoading] = useState(false)
   const [showEmailForm, setShowEmailForm] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [showPasswordForm, setShowPasswordForm] = useState(false)
@@ -47,6 +49,12 @@ export default function SettingsScreen() {
       refreshSession()
     }
   }, [session?.user.id])
+
+  useEffect(() => {
+    if (!isAuthLoading && !session) {
+      router.replace('/(auth)/login')
+    }
+  }, [isAuthLoading, session])
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (nextState) => {
@@ -175,36 +183,47 @@ export default function SettingsScreen() {
       return Alert.alert('Aynı e-posta', 'Yeni e-posta adresi mevcut adresinizle aynı olamaz.')
     }
 
-    setLoading(true)
+    setEmailLoading(true)
     try {
       const updatePromise = supabase.auth.updateUser(
         { email: targetEmail },
         { emailRedirectTo: 'dythin://' }
       )
-      const timeoutPromise = new Promise<{ error: Error }>((_, reject) =>
-        setTimeout(() => reject(new Error('Sunucu yanıt vermedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.')), 45000)
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('TIMEOUT')), 15000)
       )
 
-      const { error } = (await Promise.race([updatePromise, timeoutPromise])) as any
-      if (error) throw error
+      const result = await Promise.race([updatePromise, timeoutPromise]) as Awaited<ReturnType<typeof supabase.auth.updateUser>>
+      const { data, error } = result
+
+      if (error) {
+        const msg = error.message?.includes('rate limit') || error.message?.includes('security purposes')
+          ? 'Çok sık deneme yapıldı. Birkaç dakika bekleyip tekrar deneyin.'
+          : error.message?.includes('already registered') || error.message?.includes('already been used')
+          ? 'Bu e-posta adresi başka bir hesapta kayıtlı.'
+          : `Hata: ${error.message}`
+        return Alert.alert('E-posta Değiştirilemedi', msg)
+      }
 
       setNewEmail('')
       setShowEmailForm(false)
-      setTimeout(() => {
-        Alert.alert(
-          'Onay E-postaları Gönderildi',
-          'ÖNEMLİ: Güvenlik gereği hem MEVCUT e-posta adresinize hem de YENİ e-posta adresinize birer onay bağlantısı gönderilmiştir.\n\n1. Her iki gelen kutunuzdaki bağlantılara tıklayarak onaylayın.\n2. Onayladıktan sonra uygulamaya dönün; adresiniz otomatik güncellenecektir (veya 🔄 Yenile simgesine dokunun).'
-        )
-      }, 150)
+      Alert.alert(
+        '✉️ Onay Bağlantısı Gönderildi',
+        'E-posta değişikliği için hem mevcut adresinize hem de yeni adresinize onay bağlantısı gönderildi.\n\nBağlantılara tıkladıktan sonra e-posta adresiniz güncellenecektir.'
+      )
     } catch (error: any) {
-      const msg = error?.message?.includes('rate limit') || error?.message?.includes('security purposes')
-        ? 'Çok sık deneme yapıldı. Lütfen birkaç dakika bekleyip tekrar deneyin.'
-        : error?.message || 'Lütfen tekrar deneyin.'
-      setTimeout(() => {
-        Alert.alert('E-posta Değiştirilemedi', msg)
-      }, 150)
+      if (error?.message === 'TIMEOUT') {
+        setNewEmail('')
+        setShowEmailForm(false)
+        Alert.alert(
+          '✉️ İstek İletildi',
+          'E-posta güncelleme talebiniz iletildi. Lütfen gelen kutunuzu (ve spam klasörünü) kontrol edin.'
+        )
+      } else {
+        Alert.alert('E-posta Değiştirilemedi', error?.message || 'Lütfen tekrar deneyin.')
+      }
     } finally {
-      setLoading(false)
+      setEmailLoading(false)
     }
   }
 
@@ -245,7 +264,21 @@ export default function SettingsScreen() {
         text: 'Çıkış Yap',
         style: 'destructive',
         onPress: async () => {
-          await supabase.auth.signOut()
+          setSignOutLoading(true)
+          try {
+            await Promise.race([
+              signOut(),
+              new Promise((r) => setTimeout(r, 800)),
+            ]).catch(() => null)
+          } catch (e) {
+            console.warn('Sign out error:', e)
+          } finally {
+            setSignOutLoading(false)
+            try {
+              router.dismissAll()
+            } catch {}
+            router.replace('/(auth)/login')
+          }
         },
       },
     ])
@@ -288,7 +321,11 @@ export default function SettingsScreen() {
                         await supabase.from('profiles').delete().eq('id', session.user.id)
                       }
 
-                      await supabase.auth.signOut()
+                      await signOut()
+                      try {
+                        router.dismissAll()
+                      } catch {}
+                      router.replace('/(auth)/login')
                       Alert.alert('Hesabınız Silindi', 'Hesabınız ve tüm verileriniz kalıcı olarak sistemden kaldırıldı.')
                     } catch (e: any) {
                       Alert.alert('Hata', 'Hesap silinirken bir hata oluştu.')
@@ -459,10 +496,10 @@ export default function SettingsScreen() {
                 returnKeyType="done"
                 blurOnSubmit={true}
                 onSubmitEditing={Keyboard.dismiss}
-                editable={!loading}
+                editable={!emailLoading}
               />
-              <TouchableOpacity style={s.passwordSave} onPress={handleChangeEmail} disabled={loading}>
-                {loading ? (
+              <TouchableOpacity style={s.passwordSave} onPress={handleChangeEmail} disabled={emailLoading}>
+                {emailLoading ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                     <ActivityIndicator color={theme.bg} size="small" />
                     <Text style={s.passwordSaveText}>Gönderiliyor, lütfen bekleyin...</Text>
@@ -553,12 +590,16 @@ export default function SettingsScreen() {
           </TouchableOpacity>
           <View style={s.rowLast}>
             <Text style={s.rowLabel}>Versiyon</Text>
-            <Text style={s.emailText}>1.1.0 (Store Ready)</Text>
+            <Text style={s.emailText}>1.1.0 (Build 59)</Text>
           </View>
         </View>
 
-        <TouchableOpacity style={s.signOutBtn} onPress={handleSignOut}>
-          <Text style={s.signOutText}>Çıkış Yap</Text>
+        <TouchableOpacity style={s.signOutBtn} onPress={handleSignOut} disabled={signOutLoading}>
+          {signOutLoading ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <Text style={s.signOutText}>Çıkış Yap</Text>
+          )}
         </TouchableOpacity>
 
         {/* Apple App Store Requirement: Account Deletion */}

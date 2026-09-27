@@ -94,51 +94,46 @@ export default function Login() {
         },
       })
       if (error) throw error
-      if (data?.url) {
-        const res = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl)
+      if (!data?.url) throw new Error('OAuth URL alınamadı.')
 
-        // 1. URL geldiyse doğrudan authenticateFromUrl ile doğrula
-        if (res.type === 'success' && res.url) {
-          const success = await authenticateFromUrl(res.url)
-          if (success) {
-            router.replace('/(tabs)')
-            return
-          }
-        }
+      const res = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl)
 
-        // 2. Tarayıcı kapandıktan sonra mevcut oturumu kontrol et
-        const { data: curSession } = await supabase.auth.getSession()
-        if (curSession?.session) {
-          router.replace('/(tabs)')
-          return
-        }
-
-        // 3. Sistem deep linki ayrıca geldiyse kontrol et
-        const deepUrl = await Linking.getInitialURL().catch(() => null)
-        if (deepUrl) {
-          const success = await authenticateFromUrl(deepUrl)
-          if (success) {
-            router.replace('/(tabs)')
-            return
-          }
-        }
-
-        // 4. Son kontrol: Oturum oluştuysa doğrudan içeri al
-        const { data: finalSession } = await supabase.auth.getSession()
-        if (finalSession?.session) {
+      // 1. URL geldiyse doğrudan authenticateFromUrl ile doğrula
+      if (res.type === 'success' && res.url) {
+        const success = await authenticateFromUrl(res.url)
+        if (success) {
           router.replace('/(tabs)')
           return
         }
       }
+
+      // 2. Tarayıcı kapandı — polling ile oturumu bekle (5 saniye, her 500ms)
+      for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, 500))
+        const { data: poll } = await supabase.auth.getSession()
+        if (poll?.session) {
+          router.replace('/(tabs)')
+          return
+        }
+      }
+
+      // 3. Iptal edildiyse sessizce çık
+      if (res.type === 'cancel' || res.type === 'dismiss') {
+        return
+      }
+
+      Alert.alert('Giriş Yapılamadı', `${provider === 'apple' ? 'Apple' : 'Google'} hesabıyla giriş tamamlanamadı. Lütfen tekrar deneyin.`)
     } catch (e: any) {
       const { data: check } = await supabase.auth.getSession()
       if (check?.session) {
         router.replace('/(tabs)')
         return
       }
+      // Kullanıcı iptal ettiyse hata gösterme
+      if (e?.message?.includes('cancel') || e?.message?.includes('dismiss')) return
       Alert.alert(
-        'Giriş Başarısız',
-        getCleanErrorMessage(e, `${provider === 'apple' ? 'Apple' : 'Google'} ile giriş başlatılamadı.`)
+        'Giriş Yapılamadı',
+        e?.message || `${provider === 'apple' ? 'Apple' : 'Google'} ile giriş tamamlanamadı.`
       )
     } finally {
       setLoading(false)

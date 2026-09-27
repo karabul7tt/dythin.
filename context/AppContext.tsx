@@ -5,7 +5,7 @@ import { themes, ThemeName, Theme } from '../lib/theme'
 import { Session } from '@supabase/supabase-js'
 import * as Linking from 'expo-linking'
 import { registerForPushNotificationsAsync } from '../lib/notifications'
-import { authenticateFromUrl } from '../lib/authHelper'
+import { authenticateFromUrl, extractUserProfile, syncUserProfileWithDatabase } from '../lib/authHelper'
 
 type AppContextType = {
   session: Session | null
@@ -14,6 +14,7 @@ type AppContextType = {
   themeName: ThemeName
   setThemeName: (name: ThemeName) => void
   refreshSession: () => Promise<Session | null>
+  signOut: () => Promise<void>
 }
 
 const AppContext = createContext<AppContextType>({
@@ -23,12 +24,21 @@ const AppContext = createContext<AppContextType>({
   themeName: 'purple',
   setThemeName: () => {},
   refreshSession: async () => null,
+  signOut: async () => {},
 })
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [isAuthLoading, setIsAuthLoading] = useState(true)
   const [themeName, setThemeNameState] = useState<ThemeName>('purple')
+
+  async function signOut(): Promise<void> {
+    try {
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+    } finally {
+      setSession(null)
+    }
+  }
 
   async function refreshSession(): Promise<Session | null> {
     try {
@@ -54,11 +64,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then((res) => {
       const currentSession = res?.data?.session
       if (res?.error) {
-        supabase.auth.signOut().catch(() => null)
+        supabase.auth.signOut({ scope: 'local' }).catch(() => null)
         setSession(null)
       } else {
         setSession(currentSession || null)
         if (currentSession?.user) {
+          syncUserProfileWithDatabase(currentSession.user).catch(() => null)
+
           setTimeout(() => {
             registerForPushNotificationsAsync(currentSession.user.id).catch(() => null)
           }, 3000)
@@ -66,7 +78,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       setIsAuthLoading(false)
     }).catch(() => {
-      supabase.auth.signOut().catch(() => null)
+      supabase.auth.signOut({ scope: 'local' }).catch(() => null)
       setSession(null)
       setIsAuthLoading(false)
     })
@@ -75,10 +87,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const handleOAuthUrl = async (url: string) => {
       if (!url) return
       try {
+        // Doğrudan authenticateFromUrl dene (code varsa exchangeCodeForSession çağırır)
         const success = await authenticateFromUrl(url)
         if (success) {
           const { data } = await supabase.auth.getSession()
-          if (data?.session) setSession(data.session)
+          if (data?.session) {
+            setSession(data.session)
+            return
+          }
+        }
+
+        // Fallback: 5 saniye boyunca her 500ms'de bir session kontrolü yap
+        for (let i = 0; i < 10; i++) {
+          await new Promise(r => setTimeout(r, 500))
+          const { data } = await supabase.auth.getSession()
+          if (data?.session) {
+            setSession(data.session)
+            return
+          }
         }
       } catch (err) {
         console.warn('OAuth URL parse hatası:', err)
@@ -96,35 +122,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const authListener = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       setSession(newSession || null)
       if (newSession?.user) {
-        // Google veya Apple ile ilk kez giriş yapıldıysa profil kaydını otomatik tamamla
-        try {
-          const u = newSession.user
-          const { data: existingProfile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('id', u.id)
-            .maybeSingle()
-
-          if (!existingProfile) {
-            const rawEmail = u.email || ''
-            const name = u.user_metadata?.full_name || u.user_metadata?.name || rawEmail.split('@')[0] || 'Kullanıcı'
-            const cleanBase = (u.user_metadata?.preferred_username || rawEmail.split('@')[0] || 'user')
-              .toLowerCase()
-              .replace(/[^a-z0-9_.]/g, '')
-              .slice(0, 16) || 'user'
-            const randomSuffix = Math.floor(1000 + Math.random() * 9000)
-            const autoUsername = `${cleanBase}_${randomSuffix}`
-
-            await supabase.from('profiles').insert({
-              id: u.id,
-              username: autoUsername,
-              full_name: name,
-              avatar_url: u.user_metadata?.avatar_url || null,
-            })
-          }
-        } catch {
-          // Sessiz fallback
-        }
+        syncUserProfileWithDatabase(newSession.user).catch(() => null)
 
         setTimeout(() => {
           registerForPushNotificationsAsync(newSession.user.id).catch(() => null)
@@ -163,6 +161,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       themeName,
       setThemeName,
       refreshSession,
+      signOut,
     }}>
       {children}
     </AppContext.Provider>

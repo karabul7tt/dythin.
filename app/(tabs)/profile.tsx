@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import {
   Modal,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
+import { useFocusEffect } from '@react-navigation/native'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
@@ -23,6 +24,7 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 import ZoomablePhoto from '../../components/ZoomablePhoto'
+import { extractUserProfile, syncUserProfileWithDatabase } from '../../lib/authHelper'
 import { sendPushNotificationToUser } from '../../lib/notifications'
 import type { Profile, FriendRecord, FriendshipWithProfiles } from '../../lib/types'
 
@@ -88,6 +90,15 @@ export default function ProfileScreen() {
     fetchFriends()
   }, [userId])
 
+  useFocusEffect(
+    useCallback(() => {
+      if (userId) {
+        fetchProfile()
+        fetchFriends()
+      }
+    }, [userId])
+  )
+
   async function handleRefresh() {
     setRefreshing(true)
     const minDelay = new Promise(resolve => setTimeout(resolve, 600))
@@ -96,26 +107,53 @@ export default function ProfileScreen() {
   }
 
   async function fetchProfile() {
-    const { data } = await supabase
+    if (!session?.user?.id) return
+    let { data } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', session?.user.id)
-      .single()
+      .eq('id', session.user.id)
+      .maybeSingle()
+
+    if (!data) {
+      data = await syncUserProfileWithDatabase(session.user)
+    }
+
     if (data) {
       const prof = data as Profile
       const uName = prof.username || ''
-      const fName = prof.full_name || ''
+      let fName = prof.full_name || ''
+      let avUrl = prof.avatar_url || null
+
+      const { name: gName, avatar: gAvatar } = extractUserProfile(session.user)
+
+      let needsUpdate = false
+      const updates: any = {}
+
+      if ((!fName || fName === 'Kullanıcı' || fName.trim() === '') && gName) {
+        fName = gName
+        updates.full_name = gName
+        needsUpdate = true
+      }
+      if ((!avUrl || avUrl.trim() === '') && gAvatar) {
+        avUrl = gAvatar
+        updates.avatar_url = gAvatar
+        needsUpdate = true
+      }
+      if (needsUpdate) {
+        Promise.resolve(supabase.from('profiles').update(updates).eq('id', session.user.id)).catch(() => null)
+      }
+
       setUsername(uName)
       setFullName(fName)
       setInitialUsername(uName)
       setInitialFullName(fName)
-      setAvatar(prof.avatar_url || null)
+      setAvatar(avUrl)
       setLastUsernameUpdate(prof.updated_at || null)
     }
     const { count: postCount } = await supabase
-      .from('posts').select('*', { count: 'exact', head: true }).eq('user_id', session?.user.id)
+      .from('posts').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id)
     const { count: voteCount } = await supabase
-      .from('votes').select('*', { count: 'exact', head: true }).eq('voter_id', session?.user.id)
+      .from('votes').select('*', { count: 'exact', head: true }).eq('voter_id', session.user.id)
     setStats(prev => ({ ...prev, posts: postCount || 0, votes: voteCount || 0 }))
   }
 
