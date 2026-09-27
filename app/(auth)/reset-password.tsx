@@ -86,7 +86,7 @@ export default function ResetPassword() {
         setResendCooldown(60)
         setStep('verify')
         Alert.alert(
-          'Kod Gönderildi! 📩',
+          'Kod Gönderildi',
           `${resolvedEmail} adresinize 6 haneli şifre sıfırlama kodu gönderildi. Lütfen gelen kutunuzu (ve Spam klasörünü) kontrol edin.`
         )
       }
@@ -110,7 +110,7 @@ export default function ResetPassword() {
         Alert.alert('Kod Gönderilemedi', getCleanErrorMessage(error))
       } else {
         setResendCooldown(60)
-        Alert.alert('Kod Tekrar Gönderildi! 📩', `${targetEmail} adresine yeni bir kod iletildi.`)
+        Alert.alert('Kod Tekrar Gönderildi', `${targetEmail} adresine yeni bir kod iletildi.`)
       }
     } catch (e: any) {
       Alert.alert('Hata', getCleanErrorMessage(e))
@@ -171,7 +171,7 @@ export default function ResetPassword() {
       // 3. Başarıyla oturum aç veya login ekranına yönlendir
       await supabase.auth.signOut()
       Alert.alert(
-        'Şifreniz Değiştirildi! 🎉',
+        'Şifreniz Değiştirildi',
         'Yeni şifreniz başarıyla kaydedildi. Şimdi yeni şifrenizle giriş yapabilirsiniz.',
         [
           {

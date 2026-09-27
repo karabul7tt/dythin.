@@ -18,6 +18,7 @@ import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import { ThemeName } from '../../lib/theme'
 import { useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import { registerForPushNotificationsAsync } from '../../lib/notifications'
 
 export default function SettingsScreen() {
@@ -129,7 +130,7 @@ export default function SettingsScreen() {
     const token = await registerForPushNotificationsAsync(session.user.id)
     setLoading(false)
     if (token) {
-      Alert.alert('Bildirimler Aktif! 🔔', 'Oylamalar ve yorumlar için anlık bildirimler alacaksınız.')
+      Alert.alert('Bildirimler Aktif', 'Oylamalar ve yorumlar için anlık bildirimler alacaksınız.')
     } else {
       Alert.alert('Bildirim İzni', 'Cihaz ayarlarınızdan bildirim izinlerini kontrol edin.')
     }
@@ -365,7 +366,7 @@ export default function SettingsScreen() {
               <Text style={s.rowLabel}>Anlık Bildirimler</Text>
               <Text style={s.rowSub}>Oylama ve yorumlarda bildirim al</Text>
             </View>
-            <Text style={s.arrow}>🔔</Text>
+            <Ionicons name="notifications-outline" size={18} color={theme.textSub} />
           </TouchableOpacity>
         </View>
 
@@ -436,7 +437,7 @@ export default function SettingsScreen() {
               <View style={[s.themeDot, { backgroundColor: t.color }]} />
               <Text style={s.rowLabel}>{t.label}</Text>
               <View style={[s.themeCheck, themeName === t.key && s.themeCheckActive]}>
-                {themeName === t.key && <Text style={{ color: '#fff', fontSize: 10 }}>✓</Text>}
+                {themeName === t.key && <Ionicons name="checkmark" size={12} color="#fff" />}
               </View>
             </TouchableOpacity>
           ))}
@@ -454,7 +455,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
           <View style={s.rowLast}>
             <Text style={s.rowLabel}>Versiyon</Text>
-            <Text style={s.emailText}>1.0.0 (Store Ready)</Text>
+            <Text style={s.emailText}>1.1.0 (Store Ready)</Text>
           </View>
         </View>
 

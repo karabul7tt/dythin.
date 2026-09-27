@@ -20,6 +20,7 @@ import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput, validateInstagramUsername } from '../../lib/security'
 import { useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 import ZoomablePhoto from '../../components/ZoomablePhoto'
 import type { Profile, FriendRecord, FriendshipWithProfiles } from '../../lib/types'
@@ -300,7 +301,7 @@ export default function ProfileScreen() {
           setLastUsernameUpdate(nowIso)
         }
         setIsEditing(false)
-        Alert.alert('Başarılı ✨', 'Profil bilgileriniz başarıyla güncellendi.')
+        Alert.alert('Başarılı', 'Profil bilgileriniz başarıyla güncellendi.')
       }
     } catch (e: any) {
       Alert.alert('Hata', getCleanErrorMessage(e))
@@ -335,7 +336,7 @@ export default function ProfileScreen() {
       receiver_id: receiverId,
     })
     if (error) Alert.alert('Bilgi', 'İstek zaten gönderilmiş veya mevcut.')
-    else { Alert.alert('İstek Gönderildi! ✓'); setSearchResult(null); setSearch('') }
+    else { Alert.alert('İstek Gönderildi'); setSearchResult(null); setSearch('') }
   }
 
   async function acceptRequest(friendshipId: string) {
@@ -487,7 +488,7 @@ export default function ProfileScreen() {
               onPress={() => router.push('/(tabs)/settings')}
               activeOpacity={0.75}
             >
-              <Text style={{ fontSize: 16 }}>⚙️</Text>
+              <Ionicons name="settings-outline" size={19} color={theme.text} />
             </TouchableOpacity>
           </View>
 
@@ -499,7 +500,7 @@ export default function ProfileScreen() {
               : <View style={s.avatarPlaceholder}><Text style={{ fontSize: 24, fontWeight: '700', color: theme.textSub }}>{(username || 'D')[0].toUpperCase()}</Text></View>}
             {isEditing && (
               <View style={s.cameraBadge}>
-                <Text style={{ fontSize: 13, fontWeight: '700', color: theme.bg }}>📷</Text>
+                <Ionicons name="camera" size={13} color={theme.bg} />
               </View>
             )}
           </TouchableOpacity>
@@ -514,12 +515,16 @@ export default function ProfileScreen() {
                 borderWidth: 0.5,
                 borderColor: theme.accent,
                 alignSelf: 'center',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
               }}
               onPress={pickAvatar}
               activeOpacity={0.8}
             >
+              <Ionicons name="camera-outline" size={15} color={theme.accent} />
               <Text style={{ fontSize: 12, fontWeight: '600', color: theme.accent }}>
-                Fotoğrafı Değiştir 📷
+                Fotoğrafı Değiştir
               </Text>
             </TouchableOpacity>
           )}
@@ -680,10 +685,11 @@ export default function ProfileScreen() {
                   : <View style={s.friendAvatarPlaceholder}><Text style={{ fontSize: 16, fontWeight: '700', color: theme.textSub }}>{f.username[0].toUpperCase()}</Text></View>}
                 <Text style={s.friendName}>{f.username}</Text>
                 <TouchableOpacity
-                  style={[s.acceptBtn, { paddingHorizontal: 12, paddingVertical: 6, marginRight: 6 }]}
+                  style={[s.acceptBtn, { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 6, marginRight: 6 }]}
                   onPress={() => router.push({ pathname: '/chat/[friendId]', params: { friendId: f.id } })}
                 >
-                  <Text style={s.acceptBtnText}>Mesaj 💬</Text>
+                  <Ionicons name="chatbubbles-outline" size={13} color={theme.bg} />
+                  <Text style={s.acceptBtnText}>Mesaj</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={s.removeBtn} onPress={() => removeFriend(f.friendship_id)}>
                   <Text style={s.removeBtnText}>Çıkar</Text>

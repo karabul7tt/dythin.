@@ -14,6 +14,8 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
+import * as Linking from 'expo-linking'
 import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput, validateInstagramUsername } from '../../lib/security'
@@ -54,6 +56,31 @@ export default function Login() {
 
   const [phone, setPhone] = useState('')
 
+  async function handleOAuth(provider: 'google' | 'apple') {
+    setLoading(true)
+    try {
+      const redirectUrl = Linking.createURL('/')
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: false,
+        },
+      })
+      if (error) throw error
+      if (data?.url) {
+        await Linking.openURL(data.url)
+      }
+    } catch (e: any) {
+      Alert.alert(
+        'Giriş Başarısız',
+        getCleanErrorMessage(e, `${provider === 'apple' ? 'Apple' : 'Google'} ile giriş başlatılamadı.`)
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
   function handleForgotPassword() {
     router.push({
       pathname: '/(auth)/reset-password',
@@ -63,7 +90,7 @@ export default function Login() {
 
   async function handleAuth() {
     if (cooldown > 0) {
-      Alert.alert('Güvenlik Kısıtlaması 🔒', `Çok fazla hatalı deneme yapıldı. Lütfen ${cooldown} saniye bekleyin.`)
+      Alert.alert('Güvenlik Kısıtlaması', `Çok fazla hatalı deneme yapıldı. Lütfen ${cooldown} saniye bekleyin.`)
       return
     }
 
@@ -142,7 +169,7 @@ export default function Login() {
           if (nextAttempts >= 5) {
             setCooldown(30)
             setAttemptCount(0)
-            Alert.alert('Güvenlik Kısıtlaması 🔒', 'Üst üste 5 kez hatalı işlem yapıldı. 30 saniye kısıtlama getirildi.')
+            Alert.alert('Güvenlik Kısıtlaması', 'Üst üste 5 kez hatalı işlem yapıldı. 30 saniye kısıtlama getirildi.')
           } else {
             Alert.alert('Kayıt Oluşturulamadı', getCleanErrorMessage(error))
           }
@@ -159,11 +186,11 @@ export default function Login() {
               })
           }
           if (data.session) {
-            Alert.alert('Hoş geldin! 🎉', 'Hesabın oluşturuldu ve giriş yapıldı.')
+            Alert.alert('Hoş geldin', 'Hesabın oluşturuldu ve giriş yapıldı.')
           } else {
             setShowOtpScreen(true)
             Alert.alert(
-              'Doğrulama Kodu Gönderildi! 📩',
+              'Doğrulama Kodu Gönderildi',
               `${inputIdentifier} adresinize 6 haneli doğrulama kodu gönderildi. Lütfen gelen kutunuzu kontrol edin.`
             )
           }
@@ -199,7 +226,7 @@ export default function Login() {
           if (nextAttempts >= 5) {
             setCooldown(30)
             setAttemptCount(0)
-            Alert.alert('Güvenlik Kısıtlaması 🔒', 'Üst üste 5 kez hatalı şifre girildi. Güvenliğiniz için 30 saniye kısıtlama getirildi.')
+            Alert.alert('Güvenlik Kısıtlaması', 'Üst üste 5 kez hatalı şifre girildi. Güvenliğiniz için 30 saniye kısıtlama getirildi.')
           } else {
             Alert.alert('Giriş Başarısız', 'E-posta, telefon, kullanıcı adı veya şifreniz hatalı. Lütfen kontrol edin.')
           }
@@ -260,7 +287,7 @@ export default function Login() {
           })
         }
 
-        Alert.alert('Hesap Oluşturuldu! 🎉', 'E-posta adresiniz doğrulandı ve giriş yapıldı.')
+        Alert.alert('Hesap Oluşturuldu', 'E-posta adresiniz doğrulandı ve giriş yapıldı.')
         setShowOtpScreen(false)
         setIsRegister(false)
       }
@@ -435,7 +462,7 @@ export default function Login() {
               )}
 
               <TouchableOpacity
-                style={{ backgroundColor: '#7F77DD', borderRadius: 14, padding: 16, alignItems: 'center', marginBottom: 16, marginTop: 4 }}
+                style={{ backgroundColor: '#7F77DD', borderRadius: 14, padding: 16, alignItems: 'center', marginBottom: 4, marginTop: 4 }}
                 onPress={handleAuth}
                 disabled={loading}
                 activeOpacity={0.8}
@@ -444,6 +471,59 @@ export default function Login() {
                   ? <ActivityIndicator color="#fff" />
                   : <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>{isRegister ? 'Kayıt Ol' : 'Giriş Yap'}</Text>
                 }
+              </TouchableOpacity>
+
+              {/* VEYA Bölücü Çizgi */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 14 }}>
+                <View style={{ flex: 1, height: 0.5, backgroundColor: '#2a2a3a' }} />
+                <Text style={{ color: '#666', fontSize: 12, marginHorizontal: 12, fontWeight: '500' }}>veya</Text>
+                <View style={{ flex: 1, height: 0.5, backgroundColor: '#2a2a3a' }} />
+              </View>
+
+              {/* Apple Giriş Butonu */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: 14,
+                  padding: 14,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'row',
+                  gap: 10,
+                  marginBottom: 10,
+                }}
+                onPress={() => handleOAuth('apple')}
+                disabled={loading}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="logo-apple" size={20} color="#000000" />
+                <Text style={{ color: '#000000', fontSize: 15, fontWeight: '600' }}>
+                  {isRegister ? 'Apple ile Kayıt Ol' : 'Apple ile Devam Et'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Google Giriş Butonu */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#161622',
+                  borderWidth: 0.5,
+                  borderColor: '#2a2a3a',
+                  borderRadius: 14,
+                  padding: 14,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'row',
+                  gap: 10,
+                  marginBottom: 14,
+                }}
+                onPress={() => handleOAuth('google')}
+                disabled={loading}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="logo-google" size={18} color="#EA4335" />
+                <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '600' }}>
+                  {isRegister ? 'Google ile Kayıt Ol' : 'Google ile Devam Et'}
+                </Text>
               </TouchableOpacity>
 
               <Text style={{ color: '#888', fontSize: 11, textAlign: 'center', marginTop: 4, marginBottom: 12, lineHeight: 16 }}>

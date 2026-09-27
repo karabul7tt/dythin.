@@ -192,7 +192,12 @@ export default function UserProfileScreen() {
         Alert.alert('Hata', error.message)
       }
     } else {
-      Alert.alert('Oyunuz Kaydedildi ✓', option === 'A' ? 'Soldaki seçeneğe oy verdiniz.' : 'Sağdaki seçeneğe oy verdiniz.')
+      Alert.alert(
+        'Oyunuz Kaydedildi',
+        post.image_b_url
+          ? (option === 'A' ? 'Soldaki seçeneğe oy verdiniz.' : 'Sağdaki seçeneğe oy verdiniz.')
+          : (option === 'B' ? 'Beğendim olarak kaydedildi.' : 'Beğenmedim olarak kaydedildi.')
+      )
       fetchUserPosts()
     }
   }
@@ -259,12 +264,22 @@ export default function UserProfileScreen() {
 
   function getStats(votes: Vote[]) {
     const total = votes.length
-    if (total === 0) return { countA: 0, countB: 0, total: 0, pctA: 50, pctB: 50 }
+    if (total === 0) return { countA: 0, countB: 0, total: 0, pctA: 50, pctB: 50, likePct: 0, dislikePct: 0, likeCount: 0, dislikeCount: 0 }
     const countB = votes.filter(v => v.value === true || (v as any).selected_option === 'B').length
     const countA = total - countB
     const pctA = Math.round((countA / total) * 100)
     const pctB = 100 - pctA
-    return { countA, countB, total, pctA, pctB }
+    return {
+      countA,
+      countB,
+      total,
+      pctA,
+      pctB,
+      likeCount: countB,
+      dislikeCount: countA,
+      likePct: pctB,
+      dislikePct: pctA,
+    }
   }
 
   const s = StyleSheet.create({
@@ -472,7 +487,7 @@ export default function UserProfileScreen() {
         {/* Posts List */}
         {!isSelf && profile?.is_private && friendshipStatus !== 'accepted' ? (
           <View style={{ backgroundColor: theme.card, borderRadius: 16, padding: 30, alignItems: 'center', borderWidth: 0.5, borderColor: theme.border, marginTop: 10 }}>
-            <Text style={{ fontSize: 32, marginBottom: 10 }}>🔒</Text>
+            <Ionicons name="lock-closed-outline" size={36} color={theme.textSub} style={{ marginBottom: 10 }} />
             <Text style={{ fontSize: 16, fontWeight: '700', color: theme.text, marginBottom: 6 }}>Bu Hesap Gizli</Text>
             <Text style={{ fontSize: 13, color: theme.textSub, textAlign: 'center', lineHeight: 18 }}>
               Bu kullanıcının paylaşımlarını ve oylamalarını görebilmek için arkadaş olmalısınız.
@@ -487,8 +502,9 @@ export default function UserProfileScreen() {
               posts.map(p => {
                 const votes = (p.votes ?? []) as Vote[]
                 const userVote = votes.find(v => v.voter_id === session?.user.id)
-                const { countA, countB, total, pctA, pctB } = getStats(votes)
+                const { countA, countB, pctA, pctB, likePct, dislikePct, likeCount, dislikeCount } = getStats(votes)
                 const isVoting = votingMap[p.id]
+                const isExpired = !p.is_active || (p.expires_at && new Date(p.expires_at).getTime() <= Date.now()) || (p.created_at && (Date.now() - new Date(p.created_at).getTime()) > 24 * 60 * 60 * 1000)
 
                 return (
                   <View key={p.id} style={s.postCard}>
@@ -515,17 +531,26 @@ export default function UserProfileScreen() {
                       ) : null}
                     </View>
 
-                    {/* Vote Percentage Bar if Voted */}
-                    {userVote ? (
+                    {/* Vote Percentage Bar if Voted or Expired */}
+                    {userVote || isExpired ? (
                       <View style={{ marginTop: 4 }}>
                         <View style={s.barBg}>
-                          <View style={[s.barFillA, { width: `${pctA}%` }]} />
-                          <View style={[s.barFillB, { width: `${pctB}%` }]} />
+                          <View style={[s.barFillA, { width: `${p.image_b_url ? pctA : likePct}%` }]} />
+                          <View style={[s.barFillB, { width: `${p.image_b_url ? pctB : dislikePct}%` }]} />
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
-                          <Text style={s.barText}>{p.image_b_url ? 'Soldaki' : 'Beğendim'}: %{pctA} ({countA} oy)</Text>
-                          <Text style={s.barText}>{p.image_b_url ? 'Sağdaki' : 'Geçtim'}: %{pctB} ({countB} oy)</Text>
+                          <Text style={s.barText}>
+                            {p.image_b_url ? `Soldaki: %${pctA} (${countA} oy)` : `Beğenildi: %${likePct} (${likeCount} oy)`}
+                          </Text>
+                          <Text style={s.barText}>
+                            {p.image_b_url ? `Sağdaki: %${pctB} (${countB} oy)` : `Beğenilmedi: %${dislikePct} (${dislikeCount} oy)`}
+                          </Text>
                         </View>
+                        {isExpired && !userVote && (
+                          <Text style={{ fontSize: 10, color: theme.textSub, textAlign: 'center', marginTop: 6 }}>
+                            Oylama süresi sona erdi (24 saat tamamlandı)
+                          </Text>
+                        )}
                       </View>
                     ) : (
                       /* Interactive Voting Buttons if Not Voted Yet */
@@ -536,7 +561,11 @@ export default function UserProfileScreen() {
                           disabled={isVoting}
                           activeOpacity={0.8}
                         >
-                          {isVoting ? <ActivityIndicator size="small" color="#C9A84C" /> : <Text style={s.voteBtnTextA}>{p.image_b_url ? 'Soldaki' : 'Beğendim'}</Text>}
+                          {isVoting ? (
+                            <ActivityIndicator size="small" color="#C9A84C" />
+                          ) : (
+                            <Text style={s.voteBtnTextA}>{p.image_b_url ? 'Soldaki' : 'Beğenmedim'}</Text>
+                          )}
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -545,7 +574,11 @@ export default function UserProfileScreen() {
                           disabled={isVoting}
                           activeOpacity={0.8}
                         >
-                          {isVoting ? <ActivityIndicator size="small" color="#ffffff" /> : <Text style={s.voteBtnTextB}>{p.image_b_url ? 'Sağdaki' : 'Geçtim'}</Text>}
+                          {isVoting ? (
+                            <ActivityIndicator size="small" color="#ffffff" />
+                          ) : (
+                            <Text style={s.voteBtnTextB}>{p.image_b_url ? 'Sağdaki' : 'Beğendim'}</Text>
+                          )}
                         </TouchableOpacity>
                       </View>
                     )}

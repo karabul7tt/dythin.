@@ -15,6 +15,7 @@ import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import type { Post, Vote } from '../../lib/types'
 import { useFocusEffect } from '@react-navigation/native'
+import { Ionicons } from '@expo/vector-icons'
 import ZoomablePhoto from '../../components/ZoomablePhoto'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 
@@ -92,17 +93,29 @@ export default function ResultsScreen() {
   }
 
   function getStats(votes: Vote[]) {
-    let countA = 0
-    let countB = 0
+    let countA = 0 // Sol (A) or Beğenmedim (false)
+    let countB = 0 // Sağ (B) or Beğendim (true)
     votes.forEach(v => {
-      if (v.selected_option === 'A' || (v.selected_option === undefined && v.value === false)) countA++
-      else if (v.selected_option === 'B' || (v.selected_option === undefined && v.value === true)) countB++
-      else countA++
+      if (v.selected_option === 'B' || (v.selected_option === undefined && v.value === true)) {
+        countB++
+      } else {
+        countA++
+      }
     })
     const total = countA + countB
     const pctA = total > 0 ? Math.round((countA / total) * 100) : 0
-    const pctB = total > 0 ? Math.round((countB / total) * 100) : 0
-    return { countA, countB, total, pctA, pctB }
+    const pctB = total > 0 ? (100 - pctA) : 0
+    return {
+      countA,
+      countB,
+      total,
+      pctA,
+      pctB,
+      likeCount: countB,
+      dislikeCount: countA,
+      likePct: pctB,
+      dislikePct: pctA,
+    }
   }
 
   function getTimeRemaining(expiresAt?: string) {
@@ -163,14 +176,13 @@ export default function ResultsScreen() {
 
         {posts.length === 0 ? (
           <View style={s.empty}>
-            <Text style={{ fontSize: 40 }}>📊</Text>
+            <Ionicons name="bar-chart-outline" size={44} color={theme.textSub} />
             <Text style={s.emptyText}>Henüz paylaşımın yok</Text>
           </View>
         ) : (
           posts.map(post => {
             const votes = (post.votes ?? []) as Vote[]
-            const { countA, countB, total, pctA, pctB } = getStats(votes)
-            const isAWinning = pctA >= pctB
+            const { countA, countB, total, pctA, pctB, likePct, dislikePct } = getStats(votes)
             const isAB = !!post.image_b_url
             const timeRemaining = getTimeRemaining(post.expires_at)
             const comments = votes.filter(v => v.comment && v.comment.trim().length > 0)
@@ -194,9 +206,12 @@ export default function ResultsScreen() {
                   )}
                   <View style={{ flex: 1 }}>
                     <Text style={s.cardTitle}>{post.title}</Text>
-                    <Text style={s.cardSub}>
-                      {total} oy · {timeRemaining || (post.is_active ? '🟢 Aktif' : '🔴 Kapandı')}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 }}>
+                      <View style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: post.is_active ? '#34C759' : '#8E8E93' }} />
+                      <Text style={s.cardSub}>
+                        {total} oy · {timeRemaining || (post.is_active ? 'Aktif' : 'Kapandı')}
+                      </Text>
+                    </View>
                   </View>
                   <TouchableOpacity
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255, 255, 255, 0.05)', borderWidth: 0.5, borderColor: theme.border, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 6 }}
@@ -208,34 +223,62 @@ export default function ResultsScreen() {
                 </View>
 
                 <View style={s.cardBody}>
-                  <View style={s.barRow}>
-                    <Text style={[s.barLabel, { color: theme.accent }]}>{isAB ? 'Sol' : 'Beğenildi'}</Text>
-                    <View style={s.barTrack}>
-                      <View style={[s.barFill, { width: `${pctA}%`, backgroundColor: theme.accent }]} />
-                    </View>
-                    <Text style={[s.barNum, { color: theme.accent }]}>%{pctA}</Text>
-                  </View>
+                  {isAB ? (
+                    <>
+                      <View style={s.barRow}>
+                        <Text style={[s.barLabel, { color: theme.accent }]}>Sol</Text>
+                        <View style={s.barTrack}>
+                          <View style={[s.barFill, { width: `${pctA}%`, backgroundColor: theme.accent }]} />
+                        </View>
+                        <Text style={[s.barNum, { color: theme.accent }]}>%{pctA}</Text>
+                      </View>
 
-                  <View style={s.barRow}>
-                    <Text style={[s.barLabel, { color: theme.accentText }]}>{isAB ? 'Sağ' : 'Beğenilmedi'}</Text>
-                    <View style={s.barTrack}>
-                      <View style={[s.barFill, { width: `${pctB}%`, backgroundColor: theme.accentText }]} />
-                    </View>
-                    <Text style={[s.barNum, { color: theme.accentText }]}>%{pctB}</Text>
-                  </View>
+                      <View style={s.barRow}>
+                        <Text style={[s.barLabel, { color: theme.accentText }]}>Sağ</Text>
+                        <View style={s.barTrack}>
+                          <View style={[s.barFill, { width: `${pctB}%`, backgroundColor: theme.accentText }]} />
+                        </View>
+                        <Text style={[s.barNum, { color: theme.accentText }]}>%{pctB}</Text>
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <View style={s.barRow}>
+                        <Text style={[s.barLabel, { color: theme.accent }]}>Beğenildi</Text>
+                        <View style={s.barTrack}>
+                          <View style={[s.barFill, { width: `${likePct}%`, backgroundColor: theme.accent }]} />
+                        </View>
+                        <Text style={[s.barNum, { color: theme.accent }]}>%{likePct}</Text>
+                      </View>
+
+                      <View style={s.barRow}>
+                        <Text style={[s.barLabel, { color: theme.accentText }]}>Beğenilmedi</Text>
+                        <View style={s.barTrack}>
+                          <View style={[s.barFill, { width: `${dislikePct}%`, backgroundColor: theme.accentText }]} />
+                        </View>
+                        <Text style={[s.barNum, { color: theme.accentText }]}>%{dislikePct}</Text>
+                      </View>
+                    </>
+                  )}
 
                   {/* Yorumlar Listesi */}
                   {comments.length > 0 && (
                     <View style={s.commentsSection}>
                       <Text style={s.commentsHeader}>GELEN YORUMLAR ({comments.length})</Text>
-                      {comments.map(c => (
-                        <View key={c.id || Math.random().toString()} style={s.commentItem}>
-                          <Text style={s.commentText}>"{c.comment}"</Text>
-                          <Text style={s.commentMeta}>
-                            Oy: {c.selected_option === 'A' ? 'Sol (A)' : c.selected_option === 'B' ? 'Sağ (B)' : 'Oy Verildi'}
-                          </Text>
-                        </View>
-                      ))}
+                      {comments.map(c => {
+                        const isLikeVote = c.selected_option === 'B' || (c.selected_option === undefined && c.value === true)
+                        const voteTag = isAB
+                          ? (c.selected_option === 'A' ? 'Sol (A)' : 'Sağ (B)')
+                          : (isLikeVote ? 'Beğendi' : 'Beğenmedi')
+                        return (
+                          <View key={c.id || Math.random().toString()} style={s.commentItem}>
+                            <Text style={s.commentText}>"{c.comment}"</Text>
+                            <Text style={s.commentMeta}>
+                              Oy: {voteTag}
+                            </Text>
+                          </View>
+                        )
+                      })}
                     </View>
                   )}
                 </View>

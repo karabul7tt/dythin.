@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { supabase } from '../lib/supabase'
 import { themes, ThemeName, Theme } from '../lib/theme'
 import { Session } from '@supabase/supabase-js'
+import * as Linking from 'expo-linking'
 import { registerForPushNotificationsAsync } from '../lib/notifications'
 
 type AppContextType = {
@@ -51,9 +52,73 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsAuthLoading(false)
     })
 
-    const authListener = supabase.auth.onAuthStateChange((_event, newSession) => {
+    // OAuth Deep Link Callback Dinleyici (Google & Apple ile Giriş)
+    const handleOAuthUrl = async (url: string) => {
+      if (!url) return
+      try {
+        if (url.includes('#access_token')) {
+          const fragment = url.split('#')[1]
+          if (fragment) {
+            const params = new URLSearchParams(fragment)
+            const access_token = params.get('access_token')
+            const refresh_token = params.get('refresh_token')
+            if (access_token && refresh_token) {
+              await supabase.auth.setSession({ access_token, refresh_token })
+            }
+          }
+        } else if (url.includes('code=')) {
+          const codeMatch = url.match(/[?&]code=([^&]+)/)
+          const code = codeMatch ? codeMatch[1] : null
+          if (code) {
+            await supabase.auth.exchangeCodeForSession(code)
+          }
+        }
+      } catch (err) {
+        console.warn('OAuth URL parse hatası:', err)
+      }
+    }
+
+    const linkingSub = Linking.addEventListener('url', (event) => {
+      if (event?.url) handleOAuthUrl(event.url)
+    })
+
+    Linking.getInitialURL().then((initialUrl) => {
+      if (initialUrl) handleOAuthUrl(initialUrl)
+    }).catch(() => null)
+
+    const authListener = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       setSession(newSession || null)
       if (newSession?.user) {
+        // Google veya Apple ile ilk kez giriş yapıldıysa profil kaydını otomatik tamamla
+        try {
+          const u = newSession.user
+          const { data: existingProfile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', u.id)
+            .maybeSingle()
+
+          if (!existingProfile) {
+            const rawEmail = u.email || ''
+            const name = u.user_metadata?.full_name || u.user_metadata?.name || rawEmail.split('@')[0] || 'Kullanıcı'
+            const cleanBase = (u.user_metadata?.preferred_username || rawEmail.split('@')[0] || 'user')
+              .toLowerCase()
+              .replace(/[^a-z0-9_.]/g, '')
+              .slice(0, 16) || 'user'
+            const randomSuffix = Math.floor(1000 + Math.random() * 9000)
+            const autoUsername = `${cleanBase}_${randomSuffix}`
+
+            await supabase.from('profiles').insert({
+              id: u.id,
+              username: autoUsername,
+              full_name: name,
+              avatar_url: u.user_metadata?.avatar_url || null,
+            })
+          }
+        } catch {
+          // Sessiz fallback
+        }
+
         setTimeout(() => {
           registerForPushNotificationsAsync(newSession.user.id).catch(() => null)
         }, 3000)
@@ -68,6 +133,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => {
       clearTimeout(safetyTimer)
       try {
+        linkingSub?.remove()
         authListener?.data?.subscription?.unsubscribe()
       } catch {}
     }

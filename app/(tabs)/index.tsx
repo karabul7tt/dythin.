@@ -11,6 +11,7 @@ import type { Post } from '../../lib/types'
 import CommentInput from '../../components/CommentInput'
 import { useFocusEffect } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
@@ -52,16 +53,19 @@ export default function VoteScreen() {
       .from('blocked_users').select('blocked_id').eq('blocker_id', session?.user.id)
     const blockedIds: string[] = blockedRows?.map(b => b.blocked_id) || []
 
-    // Genel oylamalar
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+
+    // Genel oylamalar - 24 saat kuralı (24 saat sonra başkalarının oylama akışından kalkar)
     let publicQuery = supabase.from('posts').select('*')
       .eq('audience', 'public')
       .eq('is_active', true)
+      .gte('created_at', twentyFourHoursAgo)
       .neq('user_id', session?.user.id)
     if (voted.length > 0) publicQuery = publicQuery.not('id', 'in', `(${voted.join(',')})`)
     if (blockedIds.length > 0) publicQuery = publicQuery.not('user_id', 'in', `(${blockedIds.join(',')})`)
     const { data: publicPosts } = await publicQuery.order('created_at', { ascending: false })
 
-    // Arkadaş oylamaları
+    // Arkadaş oylamaları - 24 saat kuralı (24 saat sonra başkalarının oylama akışından kalkar)
     const { data: friendships } = await supabase
       .from('friendships')
       .select('requester_id, receiver_id')
@@ -75,6 +79,7 @@ export default function VoteScreen() {
     let friendQuery = supabase.from('posts').select('*')
       .eq('audience', 'friends')
       .eq('is_active', true)
+      .gte('created_at', twentyFourHoursAgo)
       .neq('user_id', session?.user.id)
     if (friendIds.length > 0) friendQuery = friendQuery.in('user_id', friendIds)
     else friendQuery = friendQuery.eq('user_id', 'none')
@@ -82,8 +87,16 @@ export default function VoteScreen() {
     if (blockedIds.length > 0) friendQuery = friendQuery.not('user_id', 'in', `(${blockedIds.join(',')})`)
     const { data: fPosts } = await friendQuery.order('created_at', { ascending: false })
 
-    setPosts((publicPosts as Post[]) || [])
-    setFriendPosts((fPosts as Post[]) || [])
+    // İstemci tarafı doğrulama (expires_at veya 24 saat kontrolü)
+    const isPostActive = (p: Post) => {
+      if (!p.is_active) return false
+      if (p.expires_at && new Date(p.expires_at).getTime() <= Date.now()) return false
+      if (p.created_at && (Date.now() - new Date(p.created_at).getTime()) > 24 * 60 * 60 * 1000) return false
+      return true
+    }
+
+    setPosts(((publicPosts as Post[]) || []).filter(isPostActive))
+    setFriendPosts(((fPosts as Post[]) || []).filter(isPostActive))
     setLoading(false)
   }
 
@@ -290,18 +303,27 @@ export default function VoteScreen() {
             onPress={() => router.push('/messages')}
             activeOpacity={0.8}
           >
-            <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }}>Mesajlar 💬</Text>
+            <Ionicons name="chatbubbles-outline" size={16} color={theme.text} />
+            <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }}>Mesajlar</Text>
           </TouchableOpacity>
         </View>
 
         {/* Centered Tabs Row */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: SCREEN_WIDTH - 24, marginBottom: 8 }}>
           <View style={s.tabRow}>
-            <TouchableOpacity style={[s.tabBtn, tab === 'public' && s.tabBtnActive]} onPress={() => setTab('public')}>
-              <Text style={[s.tabText, tab === 'public' && s.tabTextActive]}>🌍 Genel</Text>
+            <TouchableOpacity
+              style={[s.tabBtn, tab === 'public' && s.tabBtnActive, { flexDirection: 'row', alignItems: 'center', gap: 6 }]}
+              onPress={() => setTab('public')}
+            >
+              <Ionicons name="globe-outline" size={14} color={tab === 'public' ? theme.bg : theme.textSub} />
+              <Text style={[s.tabText, tab === 'public' && s.tabTextActive]}>Genel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[s.tabBtn, tab === 'friends' && s.tabBtnActive]} onPress={() => setTab('friends')}>
-              <Text style={[s.tabText, tab === 'friends' && s.tabTextActive]}>👥 Arkadaşlar</Text>
+            <TouchableOpacity
+              style={[s.tabBtn, tab === 'friends' && s.tabBtnActive, { flexDirection: 'row', alignItems: 'center', gap: 6 }]}
+              onPress={() => setTab('friends')}
+            >
+              <Ionicons name="people-outline" size={14} color={tab === 'friends' ? theme.bg : theme.textSub} />
+              <Text style={[s.tabText, tab === 'friends' && s.tabTextActive]}>Arkadaşlar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -375,7 +397,7 @@ export default function VoteScreen() {
                 <>
                   <TouchableOpacity style={[s.actionBtn, s.btnCardPass]} onPress={() => handleVote('A')} activeOpacity={0.75}>
                     <View style={s.badgeCirclePass}>
-                      <Text style={s.badgeLetterPass}>✕</Text>
+                      <Ionicons name="close" size={18} color="#aaa" />
                     </View>
                     <View style={s.btnTextCol}>
                       <Text style={s.btnMainTextPass}>Beğenmedim</Text>
@@ -385,7 +407,7 @@ export default function VoteScreen() {
 
                   <TouchableOpacity style={[s.actionBtn, s.btnCardLike]} onPress={() => handleVote('B')} activeOpacity={0.75}>
                     <View style={s.badgeCircleLike}>
-                      <Text style={s.badgeLetterLike}>✓</Text>
+                      <Ionicons name="checkmark" size={18} color="#fff" />
                     </View>
                     <View style={s.btnTextCol}>
                       <Text style={s.btnMainTextLike}>Beğendim</Text>
@@ -398,9 +420,11 @@ export default function VoteScreen() {
           </>
         ) : (
           <View style={[s.empty, { flex: 1, justifyContent: 'center', minHeight: 400 }]}>
-            <Text style={{ fontSize: 44 }}>
-              {tab === 'friends' ? '👥' : '✨'}
-            </Text>
+            <Ionicons
+              name={tab === 'friends' ? 'people-outline' : 'sparkles-outline'}
+              size={48}
+              color={theme.accent}
+            />
             <Text style={s.emptyText}>
               {tab === 'friends' ? 'Arkadaşlarından henüz\noylama yok' : 'Şimdilik tüm oylamalar\ntamamlandı'}
             </Text>

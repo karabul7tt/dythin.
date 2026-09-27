@@ -19,6 +19,7 @@ import { supabase } from '../../lib/supabase'
 import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput } from '../../lib/security'
 import { useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 
 export default function ShareScreen() {
@@ -120,7 +121,7 @@ export default function ShareScreen() {
     if (now - lastPostTime < 30000) {
       const remainingSec = Math.ceil((30000 - (now - lastPostTime)) / 1000)
       return Alert.alert(
-        'Yükleme Sınırı ⏳',
+        'Yükleme Sınırı',
         `Yeni bir oylama paylaşabilmek için lütfen ${remainingSec} saniye bekleyin.`
       )
     }
@@ -193,7 +194,7 @@ export default function ShareScreen() {
       setLastPostTime(Date.now())
 
       Alert.alert(
-        'Paylaşıldı! 🎉',
+        'Paylaşıldı',
         'Gönderiniz oylamaya açıldı. Kendi gönderinizi Sonuçlar sayfasından takip edebilirsiniz.'
       )
       setTitle('')
@@ -293,11 +294,16 @@ export default function ShareScreen() {
         <Text style={s.label}>FOTOĞRAF SEÇİMİ</Text>
 
         <TouchableOpacity
-          style={[s.toggleBtn, isAB && s.toggleBtnActive]}
+          style={[s.toggleBtn, isAB && s.toggleBtnActive, { flexDirection: 'row', justifyContent: 'center', gap: 8 }]}
           onPress={() => setIsAB(!isAB)}
         >
+          <Ionicons
+            name={isAB ? 'checkmark-circle' : 'add-circle-outline'}
+            size={18}
+            color={isAB ? theme.accent : theme.textSub}
+          />
           <Text style={[s.toggleText, isAB && s.toggleTextActive]}>
-            {isAB ? '✔ A/B Karşılaştırma Modu (2 Fotoğraf)' : '+ A/B Karşılaştırma Fotoğrafı Ekle'}
+            {isAB ? 'A/B Karşılaştırma Modu (2 Fotoğraf)' : 'A/B Karşılaştırma Fotoğrafı Ekle'}
           </Text>
         </TouchableOpacity>
 
@@ -308,7 +314,7 @@ export default function ShareScreen() {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity style={s.uploadZone} onPress={() => pickImage(setImageA)}>
-              <Text style={{ fontSize: 28 }}>📸</Text>
+              <Ionicons name="camera-outline" size={34} color={theme.accent} />
               <Text style={s.uploadText}>Fotoğraf Seç</Text>
             </TouchableOpacity>
           )
@@ -322,7 +328,7 @@ export default function ShareScreen() {
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={s.uploadZone} onPress={() => pickImage(setImageA)}>
-                  <Text style={{ fontSize: 24 }}>📷</Text>
+                  <Ionicons name="image-outline" size={28} color={theme.accent} />
                   <Text style={s.uploadText}>Sol Fotoğrafı Seç</Text>
                 </TouchableOpacity>
               )}
@@ -336,7 +342,7 @@ export default function ShareScreen() {
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={s.uploadZone} onPress={() => pickImage(setImageB)}>
-                  <Text style={{ fontSize: 24 }}>📷</Text>
+                  <Ionicons name="image-outline" size={28} color={theme.accent} />
                   <Text style={s.uploadText}>Sağ Fotoğrafı Seç</Text>
                 </TouchableOpacity>
               )}
@@ -372,19 +378,29 @@ export default function ShareScreen() {
         <Text style={s.label}>KİM OYLASIN?</Text>
         <View style={s.audienceRow}>
           <TouchableOpacity
-            style={[s.audienceBtn, audience === 'public' && s.audienceBtnActive]}
+            style={[s.audienceBtn, audience === 'public' && s.audienceBtnActive, { flexDirection: 'row', justifyContent: 'center', gap: 6 }]}
             onPress={() => setAudience('public')}
           >
+            <Ionicons
+              name="globe-outline"
+              size={15}
+              color={audience === 'public' ? theme.accent : theme.textSub}
+            />
             <Text style={[s.audienceBtnText, audience === 'public' && s.audienceBtnTextActive]}>
-              🌍 Herkes
+              Herkes
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[s.audienceBtn, audience === 'friends' && s.audienceBtnActive]}
+            style={[s.audienceBtn, audience === 'friends' && s.audienceBtnActive, { flexDirection: 'row', justifyContent: 'center', gap: 6 }]}
             onPress={() => setAudience('friends')}
           >
+            <Ionicons
+              name="people-outline"
+              size={15}
+              color={audience === 'friends' ? theme.accent : theme.textSub}
+            />
             <Text style={[s.audienceBtnText, audience === 'friends' && s.audienceBtnTextActive]}>
-              👥 Arkadaşlar
+              Arkadaşlar
             </Text>
           </TouchableOpacity>
         </View>
@@ -393,7 +409,10 @@ export default function ShareScreen() {
           {loading ? (
             <ActivityIndicator color={theme.bg} />
           ) : (
-            <Text style={s.btnText}>Paylaş ve Oylamaya Gönder →</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <Text style={s.btnText}>Paylaş ve Oylamaya Gönder</Text>
+              <Ionicons name="arrow-forward" size={16} color={theme.bg} />
+            </View>
           )}
         </TouchableOpacity>
         </CustomRefreshContainer>

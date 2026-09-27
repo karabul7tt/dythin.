@@ -428,8 +428,8 @@ export default function ChatScreen() {
   }
 
   // Tik Mantığı:
-  // Okunduysa (is_read === true) => Aktif tema renginde parlayan çift tik ✓✓
-  // Okunmadıysa => Gri çift tik ✓✓ (İletildi)
+  // Okunduysa (is_read === true) => Aktif tema renginde parlayan çift tik
+  // Okunmadıysa => Gri çift tik (İletildi)
   const readReceiptColor = theme.accentText || theme.accent || '#38BDF8'
 
   const s = StyleSheet.create({
@@ -652,11 +652,11 @@ export default function ChatScreen() {
                             {formatTime(m.created_at)}
                           </Text>
                           {isMine && (
-                            m.is_read ? (
-                              <Text style={{ color: readReceiptColor, fontSize: 11, fontWeight: '900', letterSpacing: -1 }}>✓✓</Text>
-                            ) : (
-                              <Text style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 11, fontWeight: '700', letterSpacing: -1 }}>✓✓</Text>
-                            )
+                            <Ionicons
+                              name={m.is_read ? 'checkmark-done' : 'checkmark'}
+                              size={13}
+                              color={m.is_read ? readReceiptColor : 'rgba(255, 255, 255, 0.8)'}
+                            />
                           )}
                         </View>
                       </TouchableOpacity>
@@ -695,9 +695,9 @@ export default function ChatScreen() {
                         <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-end', gap: 4, marginTop: 4 }}>
                           <Text style={s.timeMine}>{formatTime(m.created_at)}</Text>
                           {m.is_read ? (
-                            <Text style={{ color: readReceiptColor, fontSize: 11, fontWeight: '900', letterSpacing: -1 }}>✓✓</Text>
+                            <Ionicons name="checkmark-done" size={13} color={readReceiptColor} />
                           ) : (
-                            <Text style={{ color: 'rgba(255, 255, 255, 0.65)', fontSize: 11, fontWeight: '700', letterSpacing: -1 }}>✓✓</Text>
+                            <Ionicons name="checkmark" size={13} color="rgba(255, 255, 255, 0.65)" />
                           )}
                         </View>
                       ) : (
