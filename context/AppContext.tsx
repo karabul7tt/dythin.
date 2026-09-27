@@ -12,6 +12,7 @@ type AppContextType = {
   theme: Theme
   themeName: ThemeName
   setThemeName: (name: ThemeName) => void
+  refreshSession: () => Promise<Session | null>
 }
 
 const AppContext = createContext<AppContextType>({
@@ -20,12 +21,29 @@ const AppContext = createContext<AppContextType>({
   theme: themes.purple,
   themeName: 'purple',
   setThemeName: () => {},
+  refreshSession: async () => null,
 })
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [isAuthLoading, setIsAuthLoading] = useState(true)
   const [themeName, setThemeNameState] = useState<ThemeName>('purple')
+
+  async function refreshSession(): Promise<Session | null> {
+    try {
+      const { data: refreshed, error } = await supabase.auth.refreshSession()
+      if (!error && refreshed?.session) {
+        setSession(refreshed.session)
+        return refreshed.session
+      }
+      const { data: current } = await supabase.auth.getSession()
+      if (current?.session) {
+        setSession(current.session)
+        return current.session
+      }
+    } catch {}
+    return null
+  }
 
   useEffect(() => {
     AsyncStorage.getItem('themeName').then((saved) => {
@@ -56,6 +74,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const handleOAuthUrl = async (url: string) => {
       if (!url) return
       try {
+        // Oturum zaten varsa gereksiz exchange yapma
+        const { data: check } = await supabase.auth.getSession()
+        if (check?.session) {
+          setSession(check.session)
+          return
+        }
+
         if (url.includes('#access_token') || url.includes('&access_token')) {
           const fragment = url.includes('#') ? url.split('#')[1] : url.split('?')[1]
           if (fragment) {
@@ -71,7 +96,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const codeMatch = url.match(/[?&]code=([^&#]+)/)
           const code = codeMatch ? decodeURIComponent(codeMatch[1]) : null
           if (code) {
-            const { data } = await supabase.auth.exchangeCodeForSession(code)
+            const { data } = await supabase.auth.exchangeCodeForSession(code).catch(() => ({ data: null }))
             if (data?.session) setSession(data.session)
           }
         }
@@ -157,6 +182,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       theme: activeTheme,
       themeName,
       setThemeName,
+      refreshSession,
     }}>
       {children}
     </AppContext.Provider>

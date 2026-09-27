@@ -22,7 +22,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { registerForPushNotificationsAsync } from '../../lib/notifications'
 
 export default function SettingsScreen() {
-  const { theme, themeName, setThemeName, session } = useApp()
+  const { theme, themeName, setThemeName, session, refreshSession } = useApp()
   const [loading, setLoading] = useState(false)
   const [showEmailForm, setShowEmailForm] = useState(false)
   const [newEmail, setNewEmail] = useState('')
@@ -43,12 +43,13 @@ export default function SettingsScreen() {
   useEffect(() => {
     if (session?.user.id) {
       fetchPrivacySettings()
+      refreshSession()
     }
   }, [session?.user.id])
 
   async function handleRefresh() {
     setRefreshing(true)
-    await fetchPrivacySettings()
+    await Promise.all([fetchPrivacySettings(), refreshSession()])
     setRefreshing(false)
   }
 
@@ -164,16 +165,17 @@ export default function SettingsScreen() {
 
     setLoading(true)
     try {
-      const { error } = await supabase.auth.updateUser({
-        email: newEmail.trim().toLowerCase(),
-      })
+      const { error } = await supabase.auth.updateUser(
+        { email: newEmail.trim().toLowerCase() },
+        { emailRedirectTo: 'dythin://' }
+      )
       if (error) throw error
 
       setNewEmail('')
       setShowEmailForm(false)
       Alert.alert(
         'Onay E-postası Gönderildi',
-        'Yeni e-posta adresinize bir onay bağlantısı gönderildi. Değişikliğin tamamlanması için lütfen gelen kutunuzu kontrol edip bağlantıya tıklayın.'
+        'ÖNEMLİ: Güvenlik gereği hem YENİ e-posta adresinize hem de MEVCUT e-posta adresinize birer onay bağlantısı gönderilmiş olabilir.\n\nDeğişikliğin tamamlanması için her iki gelen kutunuzdaki bağlantılara tıklamanız gerekir. Onayladıktan sonra ayarlar sayfasını yenileyebilirsiniz.'
       )
     } catch (error: any) {
       Alert.alert('E-posta değiştirilemedi', error.message || 'Lütfen tekrar deneyin.')
@@ -407,10 +409,13 @@ export default function SettingsScreen() {
         <Text style={s.sectionLabel}>HESAP</Text>
         <View style={s.card}>
           <View style={s.row}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={s.rowLabel}>E-posta</Text>
               <Text style={s.emailText}>{session?.user.email}</Text>
             </View>
+            <TouchableOpacity onPress={handleRefresh} style={{ padding: 6 }} activeOpacity={0.7}>
+              <Ionicons name="reload-outline" size={18} color={theme.accent} />
+            </TouchableOpacity>
           </View>
           <TouchableOpacity style={s.row} onPress={() => setShowEmailForm(value => !value)}>
             <Text style={s.rowLabel}>E-posta değiştir</Text>

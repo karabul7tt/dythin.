@@ -74,6 +74,15 @@ export default function Login() {
       if (error) throw error
       if (data?.url) {
         const res = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl)
+
+        // 1. Tarayıcı penceresi kapandığında (başarılı veya kullanıcı döndüğünde) önce mevcut oturumu kontrol et
+        const { data: curSession } = await supabase.auth.getSession()
+        if (curSession?.session) {
+          router.replace('/(tabs)')
+          return
+        }
+
+        // 2. Eğer URL res içinde geldiyse işle
         if (res.type === 'success' && res.url) {
           const url = res.url
           if (url.includes('#access_token') || url.includes('&access_token')) {
@@ -86,6 +95,7 @@ export default function Login() {
                 const { data: sData } = await supabase.auth.setSession({ access_token, refresh_token })
                 if (sData?.session) {
                   router.replace('/(tabs)')
+                  return
                 }
               }
             }
@@ -93,16 +103,28 @@ export default function Login() {
             const codeMatch = url.match(/[?&]code=([^&#]+)/)
             const code = codeMatch ? decodeURIComponent(codeMatch[1]) : null
             if (code) {
-              const { data: sData, error: sessionErr } = await supabase.auth.exchangeCodeForSession(code)
-              if (sessionErr) throw sessionErr
+              const { data: sData } = await supabase.auth.exchangeCodeForSession(code).catch(() => ({ data: null }))
               if (sData?.session) {
                 router.replace('/(tabs)')
+                return
               }
             }
           }
         }
+
+        // 3. Son kontrol: Oturum oluştuysa doğrudan içeri al
+        const { data: finalSession } = await supabase.auth.getSession()
+        if (finalSession?.session) {
+          router.replace('/(tabs)')
+          return
+        }
       }
     } catch (e: any) {
+      const { data: check } = await supabase.auth.getSession()
+      if (check?.session) {
+        router.replace('/(tabs)')
+        return
+      }
       Alert.alert(
         'Giriş Başarısız',
         getCleanErrorMessage(e, `${provider === 'apple' ? 'Apple' : 'Google'} ile giriş başlatılamadı.`)
