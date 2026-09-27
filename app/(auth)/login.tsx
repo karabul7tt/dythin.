@@ -13,7 +13,7 @@ import {
   Modal,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
+import { useRouter, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import * as Linking from 'expo-linking'
 import * as AppleAuthentication from 'expo-apple-authentication'
@@ -28,6 +28,18 @@ import { useApp } from '../../context/AppContext'
 export default function Login() {
   const router = useRouter()
   const { session, isAuthLoading } = useApp()
+  const params = useLocalSearchParams<{ code?: string }>()
+
+  useEffect(() => {
+    if (params.code) {
+      setLoading(true)
+      supabase.auth.exchangeCodeForSession(params.code).then(({ data, error }) => {
+        if (!error && data?.session) {
+          router.replace('/(tabs)')
+        }
+      }).catch(() => null).finally(() => setLoading(false))
+    }
+  }, [params.code])
 
   useEffect(() => {
     if (!isAuthLoading && session) {
@@ -63,7 +75,7 @@ export default function Login() {
   async function handleOAuth(provider: 'google' | 'apple') {
     setLoading(true)
     try {
-      const redirectUrl = 'dythin://'
+      const redirectUrl = Linking.createURL('auth/callback')
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
