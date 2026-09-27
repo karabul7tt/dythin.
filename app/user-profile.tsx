@@ -18,6 +18,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
+import { sendPushNotificationToUser } from '../lib/notifications'
 import type { Profile, Post, Vote } from '../lib/types'
 import ZoomablePhoto from '../components/ZoomablePhoto'
 
@@ -192,6 +193,13 @@ export default function UserProfileScreen() {
         Alert.alert('Hata', error.message)
       }
     } else {
+      if (post.user_id && post.user_id !== session.user.id) {
+        sendPushNotificationToUser(
+          post.user_id,
+          'Yeni Bir Oyun Var!',
+          `"${post.title || 'Fotoğrafın'}" oylandı. Sonuçları görmek için tıkla!`
+        ).catch(() => {})
+      }
       Alert.alert(
         'Oyunuz Kaydedildi',
         post.image_b_url

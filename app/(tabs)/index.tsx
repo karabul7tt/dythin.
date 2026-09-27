@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
+import { sendPushNotificationToUser } from '../../lib/notifications'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -131,6 +132,16 @@ export default function VoteScreen() {
       Alert.alert('Hata', error.message)
       return
     }
+
+    // Post sahibine push bildirim gönder
+    if (current.user_id && current.user_id !== session?.user.id) {
+      sendPushNotificationToUser(
+        current.user_id,
+        'Yeni Bir Oyun Var!',
+        `"${current.title || 'Fotoğrafın'}" oylandı. Sonuçları görmek için tıkla!`
+      ).catch(() => {})
+    }
+
     // Remove current post from stack
     if (tab === 'public') setPosts(prev => prev.slice(1))
     else setFriendPosts(prev => prev.slice(1))
