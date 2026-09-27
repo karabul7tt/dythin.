@@ -17,7 +17,10 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import * as Linking from 'expo-linking'
 import * as AppleAuthentication from 'expo-apple-authentication'
+import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '../../lib/supabase'
+
+WebBrowser.maybeCompleteAuthSession()
 import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput, validateInstagramUsername } from '../../lib/security'
 import { useApp } from '../../context/AppContext'
@@ -60,17 +63,37 @@ export default function Login() {
   async function handleOAuth(provider: 'google' | 'apple') {
     setLoading(true)
     try {
-      const redirectUrl = Linking.createURL('/')
+      const redirectUrl = 'dythin://'
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: redirectUrl,
-          skipBrowserRedirect: false,
+          skipBrowserRedirect: true,
         },
       })
       if (error) throw error
       if (data?.url) {
-        await Linking.openURL(data.url)
+        const res = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl)
+        if (res.type === 'success' && res.url) {
+          const url = res.url
+          if (url.includes('#access_token')) {
+            const fragment = url.split('#')[1]
+            if (fragment) {
+              const params = new URLSearchParams(fragment)
+              const access_token = params.get('access_token')
+              const refresh_token = params.get('refresh_token')
+              if (access_token && refresh_token) {
+                await supabase.auth.setSession({ access_token, refresh_token })
+              }
+            }
+          } else if (url.includes('code=')) {
+            const codeMatch = url.match(/[?&]code=([^&]+)/)
+            const code = codeMatch ? codeMatch[1] : null
+            if (code) {
+              await supabase.auth.exchangeCodeForSession(code)
+            }
+          }
+        }
       }
     } catch (e: any) {
       Alert.alert(
