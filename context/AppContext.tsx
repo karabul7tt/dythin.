@@ -5,6 +5,7 @@ import { themes, ThemeName, Theme } from '../lib/theme'
 import { Session } from '@supabase/supabase-js'
 import * as Linking from 'expo-linking'
 import { registerForPushNotificationsAsync } from '../lib/notifications'
+import { authenticateFromUrl } from '../lib/authHelper'
 
 type AppContextType = {
   session: Session | null
@@ -74,31 +75,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const handleOAuthUrl = async (url: string) => {
       if (!url) return
       try {
-        // Oturum zaten varsa gereksiz exchange yapma
-        const { data: check } = await supabase.auth.getSession()
-        if (check?.session) {
-          setSession(check.session)
-          return
-        }
-
-        if (url.includes('#access_token') || url.includes('&access_token')) {
-          const fragment = url.includes('#') ? url.split('#')[1] : url.split('?')[1]
-          if (fragment) {
-            const params = new URLSearchParams(fragment)
-            const access_token = params.get('access_token')
-            const refresh_token = params.get('refresh_token')
-            if (access_token && refresh_token) {
-              const { data } = await supabase.auth.setSession({ access_token, refresh_token })
-              if (data?.session) setSession(data.session)
-            }
-          }
-        } else if (url.includes('code=')) {
-          const codeMatch = url.match(/[?&]code=([^&#]+)/)
-          const code = codeMatch ? decodeURIComponent(codeMatch[1]) : null
-          if (code) {
-            const { data } = await supabase.auth.exchangeCodeForSession(code).catch(() => ({ data: null }))
-            if (data?.session) setSession(data.session)
-          }
+        const success = await authenticateFromUrl(url)
+        if (success) {
+          const { data } = await supabase.auth.getSession()
+          if (data?.session) setSession(data.session)
         }
       } catch (err) {
         console.warn('OAuth URL parse hatası:', err)

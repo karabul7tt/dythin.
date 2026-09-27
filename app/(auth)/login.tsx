@@ -19,6 +19,7 @@ import * as Linking from 'expo-linking'
 import * as AppleAuthentication from 'expo-apple-authentication'
 import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '../../lib/supabase'
+import { authenticateFromUrl } from '../../lib/authHelper'
 
 WebBrowser.maybeCompleteAuthSession()
 import { getCleanErrorMessage } from '../../lib/errors'
@@ -39,6 +40,15 @@ export default function Login() {
         }
       }).catch(() => null).finally(() => setLoading(false))
     }
+
+    Linking.getInitialURL().then((url) => {
+      if (url && (url.includes('code=') || url.includes('access_token'))) {
+        setLoading(true)
+        authenticateFromUrl(url).then((ok) => {
+          if (ok) router.replace('/(tabs)')
+        }).catch(() => null).finally(() => setLoading(false))
+      }
+    }).catch(() => null)
   }, [params.code])
 
   useEffect(() => {
@@ -87,44 +97,33 @@ export default function Login() {
       if (data?.url) {
         const res = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl)
 
-        // 1. Tarayıcı penceresi kapandığında (başarılı veya kullanıcı döndüğünde) önce mevcut oturumu kontrol et
+        // 1. URL geldiyse doğrudan authenticateFromUrl ile doğrula
+        if (res.type === 'success' && res.url) {
+          const success = await authenticateFromUrl(res.url)
+          if (success) {
+            router.replace('/(tabs)')
+            return
+          }
+        }
+
+        // 2. Tarayıcı kapandıktan sonra mevcut oturumu kontrol et
         const { data: curSession } = await supabase.auth.getSession()
         if (curSession?.session) {
           router.replace('/(tabs)')
           return
         }
 
-        // 2. Eğer URL res içinde geldiyse işle
-        if (res.type === 'success' && res.url) {
-          const url = res.url
-          if (url.includes('#access_token') || url.includes('&access_token')) {
-            const fragment = url.includes('#') ? url.split('#')[1] : url.split('?')[1]
-            if (fragment) {
-              const params = new URLSearchParams(fragment)
-              const access_token = params.get('access_token')
-              const refresh_token = params.get('refresh_token')
-              if (access_token && refresh_token) {
-                const { data: sData } = await supabase.auth.setSession({ access_token, refresh_token })
-                if (sData?.session) {
-                  router.replace('/(tabs)')
-                  return
-                }
-              }
-            }
-          } else if (url.includes('code=')) {
-            const codeMatch = url.match(/[?&]code=([^&#]+)/)
-            const code = codeMatch ? decodeURIComponent(codeMatch[1]) : null
-            if (code) {
-              const { data: sData } = await supabase.auth.exchangeCodeForSession(code).catch(() => ({ data: null }))
-              if (sData?.session) {
-                router.replace('/(tabs)')
-                return
-              }
-            }
+        // 3. Sistem deep linki ayrıca geldiyse kontrol et
+        const deepUrl = await Linking.getInitialURL().catch(() => null)
+        if (deepUrl) {
+          const success = await authenticateFromUrl(deepUrl)
+          if (success) {
+            router.replace('/(tabs)')
+            return
           }
         }
 
-        // 3. Son kontrol: Oturum oluştuysa doğrudan içeri al
+        // 4. Son kontrol: Oturum oluştuysa doğrudan içeri al
         const { data: finalSession } = await supabase.auth.getSession()
         if (finalSession?.session) {
           router.replace('/(tabs)')

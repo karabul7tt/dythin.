@@ -12,6 +12,7 @@ import {
   Modal,
   Keyboard,
   RefreshControl,
+  AppState,
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useApp } from '../../context/AppContext'
@@ -46,6 +47,15 @@ export default function SettingsScreen() {
       refreshSession()
     }
   }, [session?.user.id])
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        refreshSession().catch(() => null)
+      }
+    })
+    return () => sub.remove()
+  }, [])
 
   async function handleRefresh() {
     setRefreshing(true)
@@ -172,7 +182,7 @@ export default function SettingsScreen() {
         { emailRedirectTo: 'dythin://' }
       )
       const timeoutPromise = new Promise<{ error: Error }>((_, reject) =>
-        setTimeout(() => reject(new Error('İşlem zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.')), 12000)
+        setTimeout(() => reject(new Error('Sunucu yanıt vermedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.')), 45000)
       )
 
       const { error } = (await Promise.race([updatePromise, timeoutPromise])) as any
@@ -182,16 +192,16 @@ export default function SettingsScreen() {
       setShowEmailForm(false)
       setTimeout(() => {
         Alert.alert(
-          'Onay E-postası Gönderildi',
-          'ÖNEMLİ: Güvenlik gereği hem YENİ e-posta adresinize hem de MEVCUT e-posta adresinize birer onay bağlantısı gönderilmiş olabilir.\n\nDeğişikliğin tamamlanması için her iki gelen kutunuzdaki bağlantılara tıklamanız gerekir. Onayladıktan sonra ayarlar sayfasını yenileyebilirsiniz.'
+          'Onay E-postaları Gönderildi',
+          'ÖNEMLİ: Güvenlik gereği hem MEVCUT e-posta adresinize hem de YENİ e-posta adresinize birer onay bağlantısı gönderilmiştir.\n\n1. Her iki gelen kutunuzdaki bağlantılara tıklayarak onaylayın.\n2. Onayladıktan sonra uygulamaya dönün; adresiniz otomatik güncellenecektir (veya 🔄 Yenile simgesine dokunun).'
         )
       }, 150)
     } catch (error: any) {
       const msg = error?.message?.includes('rate limit') || error?.message?.includes('security purposes')
-        ? 'Çok sık deneme yapıldı. Lütfen 60 saniye bekleyip tekrar deneyin.'
+        ? 'Çok sık deneme yapıldı. Lütfen birkaç dakika bekleyip tekrar deneyin.'
         : error?.message || 'Lütfen tekrar deneyin.'
       setTimeout(() => {
-        Alert.alert('E-posta değiştirilemedi', msg)
+        Alert.alert('E-posta Değiştirilemedi', msg)
       }, 150)
     } finally {
       setLoading(false)
@@ -452,7 +462,14 @@ export default function SettingsScreen() {
                 editable={!loading}
               />
               <TouchableOpacity style={s.passwordSave} onPress={handleChangeEmail} disabled={loading}>
-                {loading ? <ActivityIndicator color={theme.bg} /> : <Text style={s.passwordSaveText}>E-postayı güncelle</Text>}
+                {loading ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <ActivityIndicator color={theme.bg} size="small" />
+                    <Text style={s.passwordSaveText}>Gönderiliyor, lütfen bekleyin...</Text>
+                  </View>
+                ) : (
+                  <Text style={s.passwordSaveText}>E-postayı güncelle</Text>
+                )}
               </TouchableOpacity>
               <Text style={{ fontSize: 11, color: theme.textSub, marginTop: 8, textAlign: 'center' }}>
                 Onay bağlantısı yeni e-posta adresinize gönderilecektir.
