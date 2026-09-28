@@ -590,7 +590,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
           <View style={s.rowLast}>
             <Text style={s.rowLabel}>Versiyon</Text>
-            <Text style={s.emailText}>1.1.0 (Build 61)</Text>
+            <Text style={s.emailText}>1.1.0 (Build 62)</Text>
           </View>
         </View>
 
