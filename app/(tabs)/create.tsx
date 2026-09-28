@@ -23,7 +23,7 @@ import { Ionicons } from '@expo/vector-icons'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 
 export default function ShareScreen() {
-  const { theme, session } = useApp()
+  const { theme, session, t } = useApp()
   const router = useRouter()
   const isDark = theme.bg === '#0e0e1a' || theme.bg === '#111108'
   const refreshColor = isDark ? '#ffffff' : '#555555'
@@ -350,24 +350,24 @@ export default function ShareScreen() {
           </View>
         )}
 
-        <Text style={s.label}>BAŞLIK</Text>
+        <Text style={s.label}>{t('create.header').toUpperCase()}</Text>
         <TextInput
           style={s.input}
           value={title}
           onChangeText={setTitle}
-          placeholder="Bugünkü kombinim nasıl?"
+          placeholder={t('create.titlePlaceholder')}
           placeholderTextColor={theme.textSub}
           returnKeyType="done"
           blurOnSubmit={true}
           onSubmitEditing={Keyboard.dismiss}
         />
 
-        <Text style={s.label}>AÇIKLAMA (İSTEĞE BAĞLI)</Text>
+        <Text style={s.label}>AÇIKLAMA</Text>
         <TextInput
           style={[s.input, { height: 70 }]}
           value={description}
           onChangeText={setDescription}
-          placeholder="Açıklama ekleyin..."
+          placeholder="..."
           placeholderTextColor={theme.textSub}
           multiline
           returnKeyType="done"
@@ -387,7 +387,7 @@ export default function ShareScreen() {
               color={audience === 'public' ? theme.accent : theme.textSub}
             />
             <Text style={[s.audienceBtnText, audience === 'public' && s.audienceBtnTextActive]}>
-              Herkes
+              {t('settings.everyone')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -400,7 +400,7 @@ export default function ShareScreen() {
               color={audience === 'friends' ? theme.accent : theme.textSub}
             />
             <Text style={[s.audienceBtnText, audience === 'friends' && s.audienceBtnTextActive]}>
-              Arkadaşlar
+              {t('settings.onlyFriends')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -410,7 +410,7 @@ export default function ShareScreen() {
             <ActivityIndicator color={theme.bg} />
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-              <Text style={s.btnText}>Paylaş ve Oylamaya Gönder</Text>
+              <Text style={s.btnText}>{t('create.publishBtn')}</Text>
               <Ionicons name="arrow-forward" size={16} color={theme.bg} />
             </View>
           )}

@@ -25,10 +25,11 @@ WebBrowser.maybeCompleteAuthSession()
 import { getCleanErrorMessage } from '../../lib/errors'
 import { sanitizeInput, validateInstagramUsername } from '../../lib/security'
 import { useApp } from '../../context/AppContext'
+import { supportedLanguages } from '../../lib/i18n'
 
 export default function Login() {
   const router = useRouter()
-  const { session, isAuthLoading } = useApp()
+  const { session, isAuthLoading, language, setLanguage, t } = useApp()
   const params = useLocalSearchParams<{ code?: string }>()
 
   useEffect(() => {
@@ -448,11 +449,38 @@ export default function Login() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          {/* Language Switcher Bar */}
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 16, gap: 6 }}>
+            {supportedLanguages.map(l => (
+              <TouchableOpacity
+                key={l.code}
+                onPress={() => setLanguage(l.code)}
+                style={{
+                  paddingHorizontal: 10,
+                  paddingVertical: 5,
+                  borderRadius: 14,
+                  backgroundColor: language === l.code ? '#7F77DD' : '#161622',
+                  borderWidth: 0.5,
+                  borderColor: language === l.code ? '#7F77DD' : '#2a2a3a',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={{ fontSize: 13 }}>{l.flag}</Text>
+                <Text style={{ fontSize: 11, fontWeight: '600', color: language === l.code ? '#fff' : '#888' }}>
+                  {l.code.toUpperCase()}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           <Text style={{ fontSize: 42, fontWeight: '700', color: '#f0f0f0', textAlign: 'center', marginBottom: 6 }}>
             dythin<Text style={{ color: '#7F77DD' }}>.</Text>
           </Text>
           <Text style={{ fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 36 }}>
-            kararsızlıktan kurtar kendini
+            {t('auth.tagline')}
           </Text>
 
           {showOtpScreen ? (
@@ -598,7 +626,7 @@ export default function Login() {
               >
                 {loading
                   ? <ActivityIndicator color="#fff" />
-                  : <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>{isRegister ? 'Kayıt Ol' : 'Giriş Yap'}</Text>
+                  : <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>{isRegister ? t('auth.registerBtn') : t('auth.loginBtn')}</Text>
                 }
               </TouchableOpacity>
 
@@ -627,7 +655,7 @@ export default function Login() {
               >
                 <Ionicons name="logo-apple" size={20} color="#000000" />
                 <Text style={{ color: '#000000', fontSize: 15, fontWeight: '600' }}>
-                  {isRegister ? 'Apple ile Kayıt Ol' : 'Apple ile Devam Et'}
+                  {t('auth.appleBtn')}
                 </Text>
               </TouchableOpacity>
 
@@ -651,20 +679,12 @@ export default function Login() {
               >
                 <Ionicons name="logo-google" size={18} color="#EA4335" />
                 <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '600' }}>
-                  {isRegister ? 'Google ile Kayıt Ol' : 'Google ile Devam Et'}
+                  {t('auth.googleBtn')}
                 </Text>
               </TouchableOpacity>
 
               <Text style={{ color: '#888', fontSize: 11, textAlign: 'center', marginTop: 4, marginBottom: 12, lineHeight: 16 }}>
-                Uygulamayı kullanarak{' '}
-                <Text style={{ color: '#7F77DD', textDecorationLine: 'underline', fontWeight: '600' }} onPress={() => setShowTermsModal(true)}>
-                  Kullanım Koşulları (EULA)
-                </Text>
-                {' '}ve{' '}
-                <Text style={{ color: '#7F77DD', textDecorationLine: 'underline', fontWeight: '600' }} onPress={() => setShowPrivacyModal(true)}>
-                  Gizlilik Politikası
-                </Text>
-                {"'"}nı kabul etmiş olursunuz.
+                {t('auth.legalNotice')}
               </Text>
 
               {!isRegister && (
@@ -673,7 +693,7 @@ export default function Login() {
                   onPress={handleForgotPassword}
                   disabled={loading}
                 >
-                  <Text style={{ color: '#aaa', fontSize: 14 }}>Şifremi unuttum</Text>
+                  <Text style={{ color: '#aaa', fontSize: 14 }}>{t('auth.forgotPassword')}</Text>
                 </TouchableOpacity>
               )}
 
@@ -689,7 +709,7 @@ export default function Login() {
                 disabled={loading}
               >
                 <Text style={{ color: '#7F77DD', fontSize: 14 }}>
-                  {isRegister ? 'Hesabın var mı? Giriş Yap' : 'Hesabın yok mu? Kayıt Ol'}
+                  {isRegister ? t('auth.hasAccount') : t('auth.noAccount')}
                 </Text>
               </TouchableOpacity>
             </>

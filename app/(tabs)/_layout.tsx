@@ -6,7 +6,7 @@ import { Platform } from 'react-native'
 import { useFonts } from 'expo-font'
 
 export default function TabLayout() {
-  const { theme, session, isAuthLoading } = useApp()
+  const { theme, session, isAuthLoading, t } = useApp()
   const router = useRouter()
 
   const [fontsLoaded] = useFonts({
@@ -43,7 +43,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Oyla',
+          title: t('tabs.vote'),
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? 'sparkles' : 'sparkles-outline'}
@@ -56,7 +56,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="create"
         options={{
-          title: 'Paylaş',
+          title: t('tabs.create'),
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? 'add-circle' : 'add-circle-outline'}
@@ -69,7 +69,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="results"
         options={{
-          title: 'Sonuçlar',
+          title: t('tabs.results'),
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? 'stats-chart' : 'stats-chart-outline'}
@@ -82,7 +82,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profil',
+          title: t('tabs.profile'),
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? 'person' : 'person-outline'}

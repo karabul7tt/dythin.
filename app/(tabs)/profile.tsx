@@ -30,7 +30,7 @@ import { sendPushNotificationToUser } from '../../lib/notifications'
 import type { Profile, FriendRecord, FriendshipWithProfiles } from '../../lib/types'
 
 export default function ProfileScreen() {
-  const { theme, session } = useApp()
+  const { theme, session, t } = useApp()
   const userId = session?.user?.id
   const router = useRouter()
   const isDark = theme.bg === '#0e0e1a' || theme.bg === '#111108'
@@ -338,8 +338,8 @@ export default function ProfileScreen() {
       const nameCheck = checkChangeLimit(nameChanges)
       if (!nameCheck.allowed) {
         return Alert.alert(
-          'İsim Değiştirilemez',
-          `Adınızı 14 günde en fazla 2 kez değiştirebilirsiniz. Bir sonraki değiştirme hakkınız için ${nameCheck.remainingDays} gün beklemeniz gerekiyor.`
+          t('profile.nameBlockedTitle'),
+          t('profile.nameBlockedMsg', { days: nameCheck.remainingDays })
         )
       }
     }
@@ -349,8 +349,8 @@ export default function ProfileScreen() {
       const usernameCheck = checkChangeLimit(usernameChanges)
       if (!usernameCheck.allowed) {
         return Alert.alert(
-          'Kullanıcı Adı Değiştirilemez',
-          `Kullanıcı adınızı 14 günde en fazla 2 kez değiştirebilirsiniz. Bir sonraki değiştirme hakkınız için ${usernameCheck.remainingDays} gün beklemeniz gerekiyor.`
+          t('profile.usernameBlockedTitle'),
+          t('profile.usernameBlockedMsg', { days: usernameCheck.remainingDays })
         )
       }
     }
@@ -371,8 +371,8 @@ export default function ProfileScreen() {
         if (existingUser) {
           setLoading(false)
           return Alert.alert(
-            'Kullanıcı Adı Alınmış',
-            'Bu kullanıcı adı başka bir üye tarafından kullanılıyor. Lütfen farklı bir kullanıcı adı seçin.'
+            t('profile.usernameTakenTitle'),
+            t('profile.usernameTakenMsg')
           )
         }
       }
@@ -423,7 +423,7 @@ export default function ProfileScreen() {
 
         setIsEditing(false)
         fetchProfile()
-        Alert.alert('Başarılı', 'Profil bilgileriniz başarıyla güncellendi.')
+        Alert.alert(t('profile.profileUpdatedTitle'), t('profile.profileUpdatedMsg'))
       }
     } catch (e: any) {
       Alert.alert('Hata', getCleanErrorMessage(e))
@@ -673,7 +673,7 @@ export default function ProfileScreen() {
             >
               <Ionicons name="camera-outline" size={15} color={theme.accent} />
               <Text style={{ fontSize: 12, fontWeight: '600', color: theme.accent }}>
-                Fotoğrafı Değiştir
+                {t('profile.changePhoto')}
               </Text>
             </TouchableOpacity>
           )}
@@ -685,26 +685,26 @@ export default function ProfileScreen() {
         <View style={s.statsRow}>
           <View style={s.statCard}>
             <Text style={s.statNum}>{stats.posts}</Text>
-            <Text style={s.statLabel}>Paylaşım</Text>
+            <Text style={s.statLabel}>{t('profile.statsPosts')}</Text>
           </View>
           <View style={s.statCard}>
             <Text style={s.statNum}>{stats.votes}</Text>
-            <Text style={s.statLabel}>Oy</Text>
+            <Text style={s.statLabel}>{t('profile.statsVotes')}</Text>
           </View>
           <View style={s.statCard}>
             <Text style={s.statNum}>{stats.friends}</Text>
-            <Text style={s.statLabel}>Arkadaş</Text>
+            <Text style={s.statLabel}>{t('profile.statsFriends')}</Text>
           </View>
         </View>
 
         {/* Tab Switcher */}
         <View style={s.tabRow}>
           <TouchableOpacity style={[s.tabBtn, tab === 'profile' && s.tabBtnActive]} onPress={() => setTab('profile')}>
-            <Text style={[s.tabText, tab === 'profile' && s.tabTextActive]}>Profil Bilgileri</Text>
+            <Text style={[s.tabText, tab === 'profile' && s.tabTextActive]}>{t('profile.tabProfile')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[s.tabBtn, tab === 'friends' && s.tabBtnActive]} onPress={() => setTab('friends')}>
             <Text style={[s.tabText, tab === 'friends' && s.tabTextActive]}>
-              Arkadaşlar {requests.length > 0 ? `(${requests.length})` : ''}
+              {t('profile.tabFriends')} {requests.length > 0 ? `(${requests.length})` : ''}
             </Text>
           </TouchableOpacity>
         </View>
@@ -713,21 +713,21 @@ export default function ProfileScreen() {
           <View style={s.formCard}>
             {!isEditing ? (
               <TouchableOpacity style={s.saveBtn} onPress={() => setIsEditing(true)} activeOpacity={0.8}>
-                <Text style={s.saveBtnText}>Düzenle</Text>
+                <Text style={s.saveBtnText}>{t('profile.edit')}</Text>
               </TouchableOpacity>
             ) : (
               <>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <Text style={[s.inputLabel, { marginBottom: 0 }]}>AD SOYAD</Text>
+                  <Text style={[s.inputLabel, { marginBottom: 0 }]}>{t('profile.fullNameLabel')}</Text>
                   <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '500' }}>
-                    14 günde 2 hak (Kalan: {Math.max(0, 2 - getRecentChanges(nameChanges).length)})
+                    {t('profile.quotaIndicator', { count: Math.max(0, 2 - getRecentChanges(nameChanges).length) })}
                   </Text>
                 </View>
                 <TextInput
                   style={s.input}
                   value={fullName}
                   onChangeText={setFullName}
-                  placeholder="Ad Soyad"
+                  placeholder={t('profile.fullNameLabel')}
                   placeholderTextColor={theme.textSub}
                   editable={!loading}
                   returnKeyType="next"
@@ -735,9 +735,9 @@ export default function ProfileScreen() {
                 />
 
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <Text style={[s.inputLabel, { marginBottom: 0 }]}>KULLANICI ADI</Text>
+                  <Text style={[s.inputLabel, { marginBottom: 0 }]}>{t('profile.usernameLabel')}</Text>
                   <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '500' }}>
-                    14 günde 2 hak (Kalan: {Math.max(0, 2 - getRecentChanges(usernameChanges).length)})
+                    {t('profile.quotaIndicator', { count: Math.max(0, 2 - getRecentChanges(usernameChanges).length) })}
                   </Text>
                 </View>
                 <TextInput
@@ -755,11 +755,11 @@ export default function ProfileScreen() {
 
                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
                   <TouchableOpacity style={[s.saveBtn, { flex: 1, backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.border }]} onPress={cancelEdit} disabled={loading} activeOpacity={0.8}>
-                    <Text style={[s.saveBtnText, { color: theme.textSub }]}>İptal</Text>
+                    <Text style={[s.saveBtnText, { color: theme.textSub }]}>{t('profile.cancel')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity style={[s.saveBtn, { flex: 1.5 }]} onPress={saveProfileInfo} disabled={loading} activeOpacity={0.8}>
-                    {loading ? <ActivityIndicator color={theme.bg} /> : <Text style={s.saveBtnText}>Kaydet</Text>}
+                    {loading ? <ActivityIndicator color={theme.bg} /> : <Text style={s.saveBtnText}>{t('profile.save')}</Text>}
                   </TouchableOpacity>
                 </View>
               </>

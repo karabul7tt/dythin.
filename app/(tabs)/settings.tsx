@@ -18,12 +18,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import { ThemeName } from '../../lib/theme'
+import { supportedLanguages } from '../../lib/i18n'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { registerForPushNotificationsAsync } from '../../lib/notifications'
 
 export default function SettingsScreen() {
-  const { theme, themeName, setThemeName, session, refreshSession, isAuthLoading, signOut } = useApp()
+  const { theme, themeName, setThemeName, session, refreshSession, isAuthLoading, signOut, language, setLanguage, t } = useApp()
   const [loading, setLoading] = useState(false)
   const [emailLoading, setEmailLoading] = useState(false)
   const [signOutLoading, setSignOutLoading] = useState(false)
@@ -409,11 +410,11 @@ export default function SettingsScreen() {
           dythin<Text style={s.logoDot}>.</Text>
         </Text>
 
-        <Text style={s.sectionLabel}>GİZLİLİK & MESAJLAR</Text>
+        <Text style={s.sectionLabel}>{t('settings.privacySection')}</Text>
         <View style={s.card}>
           <View style={{ padding: 14 }}>
-            <Text style={s.rowLabel}>Kimler Mesaj Gönderebilir?</Text>
-            <Text style={s.rowSub}>Sizi kimlerin mesajla rahatsız edebileceğini belirleyin</Text>
+            <Text style={s.rowLabel}>{t('settings.whoCanMessage')}</Text>
+            <Text style={s.rowSub}>{t('settings.whoCanMessageSub')}</Text>
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
               <TouchableOpacity
@@ -425,7 +426,7 @@ export default function SettingsScreen() {
                 activeOpacity={0.8}
               >
                 <Text style={{ fontSize: 13, fontWeight: '600', color: messagePrivacy === 'everyone' ? '#ffffff' : theme.textSub }}>
-                  Herkes
+                  {t('settings.everyone')}
                 </Text>
               </TouchableOpacity>
 
@@ -438,7 +439,7 @@ export default function SettingsScreen() {
                 activeOpacity={0.8}
               >
                 <Text style={{ fontSize: 13, fontWeight: '600', color: messagePrivacy === 'friends' ? '#ffffff' : theme.textSub }}>
-                  Sadece Arkadaşlarım
+                  {t('settings.onlyFriends')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -446,8 +447,8 @@ export default function SettingsScreen() {
             {/* Gizli Profil Row */}
             <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 18, paddingTop: 14, borderTopWidth: 0.5, borderTopColor: theme.border }} onPress={handleTogglePrivate} activeOpacity={0.8}>
               <View style={{ flex: 1, paddingRight: 10 }}>
-                <Text style={s.rowLabel}>Gizli Profil (Hesabı Gizle)</Text>
-                <Text style={s.rowSub}>Profilinizi gizlediğinizde oylamalarınızı sadece arkadaşlarınız görebilir</Text>
+                <Text style={s.rowLabel}>{t('settings.privateProfile')}</Text>
+                <Text style={s.rowSub}>{t('settings.privateProfileSub')}</Text>
               </View>
               <View style={[{ width: 44, height: 26, borderRadius: 13, backgroundColor: theme.bg, borderWidth: 1, borderColor: theme.border, justifyContent: 'center', padding: 2 }, isPrivate && { backgroundColor: theme.accent, borderColor: theme.accent }]}>
                 <View style={[{ width: 20, height: 20, borderRadius: 10, backgroundColor: theme.textSub }, isPrivate && { alignSelf: 'flex-end', backgroundColor: '#ffffff' }]} />
@@ -561,36 +562,54 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        <Text style={s.sectionLabel}>TEMA</Text>
+        <Text style={s.sectionLabel}>{t('settings.themeSection')}</Text>
         <View style={s.card}>
-          {themeOptions.map((t, i) => (
+          {themeOptions.map((tOpt, i) => (
             <TouchableOpacity
-              key={t.key}
+              key={tOpt.key}
               style={i === themeOptions.length - 1 ? s.themeRowLast : s.themeRow}
-              onPress={() => setThemeName(t.key)}
+              onPress={() => setThemeName(tOpt.key)}
             >
-              <View style={[s.themeDot, { backgroundColor: t.color }]} />
-              <Text style={s.rowLabel}>{t.label}</Text>
-              <View style={[s.themeCheck, themeName === t.key && s.themeCheckActive]}>
-                {themeName === t.key && <Ionicons name="checkmark" size={12} color="#fff" />}
+              <View style={[s.themeDot, { backgroundColor: tOpt.color }]} />
+              <Text style={s.rowLabel}>{tOpt.label}</Text>
+              <View style={[s.themeCheck, themeName === tOpt.key && s.themeCheckActive]}>
+                {themeName === tOpt.key && <Ionicons name="checkmark" size={12} color="#fff" />}
               </View>
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text style={s.sectionLabel}>YASAL VE MAĞAZA ŞARTLARI</Text>
+        <Text style={s.sectionLabel}>{t('settings.languageSection')}</Text>
+        <View style={s.card}>
+          {supportedLanguages.map((lang, i) => (
+            <TouchableOpacity
+              key={lang.code}
+              style={i === supportedLanguages.length - 1 ? s.themeRowLast : s.themeRow}
+              onPress={() => setLanguage(lang.code)}
+              activeOpacity={0.7}
+            >
+              <Text style={{ fontSize: 18, marginRight: 6 }}>{lang.flag}</Text>
+              <Text style={[s.rowLabel, { flex: 1 }]}>{lang.label} ({lang.nativeName})</Text>
+              <View style={[s.themeCheck, language === lang.code && s.themeCheckActive]}>
+                {language === lang.code && <Ionicons name="checkmark" size={12} color="#fff" />}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={s.sectionLabel}>{t('settings.legalSection')}</Text>
         <View style={s.card}>
           <TouchableOpacity style={s.row} onPress={() => setShowPrivacyModal(true)}>
-            <Text style={s.rowLabel}>Gizlilik Politikası (Privacy Policy)</Text>
+            <Text style={s.rowLabel}>{t('settings.privacyPolicy')}</Text>
             <Text style={s.arrow}>›</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.row} onPress={() => setShowTermsModal(true)}>
-            <Text style={s.rowLabel}>Kullanım Koşulları & Topluluk Kuralları (EULA)</Text>
+            <Text style={s.rowLabel}>{t('settings.termsOfUse')}</Text>
             <Text style={s.arrow}>›</Text>
           </TouchableOpacity>
           <View style={s.rowLast}>
-            <Text style={s.rowLabel}>Versiyon</Text>
-            <Text style={s.emailText}>1.1.0 (Build 62)</Text>
+            <Text style={s.rowLabel}>{t('settings.version')}</Text>
+            <Text style={s.emailText}>1.1.0 (Build 63)</Text>
           </View>
         </View>
 
@@ -598,16 +617,16 @@ export default function SettingsScreen() {
           {signOutLoading ? (
             <ActivityIndicator color="#ffffff" size="small" />
           ) : (
-            <Text style={s.signOutText}>Çıkış Yap</Text>
+            <Text style={s.signOutText}>{t('settings.signOut')}</Text>
           )}
         </TouchableOpacity>
 
         {/* Apple App Store Requirement: Account Deletion */}
         <TouchableOpacity style={s.deleteAccountBtn} onPress={handleDeleteAccount} disabled={loading}>
-          <Text style={s.deleteAccountText}>Hesabımı ve Verilerimi Sil</Text>
+          <Text style={s.deleteAccountText}>{t('settings.deleteAccount')}</Text>
         </TouchableOpacity>
 
-        <Text style={s.versionText}>dythin. — kararsızlıktan kurtar kendini</Text>
+        <Text style={s.versionText}>dythin. — {t('auth.tagline')}</Text>
       </ScrollView>
 
       {/* Privacy Policy Modal */}

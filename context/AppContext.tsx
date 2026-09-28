@@ -7,12 +7,17 @@ import * as Linking from 'expo-linking'
 import { registerForPushNotificationsAsync } from '../lib/notifications'
 import { authenticateFromUrl, extractUserProfile, syncUserProfileWithDatabase } from '../lib/authHelper'
 
+import { Language, translate } from '../lib/i18n'
+
 type AppContextType = {
   session: Session | null
   isAuthLoading: boolean
   theme: Theme
   themeName: ThemeName
   setThemeName: (name: ThemeName) => void
+  language: Language
+  setLanguage: (lang: Language) => Promise<void>
+  t: (path: string, params?: Record<string, string | number>) => string
   refreshSession: () => Promise<Session | null>
   signOut: () => Promise<void>
 }
@@ -23,6 +28,9 @@ const AppContext = createContext<AppContextType>({
   theme: themes.purple,
   themeName: 'purple',
   setThemeName: () => {},
+  language: 'tr',
+  setLanguage: async () => {},
+  t: (path) => path,
   refreshSession: async () => null,
   signOut: async () => {},
 })
@@ -31,6 +39,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [isAuthLoading, setIsAuthLoading] = useState(true)
   const [themeName, setThemeNameState] = useState<ThemeName>('purple')
+  const [language, setLanguageState] = useState<Language>('tr')
+
+  async function setLanguage(lang: Language) {
+    setLanguageState(lang)
+    try {
+      await AsyncStorage.setItem('app_language', lang)
+    } catch {}
+  }
+
+  const t = (path: string, params?: Record<string, string | number>) => {
+    return translate(language, path, params)
+  }
 
   async function signOut(): Promise<void> {
     try {
@@ -57,6 +77,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    AsyncStorage.getItem('app_language').then((saved) => {
+      if (saved && (saved === 'tr' || saved === 'en' || saved === 'de')) {
+        setLanguageState(saved as Language)
+      }
+    }).catch(() => null)
+
     AsyncStorage.getItem('themeName').then((saved) => {
       if (saved && saved in themes) setThemeNameState(saved as ThemeName)
     }).catch(() => null)
@@ -160,6 +186,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       theme: activeTheme,
       themeName,
       setThemeName,
+      language,
+      setLanguage,
+      t,
       refreshSession,
       signOut,
     }}>
