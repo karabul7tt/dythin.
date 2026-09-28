@@ -40,7 +40,43 @@ export default function ProfileScreen() {
   const [username, setUsername] = useState('')
   const [initialFullName, setInitialFullName] = useState('')
   const [initialUsername, setInitialUsername] = useState('')
-  const [lastUsernameUpdate, setLastUsernameUpdate] = useState<string | null>(null)
+  const [nameChanges, setNameChanges] = useState<string[]>([])
+  const [usernameChanges, setUsernameChanges] = useState<string[]>([])
+
+  const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
+  const MAX_CHANGES_IN_14_DAYS = 2
+
+  const getRecentChanges = (history: string[]) => {
+    const now = Date.now()
+    return (history || []).filter(ts => {
+      const time = new Date(ts).getTime()
+      return !isNaN(time) && now - time < FOURTEEN_DAYS_MS
+    })
+  }
+
+  const checkChangeLimit = (history: string[]) => {
+    const now = Date.now()
+    const recent = getRecentChanges(history)
+    if (recent.length >= MAX_CHANGES_IN_14_DAYS) {
+      const sorted = [...recent].sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+      const oldestChangeTime = new Date(sorted[0]).getTime()
+      const unlockTime = oldestChangeTime + FOURTEEN_DAYS_MS
+      const remainingMs = Math.max(0, unlockTime - now)
+      const remainingDays = Math.max(1, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)))
+      return {
+        allowed: false,
+        remainingDays,
+        remainingCount: 0,
+        recent,
+      }
+    }
+    return {
+      allowed: true,
+      remainingDays: 0,
+      remainingCount: MAX_CHANGES_IN_14_DAYS - recent.length,
+      recent,
+    }
+  }
   const [avatar, setAvatar] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [stats, setStats] = useState({ posts: 0, votes: 0, friends: 0 })
@@ -149,7 +185,28 @@ export default function ProfileScreen() {
       setInitialUsername(uName)
       setInitialFullName(fName)
       setAvatar(avUrl)
-      setLastUsernameUpdate(prof.updated_at || null)
+
+      try {
+        const storedNameChanges = await AsyncStorage.getItem(`name_changes_${session.user.id}`)
+        let parsedNameChanges: string[] = storedNameChanges ? JSON.parse(storedNameChanges) : []
+        const metaNameChanges = session.user.user_metadata?.name_changes
+        if (Array.isArray(metaNameChanges) && metaNameChanges.length > parsedNameChanges.length) {
+          parsedNameChanges = metaNameChanges
+        }
+        setNameChanges(parsedNameChanges)
+
+        const storedUsernameChanges = await AsyncStorage.getItem(`username_changes_${session.user.id}`)
+        let parsedUsernameChanges: string[] = storedUsernameChanges ? JSON.parse(storedUsernameChanges) : []
+        if (parsedUsernameChanges.length === 0) {
+          const legacyUpdate = await AsyncStorage.getItem(`last_username_update_${session.user.id}`)
+          if (legacyUpdate) parsedUsernameChanges = [legacyUpdate]
+        }
+        const metaUsernameChanges = session.user.user_metadata?.username_changes
+        if (Array.isArray(metaUsernameChanges) && metaUsernameChanges.length > parsedUsernameChanges.length) {
+          parsedUsernameChanges = metaUsernameChanges
+        }
+        setUsernameChanges(parsedUsernameChanges)
+      } catch {}
     }
     const { count: postCount } = await supabase
       .from('posts').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id)
@@ -268,30 +325,41 @@ export default function ProfileScreen() {
     }
 
     const cleanUsername = usernameValidation.cleanUsername
+    const isNameChanged = cleanFullName.trim() !== initialFullName.trim()
+    const isUsernameChanged = cleanUsername.toLowerCase() !== initialUsername.toLowerCase()
+
+    if (!isNameChanged && !isUsernameChanged) {
+      setIsEditing(false)
+      return
+    }
+
+    // 1. İsim Değişiklik Limiti Denetimi (14 günde en fazla 2 kez)
+    if (isNameChanged) {
+      const nameCheck = checkChangeLimit(nameChanges)
+      if (!nameCheck.allowed) {
+        return Alert.alert(
+          'İsim Değiştirilemez',
+          `Adınızı 14 günde en fazla 2 kez değiştirebilirsiniz. Bir sonraki değiştirme hakkınız için ${nameCheck.remainingDays} gün beklemeniz gerekiyor.`
+        )
+      }
+    }
+
+    // 2. Kullanıcı Adı Değişiklik Limiti Denetimi (14 günde en fazla 2 kez)
+    if (isUsernameChanged) {
+      const usernameCheck = checkChangeLimit(usernameChanges)
+      if (!usernameCheck.allowed) {
+        return Alert.alert(
+          'Kullanıcı Adı Değiştirilemez',
+          `Kullanıcı adınızı 14 günde en fazla 2 kez değiştirebilirsiniz. Bir sonraki değiştirme hakkınız için ${usernameCheck.remainingDays} gün beklemeniz gerekiyor.`
+        )
+      }
+    }
 
     setLoading(true)
     try {
       if (!session?.user?.id) throw new Error('Oturum açmış kullanıcı bulunamadı.')
 
-      const isUsernameChanged = cleanUsername.toLowerCase() !== initialUsername.toLowerCase()
-
-      // 1. 14 Günlük Kullanıcı Adı Değiştirme Kuralı
-      if (isUsernameChanged && lastUsernameUpdate) {
-        const lastUpdate = new Date(lastUsernameUpdate).getTime()
-        const now = new Date().getTime()
-        const daysDiff = (now - lastUpdate) / (1000 * 3600 * 24)
-
-        if (daysDiff < 14) {
-          const remainingDays = Math.ceil(14 - daysDiff)
-          setLoading(false)
-          return Alert.alert(
-            'Kullanıcı Adı Değiştirilemez',
-            `Kullanıcı adınızı 14 günde bir değiştirebilirsiniz. Bir sonraki değiştirme hakkınız için ${remainingDays} gün beklemeniz gerekiyor.`
-          )
-        }
-      }
-
-      // 2. Benzersiz Kullanıcı Adı Denetimi (Case-Insensitive)
+      // 3. Benzersiz Kullanıcı Adı Denetimi (Case-Insensitive)
       if (isUsernameChanged) {
         const { data: existingUser } = await supabase
           .from('profiles')
@@ -328,10 +396,31 @@ export default function ProfileScreen() {
         setUsername(cleanUsername)
         setInitialFullName(cleanFullName)
         setInitialUsername(cleanUsername)
-        if (isUsernameChanged) {
-          setLastUsernameUpdate(nowIso)
-          AsyncStorage.setItem(`last_username_update_${session.user.id}`, nowIso).catch(() => null)
+
+        let nextNameChanges = nameChanges
+        if (isNameChanged) {
+          const recent = getRecentChanges(nameChanges)
+          nextNameChanges = [...recent, nowIso]
+          setNameChanges(nextNameChanges)
+          AsyncStorage.setItem(`name_changes_${session.user.id}`, JSON.stringify(nextNameChanges)).catch(() => null)
         }
+
+        let nextUsernameChanges = usernameChanges
+        if (isUsernameChanged) {
+          const recent = getRecentChanges(usernameChanges)
+          nextUsernameChanges = [...recent, nowIso]
+          setUsernameChanges(nextUsernameChanges)
+          AsyncStorage.setItem(`username_changes_${session.user.id}`, JSON.stringify(nextUsernameChanges)).catch(() => null)
+        }
+
+        // Supabase Auth user_metadata senkronizasyonu
+        supabase.auth.updateUser({
+          data: {
+            name_changes: nextNameChanges,
+            username_changes: nextUsernameChanges,
+          },
+        }).catch(() => null)
+
         setIsEditing(false)
         fetchProfile()
         Alert.alert('Başarılı', 'Profil bilgileriniz başarıyla güncellendi.')
@@ -628,7 +717,12 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             ) : (
               <>
-                <Text style={s.inputLabel}>AD SOYAD</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <Text style={[s.inputLabel, { marginBottom: 0 }]}>AD SOYAD</Text>
+                  <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '500' }}>
+                    14 günde 2 hak (Kalan: {Math.max(0, 2 - getRecentChanges(nameChanges).length)})
+                  </Text>
+                </View>
                 <TextInput
                   style={s.input}
                   value={fullName}
@@ -640,7 +734,12 @@ export default function ProfileScreen() {
                   blurOnSubmit={false}
                 />
 
-                <Text style={s.inputLabel}>KULLANICI ADI</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <Text style={[s.inputLabel, { marginBottom: 0 }]}>KULLANICI ADI</Text>
+                  <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '500' }}>
+                    14 günde 2 hak (Kalan: {Math.max(0, 2 - getRecentChanges(usernameChanges).length)})
+                  </Text>
+                </View>
                 <TextInput
                   style={s.input}
                   value={username}

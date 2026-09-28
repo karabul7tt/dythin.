@@ -37,6 +37,7 @@ create table if not exists public.blocked_users (
 
 alter table if exists public.profiles add column if not exists full_name text;
 alter table if exists public.profiles add column if not exists role text default 'user' check (role in ('user', 'admin'));
+alter table if exists public.profiles add column if not exists updated_at timestamptz default now();
 alter table if exists public.posts add column if not exists image_b_url text;
 alter table if exists public.posts add column if not exists expires_at timestamptz;
 alter table if exists public.posts add column if not exists category text default 'kombin';
