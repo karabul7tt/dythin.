@@ -15,6 +15,7 @@ import {
   Modal,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useFocusEffect } from '@react-navigation/native'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
@@ -311,35 +312,28 @@ export default function ProfileScreen() {
       const nowIso = new Date().toISOString()
 
       const updateData: Record<string, any> = {
-        id: session.user.id,
         username: cleanUsername,
         full_name: cleanFullName,
-        updated_at: nowIso,
       }
 
-      let { error } = await supabase
+      const { error } = await supabase
         .from('profiles')
-        .upsert(updateData)
-
-      if (error) {
-        const res = await supabase
-          .from('profiles')
-          .upsert({
-            id: session.user.id,
-            username: cleanUsername,
-          })
-        error = res.error
-      }
+        .update(updateData)
+        .eq('id', session.user.id)
 
       if (error) {
         Alert.alert('Güncelleme Başarısız', getCleanErrorMessage(error))
       } else {
+        setFullName(cleanFullName)
+        setUsername(cleanUsername)
         setInitialFullName(cleanFullName)
         setInitialUsername(cleanUsername)
         if (isUsernameChanged) {
           setLastUsernameUpdate(nowIso)
+          AsyncStorage.setItem(`last_username_update_${session.user.id}`, nowIso).catch(() => null)
         }
         setIsEditing(false)
+        fetchProfile()
         Alert.alert('Başarılı', 'Profil bilgileriniz başarıyla güncellendi.')
       }
     } catch (e: any) {
