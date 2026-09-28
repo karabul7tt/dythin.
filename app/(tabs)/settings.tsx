@@ -608,7 +608,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
           <View style={s.rowLast}>
             <Text style={s.rowLabel}>{t('settings.version')}</Text>
-            <Text style={s.emailText}>1.1.0 (Build 64)</Text>
+            <Text style={s.emailText}>1.1.0 (Build 65)</Text>
           </View>
         </View>
 
