@@ -440,6 +440,31 @@ export default function Login() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0e0e1a' }}>
+      {/* Top Header / Language Switcher Bar */}
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 24, paddingTop: 6, paddingBottom: 4, gap: 6 }}>
+        {supportedLanguages.map(l => (
+          <TouchableOpacity
+            key={l.code}
+            onPress={() => setLanguage(l.code)}
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 12,
+              backgroundColor: language === l.code ? '#7F77DD' : '#161622',
+              borderWidth: 0.5,
+              borderColor: language === l.code ? '#7F77DD' : '#2a2a3a',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={{ fontSize: 11, fontWeight: '700', color: language === l.code ? '#fff' : '#888' }}>
+              {l.code.toUpperCase()}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -449,33 +474,6 @@ export default function Login() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Language Switcher Bar */}
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 16, gap: 6 }}>
-            {supportedLanguages.map(l => (
-              <TouchableOpacity
-                key={l.code}
-                onPress={() => setLanguage(l.code)}
-                style={{
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
-                  borderRadius: 14,
-                  backgroundColor: language === l.code ? '#7F77DD' : '#161622',
-                  borderWidth: 0.5,
-                  borderColor: language === l.code ? '#7F77DD' : '#2a2a3a',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
-                activeOpacity={0.7}
-              >
-                <Text style={{ fontSize: 13 }}>{l.flag}</Text>
-                <Text style={{ fontSize: 11, fontWeight: '600', color: language === l.code ? '#fff' : '#888' }}>
-                  {l.code.toUpperCase()}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
           <Text style={{ fontSize: 42, fontWeight: '700', color: '#f0f0f0', textAlign: 'center', marginBottom: 6 }}>
             dythin<Text style={{ color: '#7F77DD' }}>.</Text>
           </Text>
@@ -677,7 +675,7 @@ export default function Login() {
                 disabled={loading}
                 activeOpacity={0.85}
               >
-                <Ionicons name="logo-google" size={18} color="#EA4335" />
+                <Ionicons name="logo-google" size={18} color="#ffffff" />
                 <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '600' }}>
                   {t('auth.googleBtn')}
                 </Text>

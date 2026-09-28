@@ -588,7 +588,6 @@ export default function SettingsScreen() {
               onPress={() => setLanguage(lang.code)}
               activeOpacity={0.7}
             >
-              <Text style={{ fontSize: 18, marginRight: 6 }}>{lang.flag}</Text>
               <Text style={[s.rowLabel, { flex: 1 }]}>{lang.label} ({lang.nativeName})</Text>
               <View style={[s.themeCheck, language === lang.code && s.themeCheckActive]}>
                 {language === lang.code && <Ionicons name="checkmark" size={12} color="#fff" />}
@@ -609,7 +608,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
           <View style={s.rowLast}>
             <Text style={s.rowLabel}>{t('settings.version')}</Text>
-            <Text style={s.emailText}>1.1.0 (Build 63)</Text>
+            <Text style={s.emailText}>1.1.0 (Build 64)</Text>
           </View>
         </View>
 

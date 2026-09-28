@@ -3,14 +3,13 @@ export type Language = 'tr' | 'en' | 'de'
 export interface LanguageOption {
   code: Language
   label: string
-  flag: string
   nativeName: string
 }
 
 export const supportedLanguages: LanguageOption[] = [
-  { code: 'tr', label: 'Türkçe', flag: '🇹🇷', nativeName: 'Türkçe' },
-  { code: 'en', label: 'English', flag: '🇬🇧', nativeName: 'English' },
-  { code: 'de', label: 'Deutsch', flag: '🇩🇪', nativeName: 'Deutsch' },
+  { code: 'tr', label: 'TR', nativeName: 'Türkçe' },
+  { code: 'en', label: 'EN', nativeName: 'English' },
+  { code: 'de', label: 'DE', nativeName: 'Deutsch' },
 ]
 
 export const translations = {
