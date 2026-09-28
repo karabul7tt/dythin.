@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react'
 import * as Haptics from 'expo-haptics'
 import { View, Text, Image, StyleSheet, Dimensions, PanResponder, Animated, Modal, TouchableOpacity, ScrollView } from 'react-native'
+import { useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import { useApp } from '../context/AppContext'
 import type { Post } from '../lib/types'
 
@@ -18,8 +20,14 @@ type Props = {
 
 export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown }: Props) {
   const { theme } = useApp()
+  const router = useRouter()
   const [zoomUri, setZoomUri] = useState('')
   const [zoomMounted, setZoomMounted] = useState(false)
+
+  const authorProfile = post.profiles
+  const authorUsername = authorProfile?.username || 'kullanici'
+  const authorAvatar = authorProfile?.avatar_url
+  const authorInitial = (authorUsername.charAt(0) || 'D').toUpperCase()
 
   const openZoom = (uri: string) => {
     setZoomMounted(false)
@@ -71,6 +79,15 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
       onPanResponderRelease: (evt, gesture) => {
         // Tıklama tespiti (8px'den az hareket)
         if (Math.abs(gesture.dx) < 8 && Math.abs(gesture.dy) < 8) {
+          const touchY = evt.nativeEvent.locationY || 0
+          // Fotoğraf yüksekliği 470px - altındaki bilgi/profil alanına tıklandıysa profile git
+          if (touchY >= 470 && post.user_id) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+            router.push({ pathname: '/user-profile', params: { userId: post.user_id } })
+            Animated.spring(position, { toValue: { x: 0, y: 0 }, friction: 6, tension: 50, useNativeDriver: false }).start()
+            return
+          }
+
           const touchX = gesture.x0 || evt.nativeEvent.pageX || 0
           if (post.image_b_url) {
             if (touchX < SCREEN_WIDTH / 2) {
@@ -170,6 +187,74 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
       height: '100%',
     },
     info: { padding: 14 },
+    profileRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    avatarWrapper: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      borderWidth: 1.5,
+      borderColor: theme.accent,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 10,
+      overflow: 'hidden',
+    },
+    avatar: {
+      width: '100%',
+      height: '100%',
+      borderRadius: 19,
+    },
+    avatarFallback: {
+      backgroundColor: theme.accent + '25',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    avatarInitial: {
+      color: theme.accent,
+      fontWeight: '700',
+      fontSize: 15,
+    },
+    profileTextContainer: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    profileNameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    username: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: theme.text,
+    },
+    fullName: {
+      fontSize: 12,
+      color: theme.textSub,
+      marginLeft: 6,
+    },
+    profileHint: {
+      fontSize: 11,
+      color: theme.textSub,
+      marginTop: 1,
+    },
+    viewProfileBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.accent + '15',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 12,
+      gap: 3,
+    },
+    viewProfileText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: theme.accent,
+    },
     title: { fontSize: 16, fontWeight: '700', color: theme.text },
     desc: { fontSize: 13, color: theme.textSub, marginTop: 4 },
     badge: {
@@ -243,6 +328,47 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
         )}
 
         <View style={s.info}>
+          {/* Instagram Reels Tarzı Profil Alanı */}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => {
+              if (post.user_id) {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+                router.push({ pathname: '/user-profile', params: { userId: post.user_id } })
+              }
+            }}
+            style={s.profileRow}
+          >
+            <View style={s.avatarWrapper}>
+              {authorAvatar ? (
+                <Image source={{ uri: authorAvatar }} style={s.avatar} />
+              ) : (
+                <View style={[s.avatar, s.avatarFallback]}>
+                  <Text style={s.avatarInitial}>{authorInitial}</Text>
+                </View>
+              )}
+            </View>
+
+            <View style={s.profileTextContainer}>
+              <View style={s.profileNameRow}>
+                <Text style={s.username} numberOfLines={1}>
+                  @{authorUsername}
+                </Text>
+                {authorProfile?.full_name ? (
+                  <Text style={s.fullName} numberOfLines={1}>
+                    • {authorProfile.full_name}
+                  </Text>
+                ) : null}
+              </View>
+              <Text style={s.profileHint}>Profili incele</Text>
+            </View>
+
+            <View style={s.viewProfileBadge}>
+              <Text style={s.viewProfileText}>Profil</Text>
+              <Ionicons name="chevron-forward" size={12} color={theme.accent} />
+            </View>
+          </TouchableOpacity>
+
           <Text style={s.title}>{post.title}</Text>
           {post.description ? <Text style={s.desc}>{post.description}</Text> : null}
         </View>

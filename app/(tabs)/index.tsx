@@ -57,7 +57,7 @@ export default function VoteScreen() {
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
     // Genel oylamalar - 24 saat kuralı (24 saat sonra başkalarının oylama akışından kalkar)
-    let publicQuery = supabase.from('posts').select('*')
+    let publicQuery = supabase.from('posts').select('*, profiles(id, username, full_name, avatar_url)')
       .eq('audience', 'public')
       .eq('is_active', true)
       .gte('created_at', twentyFourHoursAgo)
@@ -77,7 +77,7 @@ export default function VoteScreen() {
       f.requester_id === session?.user.id ? f.receiver_id : f.requester_id
     ) || []
 
-    let friendQuery = supabase.from('posts').select('*')
+    let friendQuery = supabase.from('posts').select('*, profiles(id, username, full_name, avatar_url)')
       .eq('audience', 'friends')
       .eq('is_active', true)
       .gte('created_at', twentyFourHoursAgo)

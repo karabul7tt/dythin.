@@ -38,6 +38,7 @@ export type Post = {
   expires_at?: string // ISO timestamp for countdown timer
   created_at: string
   votes?: Vote[]
+  profiles?: Profile | null
 }
 
 export type Vote = {
