@@ -473,28 +473,18 @@ export default function SettingsScreen() {
 
         {isAdminUser && (
           <>
-            <Text style={[s.sectionLabel, { color: '#c084fc' }]}>YÖNETİCİ</Text>
-            <View style={[s.card, { borderColor: '#a855f7', borderWidth: 1 }]}>
+            <Text style={s.sectionLabel}>YÖNETİCİ</Text>
+            <View style={s.card}>
               <TouchableOpacity
                 style={s.rowLast}
                 onPress={() => router.push('/admin' as any)}
                 activeOpacity={0.8}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                  <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#a855f725', alignItems: 'center', justifyContent: 'center' }}>
-                    <Ionicons name="shield-checkmark" size={18} color="#c084fc" />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Text style={[s.rowLabel, { color: '#ffffff', fontWeight: '700' }]}>👑 Yönetici Paneli</Text>
-                      <View style={{ backgroundColor: '#a855f730', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4 }}>
-                        <Text style={{ color: '#c084fc', fontSize: 9, fontWeight: '800' }}>ADMİN</Text>
-                      </View>
-                    </View>
-                    <Text style={s.rowSub}>Şikayetler, Kullanıcı Yönetimi & Metrikler</Text>
-                  </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.rowLabel}>Yönetici Paneli</Text>
+                  <Text style={s.rowSub}>Şikayetler, Kullanıcı Yönetimi & Metrikler</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color="#c084fc" />
+                <Ionicons name="chevron-forward" size={18} color={theme.textSub} />
               </TouchableOpacity>
             </View>
           </>

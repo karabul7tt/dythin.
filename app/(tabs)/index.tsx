@@ -262,12 +262,12 @@ export default function VoteScreen() {
     if (!current) return
     const authorUser = (current as any).profiles?.username || 'kullanici'
     Alert.alert(
-      '👑 Yönetici Moderasyonu',
+      'Yönetici İşlemi',
       `"${current.title}" başlıklı gönderi ve @${authorUser} için işlem seçin:`,
       [
         { text: 'İptal', style: 'cancel' },
         {
-          text: '🗑️ Gönderiyi Anında Sil',
+          text: 'Gönderiyi Sil',
           style: 'destructive',
           onPress: async () => {
             await adminDeletePost(current.id, session!.user.id)
@@ -277,7 +277,7 @@ export default function VoteScreen() {
           },
         },
         {
-          text: '🚫 Kullanıcıyı Kalıcı Banla',
+          text: 'Kullanıcıyı Banla',
           style: 'destructive',
           onPress: async () => {
             await adminBanUser(current.user_id, authorUser, session!.user.id)
@@ -288,7 +288,7 @@ export default function VoteScreen() {
           },
         },
         {
-          text: '👑 Yönetici Paneli',
+          text: 'Yönetici Paneli',
           onPress: () => router.push('/admin' as any),
         },
       ]
@@ -439,20 +439,16 @@ export default function VoteScreen() {
               <TouchableOpacity
                 onPress={handleAdminQuickAction}
                 style={{
-                  backgroundColor: '#a855f725',
-                  paddingHorizontal: 10,
+                  backgroundColor: theme.card,
+                  paddingHorizontal: 12,
                   paddingVertical: 5,
                   borderRadius: 14,
-                  borderWidth: 1,
-                  borderColor: '#a855f7',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 4,
+                  borderWidth: 0.5,
+                  borderColor: theme.border,
                 }}
                 activeOpacity={0.7}
               >
-                <Ionicons name="shield-checkmark" size={12} color="#c084fc" />
-                <Text style={{ fontSize: 11, color: '#c084fc', fontWeight: '700' }}>Yönetici</Text>
+                <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '600' }}>Yönetici</Text>
               </TouchableOpacity>
             )}
           </View>

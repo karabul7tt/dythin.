@@ -193,7 +193,7 @@ export default function AdminScreen() {
     // Admin yap veya adminliği al
     if (targetUser.isAdmin) {
       options.push({
-        text: '⭐ Admin Yetkisini Kaldır',
+        text: 'Admin Yetkisini Kaldır',
         style: 'destructive',
         onPress: async () => {
           await adminRevokeUser(targetUser.id, targetUser.username, session!.user.id)
@@ -203,7 +203,7 @@ export default function AdminScreen() {
       })
     } else {
       options.push({
-        text: '👑 Bu Kullanıcıyı Admin Yap',
+        text: 'Bu Kullanıcıyı Admin Yap',
         onPress: async () => {
           await adminPromoteUser(targetUser.id, targetUser.username, session!.user.id)
           Alert.alert('Yönetici Atandı!', `@${targetUser.username} artık Yönetici yetkilerine sahip.`)
@@ -215,7 +215,7 @@ export default function AdminScreen() {
     // Banla veya Banı kaldır
     if (targetUser.isBanned) {
       options.push({
-        text: '✅ Kullanıcının Banını Kaldır',
+        text: 'Kullanıcının Banını Kaldır',
         onPress: async () => {
           await adminUnbanUser(targetUser.id, targetUser.username, session!.user.id)
           Alert.alert('Yasak Kaldırıldı', `@${targetUser.username} hesabı tekrar aktif edildi.`)
@@ -224,7 +224,7 @@ export default function AdminScreen() {
       })
     } else {
       options.push({
-        text: '🚫 Kullanıcıyı Banla (Askıya Al)',
+        text: 'Kullanıcıyı Banla (Askıya Al)',
         style: 'destructive',
         onPress: async () => {
           await adminBanUser(targetUser.id, targetUser.username, session!.user.id)
@@ -527,7 +527,7 @@ export default function AdminScreen() {
                 onPress={() => setUserFilter('admins')}
               >
                 <Text style={[s.filterChipText, userFilter === 'admins' && s.filterChipTextActive]}>
-                  👑 Yöneticiler ({users.filter(u => u.isAdmin).length})
+                  Yöneticiler ({users.filter(u => u.isAdmin).length})
                 </Text>
               </TouchableOpacity>
 
@@ -536,7 +536,7 @@ export default function AdminScreen() {
                 onPress={() => setUserFilter('banned')}
               >
                 <Text style={[s.filterChipText, userFilter === 'banned' && s.filterChipTextActive]}>
-                  🚫 Banlılar ({users.filter(u => u.isBanned).length})
+                  Banlılar ({users.filter(u => u.isBanned).length})
                 </Text>
               </TouchableOpacity>
             </View>

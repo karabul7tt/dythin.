@@ -707,51 +707,25 @@ export default function ProfileScreen() {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
-              backgroundColor: '#1b1838',
-              borderRadius: 16,
+              backgroundColor: theme.card,
+              borderRadius: 14,
               padding: 14,
               marginBottom: 16,
-              borderWidth: 1,
-              borderColor: '#a855f7',
-              shadowColor: '#a855f7',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 8,
-              elevation: 4,
+              borderWidth: 0.5,
+              borderColor: theme.border,
             }}
             onPress={() => router.push('/admin' as any)}
             activeOpacity={0.8}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: '#a855f725',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderWidth: 1,
-                  borderColor: '#a855f750',
-                }}
-              >
-                <Ionicons name="shield-checkmark" size={22} color="#c084fc" />
-              </View>
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '700' }}>
-                    Yönetici Paneli
-                  </Text>
-                  <View style={{ backgroundColor: '#a855f730', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4 }}>
-                    <Text style={{ color: '#c084fc', fontSize: 10, fontWeight: '800' }}>ADMİN</Text>
-                  </View>
-                </View>
-                <Text style={{ color: '#94a3b8', fontSize: 12, marginTop: 2 }}>
-                  Şikayetler, Kullanıcı Yönetimi & Metrikler
-                </Text>
-              </View>
+            <View>
+              <Text style={{ color: theme.text, fontSize: 14, fontWeight: '600' }}>
+                Yönetici Paneli
+              </Text>
+              <Text style={{ color: theme.textSub, fontSize: 12, marginTop: 2 }}>
+                Şikayetler, Kullanıcı Yönetimi & Metrikler
+              </Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#c084fc" />
+            <Ionicons name="chevron-forward" size={18} color={theme.textSub} />
           </TouchableOpacity>
         )}
 
