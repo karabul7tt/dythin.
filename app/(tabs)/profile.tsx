@@ -28,6 +28,7 @@ import ZoomablePhoto from '../../components/ZoomablePhoto'
 import { extractUserProfile, syncUserProfileWithDatabase } from '../../lib/authHelper'
 import { sendPushNotificationToUser } from '../../lib/notifications'
 import type { Profile, FriendRecord, FriendshipWithProfiles } from '../../lib/types'
+import { checkIsAdmin } from '../../lib/admin'
 
 export default function ProfileScreen() {
   const { theme, session, t } = useApp()
@@ -42,6 +43,7 @@ export default function ProfileScreen() {
   const [initialUsername, setInitialUsername] = useState('')
   const [nameChanges, setNameChanges] = useState<string[]>([])
   const [usernameChanges, setUsernameChanges] = useState<string[]>([])
+  const [isAdminUser, setIsAdminUser] = useState(false)
 
   const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
   const MAX_CHANGES_IN_14_DAYS = 2
@@ -158,6 +160,7 @@ export default function ProfileScreen() {
     if (data) {
       const prof = data as Profile
       const uName = prof.username || ''
+      checkIsAdmin(uName, prof.role, session.user.id).then(setIsAdminUser)
       let fName = prof.full_name || ''
       let avUrl = prof.avatar_url || null
 
@@ -696,6 +699,61 @@ export default function ProfileScreen() {
             <Text style={s.statLabel}>{t('profile.statsFriends')}</Text>
           </View>
         </View>
+
+        {/* Admin Paneli Butonu (Yalnızca Yöneticilere Görünür) */}
+        {isAdminUser && (
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: '#1b1838',
+              borderRadius: 16,
+              padding: 14,
+              marginBottom: 16,
+              borderWidth: 1,
+              borderColor: '#a855f7',
+              shadowColor: '#a855f7',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
+            onPress={() => router.push('/admin' as any)}
+            activeOpacity={0.8}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: '#a855f725',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderWidth: 1,
+                  borderColor: '#a855f750',
+                }}
+              >
+                <Ionicons name="shield-checkmark" size={22} color="#c084fc" />
+              </View>
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '700' }}>
+                    Yönetici Paneli
+                  </Text>
+                  <View style={{ backgroundColor: '#a855f730', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4 }}>
+                    <Text style={{ color: '#c084fc', fontSize: 10, fontWeight: '800' }}>ADMİN</Text>
+                  </View>
+                </View>
+                <Text style={{ color: '#94a3b8', fontSize: 12, marginTop: 2 }}>
+                  Şikayetler, Kullanıcı Yönetimi & Metrikler
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#c084fc" />
+          </TouchableOpacity>
+        )}
 
         {/* Tab Switcher */}
         <View style={s.tabRow}>

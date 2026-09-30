@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 import { sendPushNotificationToUser } from '../../lib/notifications'
+import { checkIsAdmin, adminDeletePost, adminBanUser } from '../../lib/admin'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -28,11 +29,13 @@ export default function VoteScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [tab, setTab] = useState<'public' | 'friends'>('public')
+  const [isAdminUser, setIsAdminUser] = useState(false)
 
   useFocusEffect(
     useCallback(() => {
       if (userId) {
         fetchPosts()
+        checkIsAdmin(session?.user?.user_metadata?.username, null, userId).then(setIsAdminUser)
       }
     }, [userId])
   )
@@ -88,9 +91,32 @@ export default function VoteScreen() {
     if (blockedIds.length > 0) friendQuery = friendQuery.not('user_id', 'in', `(${blockedIds.join(',')})`)
     const { data: fPosts } = await friendQuery.order('created_at', { ascending: false })
 
-    // İstemci tarafı doğrulama (expires_at veya 24 saat kontrolü)
+    // Admin ban ve silinen gönderi kontrolü
+    let adminEvents: any[] = []
+    try {
+      const res = await supabase
+        .from('reports')
+        .select('reason')
+        .like('reason', 'ADMIN_ACTION:%')
+      adminEvents = res.data || []
+    } catch {}
+
+    const adminDeletedPostIds = new Set<string>()
+    const adminBannedUserIds = new Set<string>()
+
+    adminEvents?.forEach((ev: any) => {
+      if (ev.reason?.startsWith('ADMIN_ACTION:DELETE_POST:')) {
+        adminDeletedPostIds.add(ev.reason.split(':')[2])
+      } else if (ev.reason?.startsWith('ADMIN_ACTION:BAN_USER:')) {
+        adminBannedUserIds.add(ev.reason.split(':')[2])
+      }
+    })
+
+    // İstemci tarafı doğrulama (expires_at, 24 saat ve admin moderasyon kontrolü)
     const isPostActive = (p: Post) => {
       if (!p.is_active) return false
+      if (adminDeletedPostIds.has(p.id)) return false
+      if (adminBannedUserIds.has(p.user_id)) return false
       if (p.expires_at && new Date(p.expires_at).getTime() <= Date.now()) return false
       if (p.created_at && (Date.now() - new Date(p.created_at).getTime()) > 24 * 60 * 60 * 1000) return false
       return true
@@ -226,6 +252,44 @@ export default function VoteScreen() {
             setPosts(prev => prev.filter(p => p.user_id !== current.user_id))
             setFriendPosts(prev => prev.filter(p => p.user_id !== current.user_id))
           },
+        },
+      ]
+    )
+  }
+
+  function handleAdminQuickAction() {
+    const current = tab === 'public' ? posts[0] : friendPosts[0]
+    if (!current) return
+    const authorUser = (current as any).profiles?.username || 'kullanici'
+    Alert.alert(
+      '👑 Yönetici Moderasyonu',
+      `"${current.title}" başlıklı gönderi ve @${authorUser} için işlem seçin:`,
+      [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: '🗑️ Gönderiyi Anında Sil',
+          style: 'destructive',
+          onPress: async () => {
+            await adminDeletePost(current.id, session!.user.id)
+            Alert.alert('Silindi', 'Gönderi akıştan kaldırıldı.')
+            if (tab === 'public') setPosts(prev => prev.slice(1))
+            else setFriendPosts(prev => prev.slice(1))
+          },
+        },
+        {
+          text: '🚫 Kullanıcıyı Kalıcı Banla',
+          style: 'destructive',
+          onPress: async () => {
+            await adminBanUser(current.user_id, authorUser, session!.user.id)
+            await adminDeletePost(current.id, session!.user.id)
+            Alert.alert('Kullanıcı Banlandı', `@${authorUser} hesabı askıya alındı.`)
+            setPosts(prev => prev.filter(p => p.user_id !== current.user_id))
+            setFriendPosts(prev => prev.filter(p => p.user_id !== current.user_id))
+          },
+        },
+        {
+          text: '👑 Yönetici Paneli',
+          onPress: () => router.push('/admin' as any),
         },
       ]
     )
@@ -370,6 +434,27 @@ export default function VoteScreen() {
             >
               <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '600' }}>Engelle</Text>
             </TouchableOpacity>
+
+            {isAdminUser && (
+              <TouchableOpacity
+                onPress={handleAdminQuickAction}
+                style={{
+                  backgroundColor: '#a855f725',
+                  paddingHorizontal: 10,
+                  paddingVertical: 5,
+                  borderRadius: 14,
+                  borderWidth: 1,
+                  borderColor: '#a855f7',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="shield-checkmark" size={12} color="#c084fc" />
+                <Text style={{ fontSize: 11, color: '#c084fc', fontWeight: '700' }}>Yönetici</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 

@@ -22,6 +22,7 @@ import { supportedLanguages } from '../../lib/i18n'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { registerForPushNotificationsAsync } from '../../lib/notifications'
+import { checkIsAdmin } from '../../lib/admin'
 
 export default function SettingsScreen() {
   const { theme, themeName, setThemeName, session, refreshSession, isAuthLoading, signOut, language, setLanguage, t } = useApp()
@@ -37,6 +38,7 @@ export default function SettingsScreen() {
   const [messagePrivacy, setMessagePrivacy] = useState<'everyone' | 'friends'>('everyone')
   const [isPrivate, setIsPrivate] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [isAdminUser, setIsAdminUser] = useState(false)
 
   // Modals for legal compliance
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
@@ -48,6 +50,7 @@ export default function SettingsScreen() {
     if (session?.user.id) {
       fetchPrivacySettings()
       refreshSession()
+      checkIsAdmin(session?.user?.user_metadata?.username, null, session?.user?.id).then(setIsAdminUser)
     }
   }, [session?.user.id])
 
@@ -467,6 +470,35 @@ export default function SettingsScreen() {
             <Ionicons name="notifications-outline" size={18} color={theme.textSub} />
           </TouchableOpacity>
         </View>
+
+        {isAdminUser && (
+          <>
+            <Text style={[s.sectionLabel, { color: '#c084fc' }]}>YÖNETİCİ</Text>
+            <View style={[s.card, { borderColor: '#a855f7', borderWidth: 1 }]}>
+              <TouchableOpacity
+                style={s.rowLast}
+                onPress={() => router.push('/admin' as any)}
+                activeOpacity={0.8}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                  <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#a855f725', alignItems: 'center', justifyContent: 'center' }}>
+                    <Ionicons name="shield-checkmark" size={18} color="#c084fc" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={[s.rowLabel, { color: '#ffffff', fontWeight: '700' }]}>👑 Yönetici Paneli</Text>
+                      <View style={{ backgroundColor: '#a855f730', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4 }}>
+                        <Text style={{ color: '#c084fc', fontSize: 9, fontWeight: '800' }}>ADMİN</Text>
+                      </View>
+                    </View>
+                    <Text style={s.rowSub}>Şikayetler, Kullanıcı Yönetimi & Metrikler</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#c084fc" />
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
 
         <Text style={s.sectionLabel}>HESAP</Text>
         <View style={s.card}>

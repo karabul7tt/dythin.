@@ -21,6 +21,7 @@ import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import { sanitizeInput } from '../../lib/security'
 import type { Profile, Message } from '../../lib/types'
+import { sendPushNotificationToUser } from '../../lib/notifications'
 import ZoomablePhoto from '../../components/ZoomablePhoto'
 
 export default function ChatScreen() {
@@ -273,6 +274,21 @@ export default function ChatScreen() {
           return [...prev, insertRes.data![0] as Message]
         })
         setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100)
+
+        // Karşı tarafa anlık bildirim gönder
+        try {
+          const { data: myProfile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', session.user.id)
+            .single()
+          const senderName = myProfile?.username ? `@${myProfile.username}` : 'Biri'
+          sendPushNotificationToUser(
+            friendId,
+            `Yeni Fotoğraf: ${senderName}`,
+            targetCaption ? `📷 ${targetCaption}` : '📷 Sana bir fotoğraf gönderdi.'
+          ).catch(() => {})
+        } catch {}
       }
     } catch (err: any) {
       Alert.alert('Fotoğraf Gönderilemedi', err.message || 'Lütfen tekrar deneyin.')
@@ -313,6 +329,21 @@ export default function ChatScreen() {
         return [...prev, data[0] as Message]
       })
       setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100)
+
+      // Karşı tarafa anlık bildirim gönder
+      try {
+        const { data: myProfile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', session.user.id)
+          .single()
+        const senderName = myProfile?.username ? `@${myProfile.username}` : 'Biri'
+        sendPushNotificationToUser(
+          friendId,
+          `Yeni Mesaj: ${senderName}`,
+          cleanText
+        ).catch(() => {})
+      } catch {}
     }
   }
 

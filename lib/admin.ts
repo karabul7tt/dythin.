@@ -1,0 +1,377 @@
+import { supabase } from './supabase'
+import type { Profile, Post } from './types'
+
+// ─── Super Admin Kullanıcı Listesi (Her zaman tam yetkili) ───────────
+export const SUPER_ADMIN_USERNAMES = [
+  'mehmetkarabul7tt',
+  'dythin',
+  'harakirikarabut',
+  'kdmdlsls',
+]
+
+export type AdminKPIs = {
+  totalUsers: number
+  totalPosts: number
+  totalVotes: number
+  pendingReports: number
+  bannedCount: number
+}
+
+export type ReportedPostItem = {
+  reportId: string
+  reason: string
+  createdAt: string
+  reporterId: string
+  reporterUsername?: string
+  post: {
+    id: string
+    title: string
+    description?: string | null
+    image_a_url: string
+    image_b_url?: string | null
+    created_at: string
+    authorId: string
+    authorUsername: string
+    authorName?: string | null
+    authorAvatar?: string | null
+  } | null
+}
+
+export type AdminUserItem = {
+  id: string
+  username: string
+  fullName?: string | null
+  avatarUrl?: string | null
+  email?: string | null
+  createdAt: string
+  isAdmin: boolean
+  isBanned: boolean
+  isSuperAdmin: boolean
+}
+
+/**
+ * Kullanıcının yönetici (admin) olup olmadığını kontrol eder.
+ */
+export async function checkIsAdmin(
+  username?: string | null,
+  role?: string | null,
+  userId?: string | null
+): Promise<boolean> {
+  if (!username && !userId) return false
+
+  const cleanUser = (username || '').toLowerCase().replace('@', '').trim()
+  if (SUPER_ADMIN_USERNAMES.includes(cleanUser)) return true
+  if (role === 'admin') return true
+
+  // Veritabanındaki dinamik yönetici kayıtlarını kontrol et
+  try {
+    const { data } = await supabase
+      .from('reports')
+      .select('reason')
+      .like('reason', 'ADMIN_ACTION:PROMOTE_ADMIN:%')
+      .order('created_at', { ascending: false })
+
+    if (data && data.length > 0) {
+      for (const row of data) {
+        if (cleanUser && row.reason.toLowerCase().includes(`:@${cleanUser}`)) return true
+        if (userId && row.reason.includes(`:${userId}:`)) return true
+      }
+    }
+  } catch {}
+
+  return false
+}
+
+/**
+ * Sistem genelindeki KPI ve istatistikleri çeker.
+ */
+export async function getAdminKPIs(): Promise<AdminKPIs> {
+  let totalUsers = 0
+  let totalPosts = 0
+  let totalVotes = 0
+  let pendingReports = 0
+  let bannedCount = 0
+
+  try {
+    const [uRes, pRes, vRes, rRes] = await Promise.all([
+      supabase.from('profiles').select('id', { count: 'exact', head: true }),
+      supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      supabase.from('votes').select('id', { count: 'exact', head: true }),
+      supabase.from('reports').select('id, reason'),
+    ])
+
+    totalUsers = uRes.count || 0
+    totalPosts = pRes.count || 0
+    totalVotes = vRes.count || 0
+
+    if (rRes.data) {
+      pendingReports = rRes.data.filter(r => !r.reason?.startsWith('ADMIN_ACTION:')).length
+      const bannedSet = new Set(
+        rRes.data
+          .filter(r => r.reason?.startsWith('ADMIN_ACTION:BAN_USER:'))
+          .map(r => r.reason.split(':')[2])
+      )
+      bannedCount = bannedSet.size
+    }
+  } catch (err) {
+    console.warn('getAdminKPIs error:', err)
+  }
+
+  return { totalUsers, totalPosts, totalVotes, pendingReports, bannedCount }
+}
+
+/**
+ * Şikayet edilen (raporlanan) gönderileri ve detaylarını listeler.
+ */
+export async function getReportedPosts(): Promise<ReportedPostItem[]> {
+  try {
+    const { data: reports, error } = await supabase
+      .from('reports')
+      .select('id, reason, created_at, reporter_id, post_id, posts(*, profiles(*))')
+      .order('created_at', { ascending: false })
+
+    if (error || !reports) return []
+
+    // Sadece gerçek kullanıcı şikayetlerini al (sistem loglarını filtrele)
+    const userReports = reports.filter(r => !r.reason?.startsWith('ADMIN_ACTION:'))
+    if (userReports.length === 0) return []
+
+    // Raporlayanların kullanıcı adlarını eşleştirmek için ID listesi
+    const reporterIds = Array.from(new Set(userReports.map(r => r.reporter_id).filter(Boolean)))
+    let reporterMap: Record<string, string> = {}
+    if (reporterIds.length > 0) {
+      const { data: reporters } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', reporterIds)
+      reporters?.forEach(rp => {
+        if (rp.username) reporterMap[rp.id] = rp.username
+      })
+    }
+
+    return userReports.map(r => {
+      const p = (r as any).posts
+      const author = p?.profiles
+      return {
+        reportId: r.id,
+        reason: r.reason || 'İçerik bildirimi',
+        createdAt: r.created_at,
+        reporterId: r.reporter_id,
+        reporterUsername: reporterMap[r.reporter_id] || 'Bilinmiyor',
+        post: p ? {
+          id: p.id,
+          title: p.title || 'Başlıksız Oylama',
+          description: p.description,
+          image_a_url: p.image_a_url,
+          image_b_url: p.image_b_url,
+          created_at: p.created_at,
+          authorId: p.user_id,
+          authorUsername: author?.username || 'kullanici',
+          authorName: author?.full_name,
+          authorAvatar: author?.avatar_url,
+        } : null,
+      }
+    })
+  } catch (err) {
+    console.warn('getReportedPosts error:', err)
+    return []
+  }
+}
+
+/**
+ * Tüm kullanıcıları ve rollerini listeler.
+ */
+export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
+  try {
+    const [profilesRes, reportsRes] = await Promise.all([
+      supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+      supabase.from('reports').select('reason, created_at').like('reason', 'ADMIN_ACTION:%').order('created_at', { ascending: false }),
+    ])
+
+    const profiles = profilesRes.data || []
+    const adminEvents = reportsRes.data || []
+
+    // Dinamik Ban ve Admin Haritası
+    const bannedUsers = new Set<string>()
+    const unbannedUsers = new Set<string>()
+    const promotedAdmins = new Set<string>()
+    const revokedAdmins = new Set<string>()
+
+    for (const ev of adminEvents) {
+      const r = ev.reason
+      if (r.startsWith('ADMIN_ACTION:BAN_USER:')) {
+        const uid = r.split(':')[2]
+        if (!unbannedUsers.has(uid)) bannedUsers.add(uid)
+      } else if (r.startsWith('ADMIN_ACTION:UNBAN_USER:')) {
+        const uid = r.split(':')[2]
+        unbannedUsers.add(uid)
+        bannedUsers.delete(uid)
+      } else if (r.startsWith('ADMIN_ACTION:PROMOTE_ADMIN:')) {
+        const uid = r.split(':')[2]
+        if (!revokedAdmins.has(uid)) promotedAdmins.add(uid)
+      } else if (r.startsWith('ADMIN_ACTION:REVOKE_ADMIN:')) {
+        const uid = r.split(':')[2]
+        revokedAdmins.add(uid)
+        promotedAdmins.delete(uid)
+      }
+    }
+
+    return profiles.map(p => {
+      const cleanUser = (p.username || '').toLowerCase()
+      const isSuper = SUPER_ADMIN_USERNAMES.includes(cleanUser)
+      const isDynamicAdmin = promotedAdmins.has(p.id) || (p.role === 'admin')
+      const isBanned = bannedUsers.has(p.id) || (p.role === 'banned')
+
+      return {
+        id: p.id,
+        username: p.username || 'isimsiz',
+        fullName: p.full_name,
+        avatarUrl: p.avatar_url,
+        email: p.email,
+        createdAt: p.created_at,
+        isAdmin: isSuper || isDynamicAdmin,
+        isBanned: isBanned,
+        isSuperAdmin: isSuper,
+      }
+    })
+  } catch (err) {
+    console.warn('getAllUsersForAdmin error:', err)
+    return []
+  }
+}
+
+/**
+ * Gönderiyi kalıcı olarak siler ve akışlardan kaldırır.
+ */
+export async function adminDeletePost(postId: string, adminUserId: string): Promise<boolean> {
+  try {
+    // 1. Postu pasif yap ve silmeyi dene
+    await supabase.from('posts').update({ is_active: false }).eq('id', postId)
+    try {
+      await supabase.from('posts').delete().eq('id', postId)
+    } catch {}
+
+    // 2. Global filtre için sistem raporu ekle
+    await supabase.from('reports').insert({
+      reporter_id: adminUserId,
+      post_id: postId,
+      reason: `ADMIN_ACTION:DELETE_POST:${postId}`,
+    })
+
+    return true
+  } catch (err) {
+    console.warn('adminDeletePost error:', err)
+    return false
+  }
+}
+
+/**
+ * Kullanıcıyı banlar (askıya alır).
+ */
+export async function adminBanUser(
+  targetUserId: string,
+  targetUsername: string,
+  adminUserId: string
+): Promise<boolean> {
+  try {
+    const cleanUser = targetUsername.replace('@', '').trim()
+
+    // 1. Kullanıcının tüm aktif gönderilerini yayından kaldır
+    await supabase.from('posts').update({ is_active: false }).eq('user_id', targetUserId)
+
+    // 2. Admin eylemini rapor tablosuna işle (tüm cihazlar anlık görür)
+    await supabase.from('reports').insert({
+      reporter_id: adminUserId,
+      reason: `ADMIN_ACTION:BAN_USER:${targetUserId}:@${cleanUser}`,
+    })
+
+    // 3. Blocked users tablosuna ekle
+    try {
+      await supabase.from('blocked_users').insert({
+        blocker_id: adminUserId,
+        blocked_id: targetUserId,
+      })
+    } catch {}
+
+    return true
+  } catch (err) {
+    console.warn('adminBanUser error:', err)
+    return false
+  }
+}
+
+/**
+ * Kullanıcının banını kaldırır.
+ */
+export async function adminUnbanUser(
+  targetUserId: string,
+  targetUsername: string,
+  adminUserId: string
+): Promise<boolean> {
+  try {
+    const cleanUser = targetUsername.replace('@', '').trim()
+    await supabase.from('reports').insert({
+      reporter_id: adminUserId,
+      reason: `ADMIN_ACTION:UNBAN_USER:${targetUserId}:@${cleanUser}`,
+    })
+    return true
+  } catch (err) {
+    console.warn('adminUnbanUser error:', err)
+    return false
+  }
+}
+
+/**
+ * Kullanıcıya Admin rolü verir.
+ */
+export async function adminPromoteUser(
+  targetUserId: string,
+  targetUsername: string,
+  adminUserId: string
+): Promise<boolean> {
+  try {
+    const cleanUser = targetUsername.replace('@', '').trim()
+    await supabase.from('reports').insert({
+      reporter_id: adminUserId,
+      reason: `ADMIN_ACTION:PROMOTE_ADMIN:${targetUserId}:@${cleanUser}`,
+    })
+    return true
+  } catch (err) {
+    console.warn('adminPromoteUser error:', err)
+    return false
+  }
+}
+
+/**
+ * Kullanıcının Admin yetkisini geri alır.
+ */
+export async function adminRevokeUser(
+  targetUserId: string,
+  targetUsername: string,
+  adminUserId: string
+): Promise<boolean> {
+  try {
+    const cleanUser = targetUsername.replace('@', '').trim()
+    await supabase.from('reports').insert({
+      reporter_id: adminUserId,
+      reason: `ADMIN_ACTION:REVOKE_ADMIN:${targetUserId}:@${cleanUser}`,
+    })
+    return true
+  } catch (err) {
+    console.warn('adminRevokeUser error:', err)
+    return false
+  }
+}
+
+/**
+ * Raporu kapatır / çözüldü olarak işaretler.
+ */
+export async function adminDismissReport(reportId: string): Promise<boolean> {
+  try {
+    await supabase.from('reports').delete().eq('id', reportId)
+    return true
+  } catch (err) {
+    console.warn('adminDismissReport error:', err)
+    return false
+  }
+}
