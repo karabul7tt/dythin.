@@ -30,7 +30,6 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false)
   const [resendCooldown, setResendCooldown] = useState(0)
 
-  // Resend cooldown timer
   useEffect(() => {
     if (resendCooldown <= 0) return
     const timer = setInterval(() => {
@@ -39,7 +38,6 @@ export default function ResetPassword() {
     return () => clearInterval(timer)
   }, [resendCooldown])
 
-  // If initialIdentifier has '@' and params.email was explicitly provided from settings, start at verify step
   useEffect(() => {
     if (params.email && params.email.includes('@')) {
       setTargetEmail(params.email.trim())
@@ -58,7 +56,6 @@ export default function ResetPassword() {
     try {
       let resolvedEmail = rawInput
 
-      // Eğer kullanıcı adı girildiyse (içinde @ yoksa), e-postasını profilden bul
       if (!rawInput.includes('@')) {
         const cleanUsername = rawInput.replace(/^@/, '')
         const { data: foundProfile, error: profileErr } = await supabase
@@ -143,7 +140,6 @@ export default function ResetPassword() {
 
     setLoading(true)
     try {
-      // 1. Recovery OTP Kodunu Doğrula
       const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
         email: targetEmail,
         token: cleanCode,
@@ -158,7 +154,6 @@ export default function ResetPassword() {
         )
       }
 
-      // 2. Yeni Şifreyi Kaydet
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       })
@@ -168,7 +163,6 @@ export default function ResetPassword() {
         return Alert.alert('Şifre Güncellenemedi', getCleanErrorMessage(updateError))
       }
 
-      // 3. Başarıyla oturum aç veya login ekranına yönlendir
       await supabase.auth.signOut()
       Alert.alert(
         'Şifreniz Değiştirildi',

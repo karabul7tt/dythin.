@@ -39,7 +39,6 @@ export default function UserProfileScreen() {
   const [zoomMounted, setZoomMounted] = useState(false)
 
   const openZoom = (uri: string) => {
-    // Tamamen unmount et, sonra yeni URI ile yeniden mount et
     setZoomMounted(false)
     setZoomUri('')
     setTimeout(() => {
@@ -83,7 +82,6 @@ export default function UserProfileScreen() {
       setProfile(p)
     }
 
-    // Stats
     const { count: postCount } = await supabase
       .from('posts')
       .select('*', { count: 'exact', head: true })
@@ -146,7 +144,6 @@ export default function UserProfileScreen() {
         setFriendshipStatus('pending')
         Alert.alert('İstek Gönderildi', 'Arkadaşlık isteği başarıyla iletildi.')
 
-        // Karşı tarafa push bildirimi gönder
         try {
           const { data: myProfile } = await supabase
             .from('profiles')
@@ -321,7 +318,6 @@ export default function UserProfileScreen() {
     headerTitle: { fontSize: 16, fontWeight: '700', color: theme.text },
     scroll: { padding: 20 },
     
-    // Profile Hero Card
     heroCard: {
       backgroundColor: theme.card,
       borderRadius: 20,
@@ -354,13 +350,11 @@ export default function UserProfileScreen() {
     },
     actionBtnText: { color: theme.bg, fontWeight: '600', fontSize: 13 },
 
-    // Stats Grid
     statsRow: { flexDirection: 'row', gap: 10, marginBottom: 24 },
     statCard: { flex: 1, backgroundColor: theme.card, borderRadius: 16, paddingVertical: 14, alignItems: 'center', borderWidth: 0.5, borderColor: theme.border },
     statNum: { fontSize: 20, fontWeight: '700', color: theme.accent },
     statLabel: { fontSize: 11, color: theme.textSub, marginTop: 4 },
 
-    // Posts Section
     sectionTitle: { fontSize: 14, fontWeight: '700', color: theme.text, marginBottom: 14 },
     postCard: {
       backgroundColor: theme.card,
@@ -374,7 +368,6 @@ export default function UserProfileScreen() {
     imagesRow: { flexDirection: 'row', gap: 8, height: 240, borderRadius: 14, overflow: 'hidden', marginBottom: 12 },
     postImage: { flex: 1, height: '100%', backgroundColor: '#0a0a12' },
     
-    // Vote Buttons Inside Card
     voteBtnRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
     voteBtnA: {
       flex: 1,
@@ -395,7 +388,6 @@ export default function UserProfileScreen() {
     voteBtnTextA: { color: '#C9A84C', fontWeight: '700', fontSize: 13 },
     voteBtnTextB: { color: '#ffffff', fontWeight: '700', fontSize: 13 },
     
-    // Progress Bar
     barBg: { height: 8, backgroundColor: theme.bg, borderRadius: 4, overflow: 'hidden', flexDirection: 'row', marginTop: 10 },
     barFillA: { height: '100%', backgroundColor: '#C9A84C' },
     barFillB: { height: '100%', backgroundColor: '#7F77DD' },

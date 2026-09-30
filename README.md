@@ -1,35 +1,36 @@
-# Dythin. — Kararsızlıktan Kurtar Kendini 📸🗳️
+# Dythin
 
-Dythin, kullanıcıların kararsız kaldıkları kombinler, ürünler ve tercihler için topluluktan ve arkadaşlarından A/B fotoğrafları veya tekli görseller ile oy toplamasını sağlayan React Native ve Expo tabanlı mobil oylama uygulamasıdır.
+Dythin, kullanıcıların kararsız kaldığı kombinler, fotoğraflar ve seçenekler için A/B karşılaştırmaları veya tekli fotoğraflar üzerinden topluluktan ve arkadaşlarından oy toplayabildiği bir mobil sosyal oylama uygulamasıdır.
 
-## 🚀 Özellikler
+## Özellikler
 
-- **Tinder Tarzı Oylama (Swipe Feed):** Kararsız kalınan gönderileri sağa/sola kaydırarak oy verme.
-- **A/B Karşılaştırma Modu:** İki farklı kombin veya fotoğraf arasında topluluk kararını öğrenme.
-- **Genel & Arkadaşlar Filtrelemesi:** Gönderileri herkese açık veya sadece arkadaşlara özel paylaşabilme.
-- **Sonuçlar & İstatistikler:** Oyların yüzde dağılımı, kazanan fotoğraf göstergesi ve zaman sayacı.
-- **Kullanıcı Moderasyonu & Güvenlik:** İçerik bildirme (Report), kullanıcı engelleme (Block), XSS sanitization, rate limiting ve App Store uyumlu Hesap Silme işlevi.
-- **Dinamik Temalar:** Mor & Gece, Siyah & Altın, Pembe & Krem, Yeşil & Bej renk temaları.
+- **Kaydırmalı Oylama Akışı:** Gönderileri sağa veya sola kaydırarak hızlı oy verme.
+- **A/B Karşılaştırma:** İki görseli yan yana koyup tercih oranını öğrenme.
+- **Gizlilik Seçenekleri:** Gönderileri herkese açık veya sadece arkadaşlara özel paylaşabilme.
+- **Anlık Mesajlaşma:** Arkadaşlar arasında fotoğraf ve metin mesajlaşması, anlık bildirim desteği.
+- **Sonuçlar & İstatistikler:** Oyların yüzde dağılımı ve detaylı dökümü.
+- **Yönetici & Moderasyon:** Gönderi şikayet ve denetleme mekanizması, hesap askıya alma ve içerik kaldırma.
+- **Tema Desteği:** Kişiselleştirilebilir renk paletleri.
 
-## 🛠️ Teknolojiler
+## Teknolojiler
 
-- **Mobil Framework:** React Native / Expo (v54), Expo Router (v6)
+- **Frontend:** React Native, Expo, Expo Router
 - **Dil:** TypeScript
-- **Veritabanı & Kimlik Doğrulama:** Supabase (PostgreSQL, Auth, Storage, RLS)
-- **Bildirimler:** Expo Notifications
+- **Backend:** Supabase (PostgreSQL, Authentication, Realtime, Storage)
+- **Bildirim:** Expo Notifications
 
-## 📦 Kurulum ve Çalıştırma
+## Kurulum ve Çalıştırma
 
 Bağımlılıkları yükleyin:
 ```bash
 npm install
 ```
 
-Expo geliştirici sunucusunu başlatın:
+Geliştirici sunucusunu başlatın:
 ```bash
 npx expo start
 ```
 
-## 📄 Lisans
+## Lisans
 
-Bu proje MIT lisansı ile lisanslanmıştır.
+MIT

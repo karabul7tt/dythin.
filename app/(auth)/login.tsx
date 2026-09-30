@@ -72,7 +72,6 @@ export default function Login() {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
 
-  // Rate Limiting Cooldown Timer (Giriş Deneme Sınırlayıcı)
   useEffect(() => {
     if (cooldown <= 0) return
     const timer = setInterval(() => {
@@ -99,7 +98,6 @@ export default function Login() {
 
       const res = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl)
 
-      // 1. URL geldiyse doğrudan authenticateFromUrl ile doğrula
       if (res.type === 'success' && res.url) {
         const success = await authenticateFromUrl(res.url)
         if (success) {
@@ -108,7 +106,6 @@ export default function Login() {
         }
       }
 
-      // 2. Tarayıcı kapandı — polling ile oturumu bekle (5 saniye, her 500ms)
       for (let i = 0; i < 10; i++) {
         await new Promise(r => setTimeout(r, 500))
         const { data: poll } = await supabase.auth.getSession()
@@ -118,7 +115,6 @@ export default function Login() {
         }
       }
 
-      // 3. Iptal edildiyse sessizce çık
       if (res.type === 'cancel' || res.type === 'dismiss') {
         return
       }
@@ -130,7 +126,6 @@ export default function Login() {
         router.replace('/(tabs)')
         return
       }
-      // Kullanıcı iptal ettiyse hata gösterme
       if (e?.message?.includes('cancel') || e?.message?.includes('dismiss')) return
       Alert.alert(
         'Giriş Yapılamadı',
@@ -195,9 +190,7 @@ export default function Login() {
           throw new Error('Apple kimlik doğrulama belirteci alınamadı.')
         }
       } catch (e: any) {
-        if (e.code === 'ERR_REQUEST_CANCELED') {
-          // Kullanıcı kendisi iptal etti, uyarı gösterme
-        } else {
+        if (e.code !== 'ERR_REQUEST_CANCELED') {
           Alert.alert(
             'Apple Girişi Başarısız',
             getCleanErrorMessage(e, 'Apple ile giriş yapılamadı. Supabase panelinde Apple sağlayıcısının açık olduğunu doğrulayın.')
@@ -267,7 +260,6 @@ export default function Login() {
         const cleanUsername = validateInstagramUsername(username).cleanUsername
         const cleanPhone = phone.trim()
 
-        // Benzersiz Kullanıcı Adı Denetimi (Case-Insensitive)
         const { data: existingUser } = await supabase
           .from('profiles')
           .select('id')
@@ -326,10 +318,8 @@ export default function Login() {
           }
         }
       } else {
-        // Giriş Modu: E-posta, Telefon veya Kullanıcı Adı ile Akıllı Çözümleme
         let targetEmail = inputIdentifier
 
-        // Eğer kullanıcı adı girildiyse (içinde @ yoksa)
         if (!inputIdentifier.includes('@')) {
           const { data: foundProfile } = await supabase
             .from('profiles')
@@ -386,7 +376,6 @@ export default function Login() {
       })
 
       if (error) {
-        // Fallback to type email
         const res = await supabase.auth.verifyOtp({
           email: email.trim(),
           token: cleanToken,
@@ -409,7 +398,6 @@ export default function Login() {
             })
         }
 
-        // 6-8 haneli kod doğrulandıktan sonra otomatik giriş yap
         if (password) {
           await supabase.auth.signInWithPassword({
             email: email.trim(),

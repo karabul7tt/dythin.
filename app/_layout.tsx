@@ -6,7 +6,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import * as SplashScreen from 'expo-splash-screen'
 import { AppProvider } from '../context/AppContext'
 
-// Alttan çıkan tüm sarı/turuncu geliştirici uyarı bildirimlerini kapat
 LogBox.ignoreAllLogs(true)
 
 export { ErrorBoundary } from 'expo-router'

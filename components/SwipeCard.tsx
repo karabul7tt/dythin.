@@ -77,10 +77,8 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
         }).start()
       },
       onPanResponderRelease: (evt, gesture) => {
-        // Tıklama tespiti (8px'den az hareket)
         if (Math.abs(gesture.dx) < 8 && Math.abs(gesture.dy) < 8) {
           const touchY = evt.nativeEvent.locationY || 0
-          // Fotoğraf yüksekliği 470px - altındaki bilgi/profil alanına tıklandıysa profile git
           if (touchY >= 470 && post.user_id) {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
             router.push({ pathname: '/user-profile', params: { userId: post.user_id } })
@@ -140,7 +138,6 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
             onSwipeLeft()
           })
         } else {
-          // Yeterince çekilmediyse akıcı ve esnek bir yayla tam ortaya geri dönsün
           Animated.spring(position, {
             toValue: { x: 0, y: 0 },
             friction: 6,

@@ -40,7 +40,6 @@ export default function SettingsScreen() {
   const [refreshing, setRefreshing] = useState(false)
   const [isAdminUser, setIsAdminUser] = useState(false)
 
-  // Modals for legal compliance
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
 
@@ -77,14 +76,12 @@ export default function SettingsScreen() {
 
   async function fetchPrivacySettings() {
     try {
-      // 1. Önce yerel hafızadan anında yükle
       const savedPrivate = await AsyncStorage.getItem(`is_private_${session?.user.id}`)
       if (savedPrivate !== null) setIsPrivate(JSON.parse(savedPrivate))
 
       const savedMsgPrivacy = await AsyncStorage.getItem(`msg_privacy_${session?.user.id}`)
       if (savedMsgPrivacy) setMessagePrivacy(savedMsgPrivacy as 'everyone' | 'friends')
 
-      // 2. Supabase'den sorgula (kolon varsa senkronize et)
       const { data, error } = await supabase
         .from('profiles')
         .select('message_privacy, is_private')
@@ -101,9 +98,7 @@ export default function SettingsScreen() {
           AsyncStorage.setItem(`is_private_${session?.user.id}`, JSON.stringify(data.is_private))
         }
       }
-    } catch {
-      // Sessiz fallback
-    }
+    } catch {}
   }
 
   async function handleTogglePrivate() {
@@ -123,9 +118,7 @@ export default function SettingsScreen() {
       if (error && error.code !== '42703' && !error.message.includes('is_private') && error.code !== 'PGRST204') {
         console.warn('Gizlilik senkronizasyon uyarısı:', error.message)
       }
-    } catch {
-      // Yerel hafızada başarıyla saklandı
-    }
+    } catch {}
   }
 
   async function handleUpdateMessagePrivacy(option: 'everyone' | 'friends') {
@@ -144,9 +137,7 @@ export default function SettingsScreen() {
       if (error && error.code !== '42703' && !error.message.includes('message_privacy') && error.code !== 'PGRST204') {
         console.warn('Mesaj gizliliği senkronizasyon uyarısı:', error.message)
       }
-    } catch {
-      // Yerel hafızada başarıyla saklandı
-    }
+    } catch {}
   }
 
   async function handleEnableNotifications() {
@@ -212,7 +203,7 @@ export default function SettingsScreen() {
       setNewEmail('')
       setShowEmailForm(false)
       Alert.alert(
-        '✉️ Onay Bağlantısı Gönderildi',
+        'Onay Bağlantısı Gönderildi',
         'E-posta değişikliği için hem mevcut adresinize hem de yeni adresinize onay bağlantısı gönderildi.\n\nBağlantılara tıkladıktan sonra e-posta adresiniz güncellenecektir.'
       )
     } catch (error: any) {
@@ -220,7 +211,7 @@ export default function SettingsScreen() {
         setNewEmail('')
         setShowEmailForm(false)
         Alert.alert(
-          '✉️ İstek İletildi',
+          'İstek İletildi',
           'E-posta güncelleme talebiniz iletildi. Lütfen gelen kutunuzu (ve spam klasörünü) kontrol edin.'
         )
       } else {
@@ -288,7 +279,6 @@ export default function SettingsScreen() {
     ])
   }
 
-  // App Store Guidelines Section 5.1.1(v) - Account Deletion Requirement
   async function handleDeleteAccount() {
     Alert.alert(
       'Hesabımı Kalıcı Olarak Sil',
@@ -311,10 +301,8 @@ export default function SettingsScreen() {
                     if (!session?.user.id) return
                     setLoading(true)
                     try {
-                      // 1. Sunucu taraflı RPC ile Auth ve tüm veri tabanı kayıtlarını kalıcı olarak sil
                       const { error: rpcError } = await supabase.rpc('delete_user_account')
 
-                      // 2. Fallback: İstemci taraflı silme işlemleri
                       if (rpcError) {
                         await supabase.from('votes').delete().eq('voter_id', session.user.id)
                         await supabase.from('posts').delete().eq('user_id', session.user.id)

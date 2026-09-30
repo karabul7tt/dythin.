@@ -8,7 +8,6 @@ export function extractAuthFromUrl(url: string | null | undefined) {
   let error: string | null = null
   let errorDescription: string | null = null
 
-  // 1. Hash Fragment (#access_token=...&refresh_token=...)
   if (url.includes('#')) {
     const hash = url.split('#')[1]
     const params = new URLSearchParams(hash)
@@ -19,7 +18,6 @@ export function extractAuthFromUrl(url: string | null | undefined) {
     errorDescription = params.get('error_description')
   }
 
-  // 2. Query Parameters (?code=... or ?access_token=...)
   if (url.includes('?')) {
     const query = url.split('?')[1].split('#')[0]
     const params = new URLSearchParams(query)
@@ -125,7 +123,6 @@ export async function authenticateFromUrl(url: string | null | undefined): Promi
   const parsed = extractAuthFromUrl(url)
   if (!parsed) return false
 
-  // URL'de bir hata parametresi varsa doğrudan fırlat
   if (parsed.error || parsed.errorDescription) {
     const errorMsg = parsed.errorDescription || parsed.error || 'Bilinmeyen kimlik doğrulama hatası'
     throw new Error(`Google/Supabase Hatası: ${errorMsg}`)
@@ -134,7 +131,6 @@ export async function authenticateFromUrl(url: string | null | undefined): Promi
   try {
     let session = null
 
-    // 1. Implicit Grant: access_token + refresh_token varsa doğrudan oturum kur
     if (parsed.accessToken && parsed.refreshToken) {
       const { data, error } = await supabase.auth.setSession({
         access_token: parsed.accessToken,
@@ -145,25 +141,21 @@ export async function authenticateFromUrl(url: string | null | undefined): Promi
       }
     }
 
-    // 2. PKCE: authorization code varsa değiştir
     if (!session && parsed.code) {
       const { data, error } = await supabase.auth.exchangeCodeForSession(parsed.code)
       if (!error && data?.session) {
         session = data.session
       } else {
-        // Fallback: belki tarayıcı oturumu zaten kurmuştur
         const { data: cur } = await supabase.auth.getSession()
         if (cur?.session) session = cur.session
       }
     }
 
-    // 3. Fallback: Aktif oturum kontrolü
     if (!session) {
       const { data: cur } = await supabase.auth.getSession()
       if (cur?.session) session = cur.session
     }
 
-    // Oturum başarıyla kurulduysa profil kaydının varlığını garantile
     if (session?.user) {
       await syncUserProfileWithDatabase(session.user)
       return true

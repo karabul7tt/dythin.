@@ -36,11 +36,8 @@ export default function ChatScreen() {
   const [sending, setSending] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
 
-  // Instagram DM Style Photo Sending Preview State
   const [pendingPhotoUri, setPendingPhotoUri] = useState<string | null>(null)
   const [photoCaption, setPhotoCaption] = useState('')
-
-  // Fullscreen Zoom Photo
   const [selectedPhotoModal, setSelectedPhotoModal] = useState<string | null>(null)
   const scrollViewRef = useRef<ScrollView>(null)
 
@@ -131,7 +128,6 @@ export default function ChatScreen() {
     }
   }
 
-  // Fotoğraf URL'sini güvenle çıkarma
   function extractPhotoUrl(msg: Message): string | null {
     if (msg.image_url) return msg.image_url
     if (msg.content?.startsWith('[PHOTO]:')) {
@@ -144,7 +140,6 @@ export default function ChatScreen() {
     return null
   }
 
-  // Metin içeriğini çıkarma
   function extractTextContent(msg: Message): string {
     if (msg.content?.startsWith('[PHOTO]:')) {
       const parts = msg.content.split('\n')
@@ -156,7 +151,6 @@ export default function ChatScreen() {
     return msg.content || ''
   }
 
-  // 1. Adım: Fotoğraf Çekme veya Galeriden Seçme Menüsü
   function handlePickImage() {
     if (uploadingImage || sending || !session?.user.id || !friendId) return
 
@@ -207,7 +201,6 @@ export default function ChatScreen() {
     )
   }
 
-  // 2. Adım: Önizleme Ekranından Fotoğrafı Gönderme
   async function handleSendPendingPhoto() {
     if (!pendingPhotoUri || !session?.user.id || !friendId || uploadingImage) return
 
@@ -240,7 +233,6 @@ export default function ChatScreen() {
 
       const imageUrl = publicUrlData.publicUrl
 
-      // 1. Normal image_url ile dene
       const newMsgPayload: any = {
         sender_id: session.user.id,
         receiver_id: friendId,
@@ -253,7 +245,6 @@ export default function ChatScreen() {
         .insert(newMsgPayload)
         .select()
 
-      // 2. image_url sütunu yoksa dual-mode fallback
       if (insertRes.error) {
         const fallbackPayload = {
           sender_id: session.user.id,
@@ -275,7 +266,6 @@ export default function ChatScreen() {
         })
         setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100)
 
-        // Karşı tarafa anlık bildirim gönder
         try {
           const { data: myProfile } = await supabase
             .from('profiles')
@@ -286,7 +276,7 @@ export default function ChatScreen() {
           sendPushNotificationToUser(
             friendId,
             `Yeni Fotoğraf: ${senderName}`,
-            targetCaption ? `📷 ${targetCaption}` : '📷 Sana bir fotoğraf gönderdi.'
+            targetCaption ? targetCaption : 'Sana bir fotoğraf gönderdi.'
           ).catch(() => {})
         } catch {}
       }
@@ -330,7 +320,6 @@ export default function ChatScreen() {
       })
       setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100)
 
-      // Karşı tarafa anlık bildirim gönder
       try {
         const { data: myProfile } = await supabase
           .from('profiles')
@@ -458,9 +447,6 @@ export default function ChatScreen() {
     return `${hours}:${mins}`
   }
 
-  // Tik Mantığı:
-  // Okunduysa (is_read === true) => Aktif tema renginde parlayan çift tik
-  // Okunmadıysa => Gri çift tik (İletildi)
   const readReceiptColor = theme.accentText || theme.accent || '#38BDF8'
 
   const s = StyleSheet.create({
@@ -501,11 +487,9 @@ export default function ChatScreen() {
 
     chatList: { flex: 1, paddingHorizontal: 14, paddingVertical: 12 },
     
-    // Bubble Row
     bubbleRowMine: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10 },
     bubbleRowOther: { flexDirection: 'row', justifyContent: 'flex-start', marginBottom: 10 },
     
-    // Text Bubble
     bubbleMine: {
       maxWidth: '82%',
       backgroundColor: theme.accent,
@@ -525,7 +509,6 @@ export default function ChatScreen() {
       paddingVertical: 10,
     },
 
-    // INSTAGRAM DM STYLE PHOTO BUBBLE (ETRAFINDA MORLUK OLMADAN, SAF FOTOĞRAF)
     photoBubbleStandalone: {
       borderRadius: 18,
       overflow: 'hidden',
@@ -558,7 +541,6 @@ export default function ChatScreen() {
 
     emptyText: { color: theme.textSub, fontSize: 13, textAlign: 'center', marginVertical: 40 },
 
-    // Input Bar
     inputRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -658,7 +640,6 @@ export default function ChatScreen() {
                 const photoUrl = extractPhotoUrl(m)
                 const textContent = extractTextContent(m)
 
-                // 1. SAF FOTOĞRAF BALONU (INSTAGRAM DM GİBİ MORLUKSUZ)
                 if (photoUrl && !textContent) {
                   return (
                     <TouchableOpacity
@@ -677,7 +658,6 @@ export default function ChatScreen() {
                           style={s.photoStandaloneImage}
                           resizeMode="cover"
                         />
-                        {/* Sağ altta hafif cam zaman ve çift tik rozeti */}
                         <View style={s.photoTimestampOverlay}>
                           <Text style={{ color: '#fff', fontSize: 10, fontWeight: '600' }}>
                             {formatTime(m.created_at)}
@@ -695,7 +675,6 @@ export default function ChatScreen() {
                   )
                 }
 
-                // 2. METİN VEYA AÇIKLAMALI FOTOĞRAF BALONU
                 return (
                   <TouchableOpacity
                     key={m.id || Math.random().toString()}

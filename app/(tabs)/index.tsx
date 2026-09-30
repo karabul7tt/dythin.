@@ -59,7 +59,6 @@ export default function VoteScreen() {
 
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-    // Genel oylamalar - 24 saat kuralı (24 saat sonra başkalarının oylama akışından kalkar)
     let publicQuery = supabase.from('posts').select('*, profiles(id, username, full_name, avatar_url)')
       .eq('audience', 'public')
       .eq('is_active', true)
@@ -69,7 +68,6 @@ export default function VoteScreen() {
     if (blockedIds.length > 0) publicQuery = publicQuery.not('user_id', 'in', `(${blockedIds.join(',')})`)
     const { data: publicPosts } = await publicQuery.order('created_at', { ascending: false })
 
-    // Arkadaş oylamaları - 24 saat kuralı (24 saat sonra başkalarının oylama akışından kalkar)
     const { data: friendships } = await supabase
       .from('friendships')
       .select('requester_id, receiver_id')
@@ -91,7 +89,6 @@ export default function VoteScreen() {
     if (blockedIds.length > 0) friendQuery = friendQuery.not('user_id', 'in', `(${blockedIds.join(',')})`)
     const { data: fPosts } = await friendQuery.order('created_at', { ascending: false })
 
-    // Admin ban ve silinen gönderi kontrolü
     let adminEvents: any[] = []
     try {
       const res = await supabase
@@ -112,7 +109,6 @@ export default function VoteScreen() {
       }
     })
 
-    // İstemci tarafı doğrulama (expires_at, 24 saat ve admin moderasyon kontrolü)
     const isPostActive = (p: Post) => {
       if (!p.is_active) return false
       if (adminDeletedPostIds.has(p.id)) return false
@@ -127,12 +123,10 @@ export default function VoteScreen() {
     setLoading(false)
   }
 
-  // State for comment modal
   const [commentVisible, setCommentVisible] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [currentVoteId, setCurrentVoteId] = useState<string | null>(null)
 
-  // Handle vote with A/B option
   async function handleVote(option: 'A' | 'B') {
     const current = tab === 'public' ? posts[0] : friendPosts[0]
     if (!current) return
@@ -144,7 +138,6 @@ export default function VoteScreen() {
     }).select('id')
 
     if (error && error.code === '42703') {
-      // Fallback if selected_option column does not exist yet
       const res = await supabase.from('votes').insert({
         post_id: current.id,
         voter_id: session?.user.id,
@@ -159,7 +152,6 @@ export default function VoteScreen() {
       return
     }
 
-    // Post sahibine push bildirim gönder
     if (current.user_id && current.user_id !== session?.user.id) {
       sendPushNotificationToUser(
         current.user_id,
@@ -168,12 +160,10 @@ export default function VoteScreen() {
       ).catch(() => {})
     }
 
-    // Remove current post from stack
     if (tab === 'public') setPosts(prev => prev.slice(1))
     else setFriendPosts(prev => prev.slice(1))
   }
 
-  // Submit comment for the current vote
   async function submitComment() {
     if (!currentVoteId || !commentText.trim()) return
     const { error } = await supabase.from('votes').update({ comment: commentText.trim() }).eq('id', currentVoteId)
@@ -230,12 +220,10 @@ export default function VoteScreen() {
           text: 'Engelle',
           style: 'destructive',
           onPress: async () => {
-            // 1. Engellenen kullanıcılar tablosuna ekle
             const { error } = await supabase.from('blocked_users').insert({
               blocker_id: session?.user.id,
               blocked_id: current.user_id,
             })
-            // 2. Geliştiriciye otomatik rapor gönder (Apple Guideline 1.2 gereksinimi)
             await supabase.from('reports').insert({
               reporter_id: session?.user.id,
               post_id: current.id,

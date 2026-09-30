@@ -336,7 +336,6 @@ export default function ProfileScreen() {
       return
     }
 
-    // 1. İsim Değişiklik Limiti Denetimi (14 günde en fazla 2 kez)
     if (isNameChanged) {
       const nameCheck = checkChangeLimit(nameChanges)
       if (!nameCheck.allowed) {
@@ -347,7 +346,6 @@ export default function ProfileScreen() {
       }
     }
 
-    // 2. Kullanıcı Adı Değişiklik Limiti Denetimi (14 günde en fazla 2 kez)
     if (isUsernameChanged) {
       const usernameCheck = checkChangeLimit(usernameChanges)
       if (!usernameCheck.allowed) {
@@ -362,7 +360,6 @@ export default function ProfileScreen() {
     try {
       if (!session?.user?.id) throw new Error('Oturum açmış kullanıcı bulunamadı.')
 
-      // 3. Benzersiz Kullanıcı Adı Denetimi (Case-Insensitive)
       if (isUsernameChanged) {
         const { data: existingUser } = await supabase
           .from('profiles')
@@ -416,7 +413,6 @@ export default function ProfileScreen() {
           AsyncStorage.setItem(`username_changes_${session.user.id}`, JSON.stringify(nextUsernameChanges)).catch(() => null)
         }
 
-        // Supabase Auth user_metadata senkronizasyonu
         supabase.auth.updateUser({
           data: {
             name_changes: nextNameChanges,
@@ -467,7 +463,6 @@ export default function ProfileScreen() {
       setSearchResult(null)
       setSearch('')
 
-      // Karşı tarafa push bildirimi gönder
       if (receiverId) {
         try {
           const senderName = username ? `@${username}` : 'Biri'
@@ -532,7 +527,6 @@ export default function ProfileScreen() {
     logoDot: { color: theme.accent },
     settingsBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: theme.card, borderWidth: 0.5, borderColor: theme.border, alignItems: 'center', justifyContent: 'center' },
     
-    // Modern Profile Hero Header Card
     heroCard: {
       backgroundColor: theme.card,
       borderRadius: 20,
@@ -564,27 +558,23 @@ export default function ProfileScreen() {
     displayName: { fontSize: 18, fontWeight: '700', color: theme.text, marginBottom: 2 },
     handleText: { fontSize: 13, color: theme.textSub },
 
-    // Stats Grid
     statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
     statCard: { flex: 1, backgroundColor: theme.card, borderRadius: 16, paddingVertical: 14, paddingHorizontal: 8, alignItems: 'center', borderWidth: 0.5, borderColor: theme.border },
     statNum: { fontSize: 20, fontWeight: '700', color: theme.accent },
     statLabel: { fontSize: 11, color: theme.textSub, marginTop: 4 },
 
-    // Segmented Tab Switcher
     tabRow: { flexDirection: 'row', backgroundColor: theme.card, borderRadius: 24, padding: 4, marginBottom: 20, borderWidth: 0.5, borderColor: theme.border },
     tabBtn: { flex: 1, paddingVertical: 10, borderRadius: 20, alignItems: 'center' },
     tabBtnActive: { backgroundColor: theme.accent },
     tabText: { fontSize: 13, color: theme.textSub, fontWeight: '600' },
     tabTextActive: { color: theme.bg },
 
-    // Form inputs
     formCard: { backgroundColor: theme.card, borderRadius: 16, padding: 16, borderWidth: 0.5, borderColor: theme.border, marginBottom: 16 },
     inputLabel: { fontSize: 11, color: theme.textSub, fontWeight: '600', letterSpacing: 0.5, marginBottom: 6 },
     input: { backgroundColor: theme.bg, borderWidth: 0.5, borderColor: theme.border, borderRadius: 12, padding: 14, fontSize: 14, color: theme.text, marginBottom: 14 },
     saveBtn: { backgroundColor: theme.accent, borderRadius: 14, padding: 14, alignItems: 'center' },
     saveBtnText: { color: theme.bg, fontSize: 14, fontWeight: '600' },
 
-    // Friends Section
     searchRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
     searchBtn: { backgroundColor: theme.accent, borderRadius: 14, paddingHorizontal: 18, justifyContent: 'center' },
     searchBtnText: { color: theme.bg, fontWeight: '600', fontSize: 13 },

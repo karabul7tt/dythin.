@@ -109,11 +109,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsAuthLoading(false)
     })
 
-    // OAuth Deep Link Callback Dinleyici (Google & Apple ile Giriş)
     const handleOAuthUrl = async (url: string) => {
       if (!url) return
       try {
-        // Doğrudan authenticateFromUrl dene (code varsa exchangeCodeForSession çağırır)
         const success = await authenticateFromUrl(url)
         if (success) {
           const { data } = await supabase.auth.getSession()
@@ -123,7 +121,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // Fallback: 5 saniye boyunca her 500ms'de bir session kontrolü yap
         for (let i = 0; i < 10; i++) {
           await new Promise(r => setTimeout(r, 500))
           const { data } = await supabase.auth.getSession()

@@ -97,7 +97,6 @@ export default function ShareScreen() {
     const response = await fetch(uri)
     const file = await response.arrayBuffer()
     
-    // Yükleme Boyutu Sınırı: Maksimum 5 MB
     const MAX_SIZE_BYTES = 5 * 1024 * 1024
     if (file.byteLength > MAX_SIZE_BYTES) {
       throw new Error("Fotoğraf boyutu 5 MB'tan büyük olamaz. Lütfen daha küçük bir resim seçin.")
@@ -116,7 +115,6 @@ export default function ShareScreen() {
   }
 
   async function handleSubmit() {
-    // 1. Yükleme Sıklığı Sınırı (Rate Limiting): 30 saniyede en fazla 1 gönderi
     const now = Date.now()
     if (now - lastPostTime < 30000) {
       const remainingSec = Math.ceil((30000 - (now - lastPostTime)) / 1000)
@@ -126,7 +124,6 @@ export default function ShareScreen() {
       )
     }
 
-    // 2. Girdi Doğrulama & XSS Kaçırma (Input Validation & XSS Sanitization)
     const cleanTitle = sanitizeInput(title)
     const cleanDesc = sanitizeInput(description)
 
@@ -151,7 +148,6 @@ export default function ShareScreen() {
         urlB = await uploadImage(imageB)
       }
 
-      // Default 24 hours expiration time
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 
       const postPayload: any = {
@@ -168,21 +164,18 @@ export default function ShareScreen() {
 
       let { error } = await supabase.from('posts').insert(postPayload)
 
-      // Fallback if image_a_url column does not exist in remote DB schema
       if (error && (error.message.includes('image_a_url') || error.code === 'PGRST204')) {
         delete postPayload.image_a_url
         const res = await supabase.from('posts').insert(postPayload)
         error = res.error
       }
 
-      // Fallback if expires_at column does not exist in remote DB schema
       if (error && (error.message.includes('expires_at') || error.code === 'PGRST204')) {
         delete postPayload.expires_at
         const res = await supabase.from('posts').insert(postPayload)
         error = res.error
       }
 
-      // Fallback if image_b_url column does not exist in remote DB schema
       if (error && (error.message.includes('image_b_url') || error.code === 'PGRST204')) {
         delete postPayload.image_b_url
         const res = await supabase.from('posts').insert(postPayload)
@@ -204,7 +197,6 @@ export default function ShareScreen() {
       setIsAB(false)
       setAudience('public')
 
-      // Redirect to Results screen to view newly created post
       router.replace('/(tabs)/results')
     } catch (e: any) {
       Alert.alert('Hata', getCleanErrorMessage(e, 'Gönderi oluşturulamadı.'))

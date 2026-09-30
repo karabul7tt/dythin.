@@ -93,8 +93,8 @@ export default function ResultsScreen() {
   }
 
   function getStats(votes: Vote[]) {
-    let countA = 0 // Sol (A) or Beğenmedim (false)
-    let countB = 0 // Sağ (B) or Beğendim (true)
+    let countA = 0
+    let countB = 0
     votes.forEach(v => {
       if (v.selected_option === 'B' || (v.selected_option === undefined && v.value === true)) {
         countB++

@@ -1,8 +1,3 @@
-/**
- * DYTHIN. — XSS (Cross-Site Scripting) Kaçırma ve Metin Temizleme Modülü
- * Kullanıcı girdilerindeki zararlı HTML ve JavaScript etiketlerini etkisiz hale getirir.
- */
-
 const HTML_ESCAPES: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',
@@ -12,24 +7,15 @@ const HTML_ESCAPES: Record<string, string> = {
   '/': '&#x2F;',
 }
 
-/**
- * Metin içerisindeki HTML özel karakterlerini kaçırır (HTML Escape)
- */
 export function escapeHtml(str: string): string {
   if (!str || typeof str !== 'string') return ''
   return str.replace(/[&<>"'/]/g, (match) => HTML_ESCAPES[match] || match)
 }
 
-/**
- * Kullanıcı tarafından girilen metinleri XSS ve komut enjeksiyonuna karşı temizler
- */
 export function sanitizeInput(input: string): string {
   if (!input || typeof input !== 'string') return ''
   
-  // 1. Boşlukları kırp
   let sanitized = input.trim()
-  
-  // 2. Potansiyel script etiketlerini ve tehlikeli nitelikleri sil
   sanitized = sanitized
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/on\w+\s*=/gi, '')
@@ -39,14 +25,6 @@ export function sanitizeInput(input: string): string {
   return sanitized
 }
 
-/**
- * Instagram tarzı standart kullanıcı adı doğrulama ve temizleme:
- * - Yalnızca küçük harf (a-z), rakam (0-9), nokta (.) ve alt çizgi (_)
- * - Minimum 3, maksimum 30 karakter
- * - Nokta veya alt çizgi ile başlayamaz / bitemez
- * - Ardışık nokta (..) veya ardışık alt çizgi (__) içeremez
- * - Boşluk, emoji veya özel şekilli semboller yasak
- */
 export function validateInstagramUsername(username: string): { valid: boolean; cleanUsername: string; error?: string } {
   if (!username || typeof username !== 'string') {
     return { valid: false, cleanUsername: '', error: 'Kullanıcı adı zorunludur.' }

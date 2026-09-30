@@ -1,5 +1,3 @@
-// ─── Dythin. — Merkezi TypeScript Tip Tanımları ─────────────────
-
 export type UserRole = 'user' | 'admin'
 
 export type Profile = {
@@ -8,9 +6,9 @@ export type Profile = {
   full_name?: string | null
   avatar_url: string | null
   push_token: string | null
-  role?: UserRole // 'user' veya 'admin' rolü
-  message_privacy?: 'everyone' | 'friends' // Mesaj gizlilik ayarı
-  is_private?: boolean // Gizli hesap ayarı
+  role?: UserRole
+  message_privacy?: 'everyone' | 'friends'
+  is_private?: boolean
   updated_at?: string
   created_at: string
 }
@@ -32,10 +30,10 @@ export type Post = {
   title: string
   description: string | null
   image_a_url: string
-  image_b_url?: string // optional for A/B comparison
+  image_b_url?: string
   audience: 'public' | 'friends'
   is_active: boolean
-  expires_at?: string // ISO timestamp for countdown timer
+  expires_at?: string
   created_at: string
   votes?: Vote[]
   profiles?: Profile | null
@@ -45,9 +43,9 @@ export type Vote = {
   id: string
   post_id: string
   voter_id: string
-  value: boolean // legacy yes/no
-  selected_option?: 'A' | 'B' // for A/B votes
-  comment?: string // optional tip/comment on vote
+  value: boolean
+  selected_option?: 'A' | 'B'
+  comment?: string
   created_at: string
 }
 
@@ -59,18 +57,15 @@ export type Friendship = {
   created_at: string
 }
 
-// Profil bilgisiyle birleştirilmiş arkadaş kaydı
 export type FriendRecord = Pick<Profile, 'id' | 'username' | 'avatar_url'> & {
   friendship_id: string
 }
 
-// Arkadaşlık sorgusu için join sonucu
 export type FriendshipWithProfiles = Friendship & {
   requester: Pick<Profile, 'id' | 'username' | 'avatar_url'>
   receiver: Pick<Profile, 'id' | 'username' | 'avatar_url'>
 }
 
-// Results ekranında oy istatistikleri
 export type VoteStats = {
   yes: number
   no: number
@@ -78,7 +73,6 @@ export type VoteStats = {
   pct: number
 }
 
-// Moderation types
 export type Report = {
   id: string
   reporter_id: string

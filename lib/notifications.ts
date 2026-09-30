@@ -7,9 +7,6 @@ let Notifications: any = null
 let notificationHandlerConfigured = false
 
 function getNotifications() {
-  // Do not initialize the native notifications module while the app's root
-  // navigator is mounting. A failed native initialization must never prevent
-  // the application from opening.
   if (Notifications) return Notifications
 
   try {
@@ -51,7 +48,6 @@ export async function registerForPushNotificationsAsync(userId?: string): Promis
       return null
     }
 
-    // On Android Expo Go, remote push notifications are disabled in SDK 53
     try {
       if (Platform.OS === 'android' && Constants && Constants.appOwnership === 'expo') {
         return null

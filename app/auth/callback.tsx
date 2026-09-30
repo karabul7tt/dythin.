@@ -16,7 +16,6 @@ export default function AuthCallback() {
     async function processAuth(urlToTry?: string | null) {
       if (hasHandled.current) return
       try {
-        // 1. Try URL if provided
         if (urlToTry) {
           const success = await authenticateFromUrl(urlToTry)
           if (success) {
@@ -26,7 +25,6 @@ export default function AuthCallback() {
           }
         }
 
-        // 2. Try params.code if present
         if (params.code) {
           const { data, error } = await supabase.auth.exchangeCodeForSession(params.code)
           if (!error && data?.session) {
@@ -36,7 +34,6 @@ export default function AuthCallback() {
           }
         }
 
-        // 3. Check current session
         const { data: cur } = await supabase.auth.getSession()
         if (cur?.session) {
           hasHandled.current = true
@@ -48,20 +45,16 @@ export default function AuthCallback() {
       }
     }
 
-    // A. Check deep link URL immediately
     Linking.getInitialURL().then((initialUrl) => {
       processAuth(initialUrl)
     }).catch(() => null)
 
-    // B. Also listen for incoming url event
     const sub = Linking.addEventListener('url', ({ url }) => {
       processAuth(url)
     })
 
-    // C. Try params.code
     processAuth()
 
-    // D. Safety fallback: only if nothing succeeded after 4 seconds, return to login
     timer = setTimeout(async () => {
       if (hasHandled.current) return
       const { data } = await supabase.auth.getSession()

@@ -17,7 +17,6 @@ export default function Index() {
     async function checkIncoming() {
       if (isHandled.current) return
 
-      // 1. Try params.code
       if (params.code) {
         setExchanging(true)
         try {
@@ -31,7 +30,6 @@ export default function Index() {
         setExchanging(false)
       }
 
-      // 2. Try initial deep link URL
       try {
         const initialUrl = await Linking.getInitialURL()
         if (initialUrl && (initialUrl.includes('code=') || initialUrl.includes('access_token'))) {

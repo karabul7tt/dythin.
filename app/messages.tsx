@@ -41,7 +41,6 @@ export default function MessagesInboxScreen() {
     const userId = session?.user.id
     if (!userId) return
 
-    // Fetch all messages involving the current user
     const { data: rawMessages } = await supabase
       .from('messages')
       .select('*')
@@ -54,7 +53,6 @@ export default function MessagesInboxScreen() {
       return
     }
 
-    // Group by friend ID to get the latest message for each chat
     const friendMap: { [friendId: string]: Message } = {}
     rawMessages.forEach(msg => {
       const friendId = msg.sender_id === userId ? msg.receiver_id : msg.sender_id
@@ -70,7 +68,6 @@ export default function MessagesInboxScreen() {
       return
     }
 
-    // Fetch friend profiles
     const { data: profiles } = await supabase
       .from('profiles')
       .select('*')

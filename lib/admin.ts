@@ -1,7 +1,5 @@
 import { supabase } from './supabase'
-import type { Profile, Post } from './types'
 
-// ─── Super Admin Kullanıcı Listesi (Her zaman tam yetkili) ───────────
 export const SUPER_ADMIN_USERNAMES = [
   'mehmetkarabul7tt',
   'dythin',
@@ -49,9 +47,6 @@ export type AdminUserItem = {
   isSuperAdmin: boolean
 }
 
-/**
- * Kullanıcının yönetici (admin) olup olmadığını kontrol eder.
- */
 export async function checkIsAdmin(
   username?: string | null,
   role?: string | null,
@@ -63,7 +58,6 @@ export async function checkIsAdmin(
   if (SUPER_ADMIN_USERNAMES.includes(cleanUser)) return true
   if (role === 'admin') return true
 
-  // Veritabanındaki dinamik yönetici kayıtlarını kontrol et
   try {
     const { data } = await supabase
       .from('reports')
@@ -82,9 +76,6 @@ export async function checkIsAdmin(
   return false
 }
 
-/**
- * Sistem genelindeki KPI ve istatistikleri çeker.
- */
 export async function getAdminKPIs(): Promise<AdminKPIs> {
   let totalUsers = 0
   let totalPosts = 0
@@ -120,9 +111,6 @@ export async function getAdminKPIs(): Promise<AdminKPIs> {
   return { totalUsers, totalPosts, totalVotes, pendingReports, bannedCount }
 }
 
-/**
- * Şikayet edilen (raporlanan) gönderileri ve detaylarını listeler.
- */
 export async function getReportedPosts(): Promise<ReportedPostItem[]> {
   try {
     const { data: reports, error } = await supabase
@@ -132,11 +120,9 @@ export async function getReportedPosts(): Promise<ReportedPostItem[]> {
 
     if (error || !reports) return []
 
-    // Sadece gerçek kullanıcı şikayetlerini al (sistem loglarını filtrele)
     const userReports = reports.filter(r => !r.reason?.startsWith('ADMIN_ACTION:'))
     if (userReports.length === 0) return []
 
-    // Raporlayanların kullanıcı adlarını eşleştirmek için ID listesi
     const reporterIds = Array.from(new Set(userReports.map(r => r.reporter_id).filter(Boolean)))
     let reporterMap: Record<string, string> = {}
     if (reporterIds.length > 0) {
@@ -178,9 +164,6 @@ export async function getReportedPosts(): Promise<ReportedPostItem[]> {
   }
 }
 
-/**
- * Tüm kullanıcıları ve rollerini listeler.
- */
 export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
   try {
     const [profilesRes, reportsRes] = await Promise.all([
@@ -191,7 +174,6 @@ export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
     const profiles = profilesRes.data || []
     const adminEvents = reportsRes.data || []
 
-    // Dinamik Ban ve Admin Haritası
     const bannedUsers = new Set<string>()
     const unbannedUsers = new Set<string>()
     const promotedAdmins = new Set<string>()
@@ -240,18 +222,13 @@ export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
   }
 }
 
-/**
- * Gönderiyi kalıcı olarak siler ve akışlardan kaldırır.
- */
 export async function adminDeletePost(postId: string, adminUserId: string): Promise<boolean> {
   try {
-    // 1. Postu pasif yap ve silmeyi dene
     await supabase.from('posts').update({ is_active: false }).eq('id', postId)
     try {
       await supabase.from('posts').delete().eq('id', postId)
     } catch {}
 
-    // 2. Global filtre için sistem raporu ekle
     await supabase.from('reports').insert({
       reporter_id: adminUserId,
       post_id: postId,
@@ -265,9 +242,6 @@ export async function adminDeletePost(postId: string, adminUserId: string): Prom
   }
 }
 
-/**
- * Kullanıcıyı banlar (askıya alır).
- */
 export async function adminBanUser(
   targetUserId: string,
   targetUsername: string,
@@ -276,16 +250,13 @@ export async function adminBanUser(
   try {
     const cleanUser = targetUsername.replace('@', '').trim()
 
-    // 1. Kullanıcının tüm aktif gönderilerini yayından kaldır
     await supabase.from('posts').update({ is_active: false }).eq('user_id', targetUserId)
 
-    // 2. Admin eylemini rapor tablosuna işle (tüm cihazlar anlık görür)
     await supabase.from('reports').insert({
       reporter_id: adminUserId,
       reason: `ADMIN_ACTION:BAN_USER:${targetUserId}:@${cleanUser}`,
     })
 
-    // 3. Blocked users tablosuna ekle
     try {
       await supabase.from('blocked_users').insert({
         blocker_id: adminUserId,
@@ -300,9 +271,6 @@ export async function adminBanUser(
   }
 }
 
-/**
- * Kullanıcının banını kaldırır.
- */
 export async function adminUnbanUser(
   targetUserId: string,
   targetUsername: string,
@@ -321,9 +289,6 @@ export async function adminUnbanUser(
   }
 }
 
-/**
- * Kullanıcıya Admin rolü verir.
- */
 export async function adminPromoteUser(
   targetUserId: string,
   targetUsername: string,
@@ -342,9 +307,6 @@ export async function adminPromoteUser(
   }
 }
 
-/**
- * Kullanıcının Admin yetkisini geri alır.
- */
 export async function adminRevokeUser(
   targetUserId: string,
   targetUsername: string,
@@ -363,9 +325,6 @@ export async function adminRevokeUser(
   }
 }
 
-/**
- * Raporu kapatır / çözüldü olarak işaretler.
- */
 export async function adminDismissReport(reportId: string): Promise<boolean> {
   try {
     await supabase.from('reports').delete().eq('id', reportId)

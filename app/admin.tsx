@@ -42,11 +42,8 @@ export default function AdminScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [isAdminAuthorized, setIsAdminAuthorized] = useState(false)
-
-  // Tabs: 'reports' | 'users' | 'posts'
   const [activeTab, setActiveTab] = useState<'reports' | 'users'>('reports')
 
-  // Data states
   const [kpis, setKpis] = useState<AdminKPIs>({
     totalUsers: 0,
     totalPosts: 0,
@@ -105,7 +102,6 @@ export default function AdminScreen() {
     setRefreshing(false)
   }
 
-  // ─── Şikayet Aksiyonları ──────────────────────────────────────────
   function handleDeleteReportedPost(item: ReportedPostItem) {
     if (!item.post) return
     Alert.alert(
@@ -179,7 +175,6 @@ export default function AdminScreen() {
     )
   }
 
-  // ─── Kullanıcı Yönetim Aksiyonları ────────────────────────────────
   function handleUserPress(targetUser: AdminUserItem) {
     if (targetUser.isSuperAdmin) {
       Alert.alert('Süper Yönetici', `@${targetUser.username} kurucu süper yöneticidir, yetkileri değiştirilemez.`)
@@ -190,7 +185,6 @@ export default function AdminScreen() {
       { text: 'İptal', style: 'cancel' },
     ]
 
-    // Admin yap veya adminliği al
     if (targetUser.isAdmin) {
       options.push({
         text: 'Admin Yetkisini Kaldır',
@@ -212,7 +206,6 @@ export default function AdminScreen() {
       })
     }
 
-    // Banla veya Banı kaldır
     if (targetUser.isBanned) {
       options.push({
         text: 'Kullanıcının Banını Kaldır',
@@ -237,7 +230,6 @@ export default function AdminScreen() {
     Alert.alert(`@${targetUser.username}`, 'Bu kullanıcı üzerinde hangi işlemi yapmak istiyorsunuz?', options)
   }
 
-  // Filtrelenmiş kullanıcılar
   const filteredUsers = users.filter(u => {
     const q = userSearch.toLowerCase().replace('@', '').trim()
     const matchesQuery = !q ||
@@ -671,7 +663,6 @@ const s = StyleSheet.create({
     flex: 1,
   },
 
-  // KPI Grid
   kpiGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -707,7 +698,6 @@ const s = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Tab Switcher
   tabSwitcher: {
     flexDirection: 'row',
     marginHorizontal: 14,
@@ -742,7 +732,6 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
   },
 
-  // Empty State
   emptyBox: {
     backgroundColor: '#13112b',
     borderRadius: 20,
@@ -766,7 +755,6 @@ const s = StyleSheet.create({
     lineHeight: 18,
   },
 
-  // Report Card
   reportCard: {
     backgroundColor: '#13112b',
     borderRadius: 16,
@@ -872,7 +860,6 @@ const s = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Users Tab
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
