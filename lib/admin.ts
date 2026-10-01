@@ -275,7 +275,22 @@ export async function adminBanUser(
   adminUserId: string
 ): Promise<boolean> {
   try {
-    const cleanUser = targetUsername.replace('@', '').trim()
+    const cleanUser = targetUsername.toLowerCase().replace('@', '').trim()
+    if (SUPER_ADMIN_USERNAMES.includes(cleanUser)) {
+      console.warn('Ana yönetici banlanamaz.')
+      return false
+    }
+
+    try {
+      await supabase.rpc('admin_set_user_role', {
+        target_user_id: targetUserId,
+        new_role: 'banned',
+      })
+    } catch {}
+
+    try {
+      await supabase.from('profiles').update({ role: 'banned' }).eq('id', targetUserId)
+    } catch {}
 
     await supabase.from('posts').update({ is_active: false }).eq('user_id', targetUserId)
 
@@ -304,11 +319,28 @@ export async function adminUnbanUser(
   adminUserId: string
 ): Promise<boolean> {
   try {
-    const cleanUser = targetUsername.replace('@', '').trim()
+    const cleanUser = targetUsername.toLowerCase().replace('@', '').trim()
+
+    try {
+      await supabase.rpc('admin_set_user_role', {
+        target_user_id: targetUserId,
+        new_role: 'user',
+      })
+    } catch {}
+
+    try {
+      await supabase.from('profiles').update({ role: 'user' }).eq('id', targetUserId)
+    } catch {}
+
     await supabase.from('reports').insert({
       reporter_id: adminUserId,
       reason: `ADMIN_ACTION:UNBAN_USER:${targetUserId}:@${cleanUser}`,
     })
+
+    try {
+      await supabase.from('blocked_users').delete().eq('blocker_id', adminUserId).eq('blocked_id', targetUserId)
+    } catch {}
+
     return true
   } catch (err) {
     console.warn('adminUnbanUser error:', err)
@@ -322,7 +354,19 @@ export async function adminPromoteUser(
   adminUserId: string
 ): Promise<boolean> {
   try {
-    const cleanUser = targetUsername.replace('@', '').trim()
+    const cleanUser = targetUsername.toLowerCase().replace('@', '').trim()
+
+    try {
+      await supabase.rpc('admin_set_user_role', {
+        target_user_id: targetUserId,
+        new_role: 'admin',
+      })
+    } catch {}
+
+    try {
+      await supabase.from('profiles').update({ role: 'admin' }).eq('id', targetUserId)
+    } catch {}
+
     await supabase.from('reports').insert({
       reporter_id: adminUserId,
       reason: `ADMIN_ACTION:PROMOTE_ADMIN:${targetUserId}:@${cleanUser}`,
@@ -340,7 +384,23 @@ export async function adminRevokeUser(
   adminUserId: string
 ): Promise<boolean> {
   try {
-    const cleanUser = targetUsername.replace('@', '').trim()
+    const cleanUser = targetUsername.toLowerCase().replace('@', '').trim()
+    if (SUPER_ADMIN_USERNAMES.includes(cleanUser)) {
+      console.warn('Ana yöneticinin yetkisi kaldırılamaz.')
+      return false
+    }
+
+    try {
+      await supabase.rpc('admin_set_user_role', {
+        target_user_id: targetUserId,
+        new_role: 'user',
+      })
+    } catch {}
+
+    try {
+      await supabase.from('profiles').update({ role: 'user' }).eq('id', targetUserId)
+    } catch {}
+
     await supabase.from('reports').insert({
       reporter_id: adminUserId,
       reason: `ADMIN_ACTION:REVOKE_ADMIN:${targetUserId}:@${cleanUser}`,

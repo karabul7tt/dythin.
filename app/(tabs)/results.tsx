@@ -22,7 +22,7 @@ import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
 
 export default function ResultsScreen() {
-  const { theme, session } = useApp()
+  const { theme, session, t } = useApp()
   const userId = session?.user.id
   const isDark = theme.bg === '#0e0e1a' || theme.bg === '#111108'
   const refreshColor = isDark ? '#ffffff' : '#555555'
@@ -72,17 +72,17 @@ export default function ResultsScreen() {
 
   async function deletePost(postId: string) {
     Alert.alert(
-      'Paylaşımı Sil',
-      'Bu paylaşım ve tüm oyları kalıcı olarak silinecek. Emin misin?',
+      t('results.deleteConfirmTitle'),
+      t('results.deleteConfirmMsg'),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('results.cancelBtn'), style: 'cancel' },
         {
-          text: 'Sil',
+          text: t('results.deleteBtn'),
           style: 'destructive',
           onPress: async () => {
             const { error } = await supabase.from('posts').delete().eq('id', postId)
             if (error) {
-              Alert.alert('Hata', 'Paylaşım silinemedi.')
+              Alert.alert(t('common.error'), t('results.deleteError'))
             } else {
               setPosts(prev => prev.filter(p => p.id !== postId))
             }
@@ -121,11 +121,11 @@ export default function ResultsScreen() {
   function getTimeRemaining(expiresAt?: string) {
     if (!expiresAt) return null
     const diff = new Date(expiresAt).getTime() - Date.now()
-    if (diff <= 0) return 'Süre doldu (Kapandı)'
+    if (diff <= 0) return t('results.timeExpired')
     const hours = Math.floor(diff / (1000 * 60 * 60))
     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-    if (hours > 0) return `${hours} sa ${mins} dk kaldı`
-    return `${mins} dk kaldı`
+    if (hours > 0) return t('results.timeLeft', { hours, mins })
+    return t('results.minsLeft', { mins })
   }
 
   const s = StyleSheet.create({
@@ -177,7 +177,7 @@ export default function ResultsScreen() {
         {posts.length === 0 ? (
           <View style={s.empty}>
             <Ionicons name="bar-chart-outline" size={44} color={theme.textSub} />
-            <Text style={s.emptyText}>Henüz paylaşımın yok</Text>
+            <Text style={s.emptyText}>{t('results.noPostsYet')}</Text>
           </View>
         ) : (
           posts.map(post => {
@@ -209,7 +209,7 @@ export default function ResultsScreen() {
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 }}>
                       <View style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: post.is_active ? '#34C759' : '#8E8E93' }} />
                       <Text style={s.cardSub}>
-                        {total} oy · {timeRemaining || (post.is_active ? 'Aktif' : 'Kapandı')}
+                        {t('feed.votesCount', { count: total })} · {timeRemaining || (post.is_active ? t('results.active') : t('results.closed'))}
                       </Text>
                     </View>
                   </View>
@@ -218,7 +218,7 @@ export default function ResultsScreen() {
                     onPress={() => deletePost(post.id)}
                     activeOpacity={0.8}
                   >
-                    <Text style={{ color: theme.textSub, fontSize: 12, fontWeight: '600' }}>Sil</Text>
+                    <Text style={{ color: theme.textSub, fontSize: 12, fontWeight: '600' }}>{t('results.deleteBtn')}</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -226,7 +226,7 @@ export default function ResultsScreen() {
                   {isAB ? (
                     <>
                       <View style={s.barRow}>
-                        <Text style={[s.barLabel, { color: theme.accent }]}>Sol</Text>
+                        <Text style={[s.barLabel, { color: theme.accent }]}>{t('results.leftBar')}</Text>
                         <View style={s.barTrack}>
                           <View style={[s.barFill, { width: `${pctA}%`, backgroundColor: theme.accent }]} />
                         </View>
@@ -234,7 +234,7 @@ export default function ResultsScreen() {
                       </View>
 
                       <View style={s.barRow}>
-                        <Text style={[s.barLabel, { color: theme.accentText }]}>Sağ</Text>
+                        <Text style={[s.barLabel, { color: theme.accentText }]}>{t('results.rightBar')}</Text>
                         <View style={s.barTrack}>
                           <View style={[s.barFill, { width: `${pctB}%`, backgroundColor: theme.accentText }]} />
                         </View>
@@ -244,7 +244,7 @@ export default function ResultsScreen() {
                   ) : (
                     <>
                       <View style={s.barRow}>
-                        <Text style={[s.barLabel, { color: theme.accent }]}>Beğenildi</Text>
+                        <Text style={[s.barLabel, { color: theme.accent }]}>{t('results.likedBar')}</Text>
                         <View style={s.barTrack}>
                           <View style={[s.barFill, { width: `${likePct}%`, backgroundColor: theme.accent }]} />
                         </View>
@@ -252,7 +252,7 @@ export default function ResultsScreen() {
                       </View>
 
                       <View style={s.barRow}>
-                        <Text style={[s.barLabel, { color: theme.accentText }]}>Beğenilmedi</Text>
+                        <Text style={[s.barLabel, { color: theme.accentText }]}>{t('results.dislikedBar')}</Text>
                         <View style={s.barTrack}>
                           <View style={[s.barFill, { width: `${dislikePct}%`, backgroundColor: theme.accentText }]} />
                         </View>
@@ -264,17 +264,17 @@ export default function ResultsScreen() {
                   {/* Yorumlar Listesi */}
                   {comments.length > 0 && (
                     <View style={s.commentsSection}>
-                      <Text style={s.commentsHeader}>GELEN YORUMLAR ({comments.length})</Text>
+                      <Text style={s.commentsHeader}>{t('results.incomingComments', { count: comments.length })}</Text>
                       {comments.map(c => {
                         const isLikeVote = c.selected_option === 'B' || (c.selected_option === undefined && c.value === true)
                         const voteTag = isAB
-                          ? (c.selected_option === 'A' ? 'Sol (A)' : 'Sağ (B)')
-                          : (isLikeVote ? 'Beğendi' : 'Beğenmedi')
+                          ? (c.selected_option === 'A' ? t('results.votedA') : t('results.votedB'))
+                          : (isLikeVote ? t('results.votedLike') : t('results.votedDislike'))
                         return (
                           <View key={c.id || Math.random().toString()} style={s.commentItem}>
                             <Text style={s.commentText}>"{c.comment}"</Text>
                             <Text style={s.commentMeta}>
-                              Oy: {voteTag}
+                              {t('results.votePrefix')}: {voteTag}
                             </Text>
                           </View>
                         )

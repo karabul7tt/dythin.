@@ -19,7 +19,7 @@ import { checkIsAdmin, adminDeletePost, adminBanUser } from '../../lib/admin'
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
 export default function VoteScreen() {
-  const { theme, session } = useApp()
+  const { theme, session, t } = useApp()
   const router = useRouter()
   const userId = session?.user.id
   const isDark = theme.bg === '#0e0e1a' || theme.bg === '#111108'
@@ -179,12 +179,12 @@ export default function VoteScreen() {
     const current = tab === 'public' ? posts[0] : friendPosts[0]
     if (!current) return
     Alert.alert(
-      'Gönderiyi Bildir',
-      'Bu gönderiyi sakıncalı veya uygunsuz içerik nedeniyle bildirmek istiyor musunuz? Şikayet edilen içerikler 24 saat içinde incelenir ve kaldırılır.',
+      t('feed.reportTitle'),
+      t('feed.reportMsg'),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('create.cancel'), style: 'cancel' },
         {
-          text: 'Bildir',
+          text: t('feed.report'),
           style: 'destructive',
           onPress: async () => {
             const { error } = await supabase.from('reports').insert({
@@ -193,12 +193,12 @@ export default function VoteScreen() {
               reason: 'Uygunsuz/Sakıncalı içerik',
             })
             if (error && error.code !== '23505') {
-              Alert.alert('Hata', 'Bildirim gönderilemedi, lütfen tekrar deneyin.')
+              Alert.alert(t('common.error'), 'Bildirim gönderilemedi.')
               return
             }
             Alert.alert(
-              'Bildiriminiz Alındı',
-              'Teşekkürler. Gönderi inceleme için bildirildi ve akışınızdan kaldırıldı. Sakıncalı içerikler 24 saat içinde incelenip kalıcı olarak silinir.'
+              t('feed.reportSuccessTitle'),
+              t('feed.reportSuccessMsg')
             )
             if (tab === 'public') setPosts(prev => prev.slice(1))
             else setFriendPosts(prev => prev.slice(1))
@@ -212,12 +212,12 @@ export default function VoteScreen() {
     const current = tab === 'public' ? posts[0] : friendPosts[0]
     if (!current) return
     Alert.alert(
-      'Kullanıcıyı Engelle',
-      'Bu kullanıcıyı engellemek istediğinize emin misiniz? Bu kullanıcının tüm gönderileri akışınızdan anında kaldırılacak ve geliştiriciye bildirilecektir.',
+      t('feed.blockTitle'),
+      t('feed.blockMsg'),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('create.cancel'), style: 'cancel' },
         {
-          text: 'Engelle',
+          text: t('feed.block'),
           style: 'destructive',
           onPress: async () => {
             const { error } = await supabase.from('blocked_users').insert({
@@ -230,12 +230,12 @@ export default function VoteScreen() {
               reason: 'Kullanıcı engellendi (Uygunsuz içerik / Otomatik moderasyon bildirimi)',
             })
             if (error && error.code !== '23505') {
-              Alert.alert('Hata', 'Engelleme yapılamadı, lütfen tekrar deneyin.')
+              Alert.alert(t('common.error'), 'Engelleme yapılamadı.')
               return
             }
             Alert.alert(
-              'Kullanıcı Engellendi',
-              'Kullanıcı engellendi. Gönderileri akışınızdan anında temizlendi ve moderasyon ekibine bildirildi.'
+              t('feed.blockSuccessTitle'),
+              t('feed.blockSuccessMsg')
             )
             setPosts(prev => prev.filter(p => p.user_id !== current.user_id))
             setFriendPosts(prev => prev.filter(p => p.user_id !== current.user_id))
@@ -250,33 +250,33 @@ export default function VoteScreen() {
     if (!current) return
     const authorUser = (current as any).profiles?.username || 'kullanici'
     Alert.alert(
-      'Yönetici İşlemi',
-      `"${current.title}" başlıklı gönderi ve @${authorUser} için işlem seçin:`,
+      t('feed.adminActionTitle'),
+      `"${current.title}" · @${authorUser}`,
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('create.cancel'), style: 'cancel' },
         {
-          text: 'Gönderiyi Sil',
+          text: t('feed.deletePost'),
           style: 'destructive',
           onPress: async () => {
             await adminDeletePost(current.id, session!.user.id)
-            Alert.alert('Silindi', 'Gönderi akıştan kaldırıldı.')
+            Alert.alert(t('feed.deleted'), t('feed.postRemoved'))
             if (tab === 'public') setPosts(prev => prev.slice(1))
             else setFriendPosts(prev => prev.slice(1))
           },
         },
         {
-          text: 'Kullanıcıyı Banla',
+          text: t('feed.banUser'),
           style: 'destructive',
           onPress: async () => {
             await adminBanUser(current.user_id, authorUser, session!.user.id)
             await adminDeletePost(current.id, session!.user.id)
-            Alert.alert('Kullanıcı Banlandı', `@${authorUser} hesabı askıya alındı.`)
+            Alert.alert(t('feed.userBannedTitle'), t('feed.userSuspended', { username: authorUser }))
             setPosts(prev => prev.filter(p => p.user_id !== current.user_id))
             setFriendPosts(prev => prev.filter(p => p.user_id !== current.user_id))
           },
         },
         {
-          text: 'Yönetici Paneli',
+          text: t('feed.adminPanel'),
           onPress: () => router.push('/admin' as any),
         },
       ]
@@ -367,7 +367,7 @@ export default function VoteScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="chatbubbles-outline" size={16} color={theme.text} />
-            <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }}>Mesajlar</Text>
+            <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }}>{t('feed.messages')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -379,14 +379,14 @@ export default function VoteScreen() {
               onPress={() => setTab('public')}
             >
               <Ionicons name="globe-outline" size={14} color={tab === 'public' ? theme.bg : theme.textSub} />
-              <Text style={[s.tabText, tab === 'public' && s.tabTextActive]}>Genel</Text>
+              <Text style={[s.tabText, tab === 'public' && s.tabTextActive]}>{t('feed.public')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[s.tabBtn, tab === 'friends' && s.tabBtnActive, { flexDirection: 'row', alignItems: 'center', gap: 6 }]}
               onPress={() => setTab('friends')}
             >
               <Ionicons name="people-outline" size={14} color={tab === 'friends' ? theme.bg : theme.textSub} />
-              <Text style={[s.tabText, tab === 'friends' && s.tabTextActive]}>Arkadaşlar</Text>
+              <Text style={[s.tabText, tab === 'friends' && s.tabTextActive]}>{t('feed.friends')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -406,7 +406,7 @@ export default function VoteScreen() {
               }}
               activeOpacity={0.7}
             >
-              <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '600' }}>Bildir</Text>
+              <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '600' }}>{t('feed.report')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleBlock}
@@ -420,7 +420,7 @@ export default function VoteScreen() {
               }}
               activeOpacity={0.7}
             >
-              <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '600' }}>Engelle</Text>
+              <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '600' }}>{t('feed.block')}</Text>
             </TouchableOpacity>
 
             {isAdminUser && (
@@ -436,7 +436,7 @@ export default function VoteScreen() {
                 }}
                 activeOpacity={0.7}
               >
-                <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '600' }}>Yönetici</Text>
+                <Text style={{ fontSize: 11, color: theme.textSub, fontWeight: '600' }}>{t('feed.admin')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -461,15 +461,15 @@ export default function VoteScreen() {
                 <>
                   <TouchableOpacity style={[s.actionBtn, s.btnCardA]} onPress={() => handleVote('A')} activeOpacity={0.75}>
                     <View style={s.btnTextCol}>
-                      <Text style={s.btnMainTextA}>Soldaki</Text>
-                      <Text style={s.btnSubText}>Sola Kaydır</Text>
+                      <Text style={s.btnMainTextA}>{t('feed.leftOption')}</Text>
+                      <Text style={s.btnSubText}>{t('feed.leftSwipe')}</Text>
                     </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity style={[s.actionBtn, s.btnCardB]} onPress={() => handleVote('B')} activeOpacity={0.75}>
                     <View style={s.btnTextCol}>
-                      <Text style={s.btnMainTextB}>Sağdaki</Text>
-                      <Text style={s.btnSubTextB}>Sağa Kaydır</Text>
+                      <Text style={s.btnMainTextB}>{t('feed.rightOption')}</Text>
+                      <Text style={s.btnSubTextB}>{t('feed.rightSwipe')}</Text>
                     </View>
                   </TouchableOpacity>
                 </>
@@ -480,8 +480,8 @@ export default function VoteScreen() {
                       <Ionicons name="close" size={18} color="#aaa" />
                     </View>
                     <View style={s.btnTextCol}>
-                      <Text style={s.btnMainTextPass}>Beğenmedim</Text>
-                      <Text style={s.btnSubText}>Geçtim (Sola Kaydır)</Text>
+                      <Text style={s.btnMainTextPass}>{t('feed.dislike')}</Text>
+                      <Text style={s.btnSubText}>{t('feed.passHint')}</Text>
                     </View>
                   </TouchableOpacity>
 
@@ -490,8 +490,8 @@ export default function VoteScreen() {
                       <Ionicons name="checkmark" size={18} color="#fff" />
                     </View>
                     <View style={s.btnTextCol}>
-                      <Text style={s.btnMainTextLike}>Beğendim</Text>
-                      <Text style={s.btnSubTextB}>Harika Seçim (Sağa Kaydır)</Text>
+                      <Text style={s.btnMainTextLike}>{t('feed.like')}</Text>
+                      <Text style={s.btnSubTextB}>{t('feed.likeHint')}</Text>
                     </View>
                   </TouchableOpacity>
                 </>
@@ -506,10 +506,10 @@ export default function VoteScreen() {
               color={theme.accent}
             />
             <Text style={s.emptyText}>
-              {tab === 'friends' ? 'Arkadaşlarından henüz\noylama yok' : 'Şimdilik tüm oylamalar\ntamamlandı'}
+              {tab === 'friends' ? t('feed.noFriendPosts') : t('feed.allCompleted')}
             </Text>
             <TouchableOpacity onPress={handleRefresh} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: theme.card, borderRadius: 20, marginTop: 16, borderWidth: 0.5, borderColor: theme.border }}>
-              <Text style={{ color: theme.accent, fontSize: 13, fontWeight: '600' }}>Yenile</Text>
+              <Text style={{ color: theme.accent, fontSize: 13, fontWeight: '600' }}>{t('feed.refresh')}</Text>
             </TouchableOpacity>
           </View>
         )}

@@ -50,15 +50,15 @@ export default function ShareScreen() {
 
   function pickImage(setImage: (uri: string | null) => void) {
     Alert.alert(
-      'Fotoğraf Ekle',
-      'Bir yöntem seçin',
+      t('create.addPhoto'),
+      '',
       [
         {
-          text: 'Fotoğraf Çek (Kamera)',
+          text: t('create.takePhoto'),
           onPress: async () => {
             const permission = await ImagePicker.requestCameraPermissionsAsync()
             if (!permission.granted) {
-              Alert.alert('Kamera İzni Gerekli', 'Fotoğraf çekebilmek için kameraya izin vermeniz gerekmektedir.')
+              Alert.alert(t('create.cameraPermRequired'), t('create.cameraPermMsg'))
               return
             }
             const result = await ImagePicker.launchCameraAsync({
@@ -71,11 +71,11 @@ export default function ShareScreen() {
           },
         },
         {
-          text: 'Galeriden Seç',
+          text: t('create.chooseGallery'),
           onPress: async () => {
             const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
             if (!permission.granted) {
-              Alert.alert('Fotoğraf İzni Gerekli', 'Fotoğraf seçebilmek için galeriye izin vermeniz gerekmektedir.')
+              Alert.alert(t('create.photoPermRequired'), t('create.photoPermMsg'))
               return
             }
             const result = await ImagePicker.launchImageLibraryAsync({
@@ -87,19 +87,19 @@ export default function ShareScreen() {
             if (!result.canceled && result.assets[0]) setImage(result.assets[0].uri)
           },
         },
-        { text: 'Vazgeç', style: 'cancel' },
+        { text: t('create.cancel'), style: 'cancel' },
       ]
     )
   }
 
   async function uploadImage(uri: string) {
-    if (!session?.user.id) throw new Error('Fotoğraf yüklemek için giriş yapmalısınız.')
+    if (!session?.user.id) throw new Error(t('create.mustLogin'))
     const response = await fetch(uri)
     const file = await response.arrayBuffer()
     
     const MAX_SIZE_BYTES = 5 * 1024 * 1024
     if (file.byteLength > MAX_SIZE_BYTES) {
-      throw new Error("Fotoğraf boyutu 5 MB'tan büyük olamaz. Lütfen daha küçük bir resim seçin.")
+      throw new Error(t('create.fileTooLarge'))
     }
 
     const ext = uri.split('?')[0].split('.').pop()?.toLowerCase() || 'jpg'
@@ -119,8 +119,8 @@ export default function ShareScreen() {
     if (now - lastPostTime < 30000) {
       const remainingSec = Math.ceil((30000 - (now - lastPostTime)) / 1000)
       return Alert.alert(
-        'Yükleme Sınırı',
-        `Yeni bir oylama paylaşabilmek için lütfen ${remainingSec} saniye bekleyin.`
+        t('create.cooldownTitle'),
+        t('create.cooldownMsg', { sec: remainingSec })
       )
     }
 
@@ -128,16 +128,16 @@ export default function ShareScreen() {
     const cleanDesc = sanitizeInput(description)
 
     if (!cleanTitle || !imageA) {
-      return Alert.alert('Eksik Bilgi', 'Başlık ve en az 1 fotoğraf seçimi zorunludur.')
+      return Alert.alert(t('create.missingFields'), t('create.titleAndPhotoRequired'))
     }
     if (cleanTitle.length > 100) {
-      return Alert.alert('Başlık Çok Uzun', 'Başlık en fazla 100 karakter olabilir.')
+      return Alert.alert(t('create.titleTooLong'), t('create.titleMax'))
     }
     if (cleanDesc.length > 300) {
-      return Alert.alert('Açıklama Çok Uzun', 'Açıklama en fazla 300 karakter olabilir.')
+      return Alert.alert(t('create.descTooLong'), t('create.descMax'))
     }
     if (isAB && !imageB) {
-      return Alert.alert('Eksik Fotoğraf', 'A/B karşılaştırması için 2. fotoğrafı da seçmelisiniz.')
+      return Alert.alert(t('create.missingFields'), t('create.missingSecondPhoto'))
     }
 
     setLoading(true)
@@ -187,8 +187,8 @@ export default function ShareScreen() {
       setLastPostTime(Date.now())
 
       Alert.alert(
-        'Paylaşıldı',
-        'Gönderiniz oylamaya açıldı. Kendi gönderinizi Sonuçlar sayfasından takip edebilirsiniz.'
+        t('create.publishedTitle'),
+        t('create.publishedMsg')
       )
       setTitle('')
       setDescription('')
@@ -199,7 +199,7 @@ export default function ShareScreen() {
 
       router.replace('/(tabs)/results')
     } catch (e: any) {
-      Alert.alert('Hata', getCleanErrorMessage(e, 'Gönderi oluşturulamadı.'))
+      Alert.alert(t('common.error'), getCleanErrorMessage(e, t('create.publishing')))
     }
     setLoading(false)
   }
@@ -283,7 +283,7 @@ export default function ShareScreen() {
             dythin<Text style={s.logoDot}>.</Text>
           </Text>
 
-        <Text style={s.label}>FOTOĞRAF SEÇİMİ</Text>
+        <Text style={s.label}>{t('create.photoSelection')}</Text>
 
         <TouchableOpacity
           style={[s.toggleBtn, isAB && s.toggleBtnActive, { flexDirection: 'row', justifyContent: 'center', gap: 8 }]}
@@ -295,7 +295,7 @@ export default function ShareScreen() {
             color={isAB ? theme.accent : theme.textSub}
           />
           <Text style={[s.toggleText, isAB && s.toggleTextActive]}>
-            {isAB ? 'A/B Karşılaştırma Modu (2 Fotoğraf)' : 'A/B Karşılaştırma Fotoğrafı Ekle'}
+            {isAB ? t('create.abComparisonMode') : t('create.addAbPhoto')}
           </Text>
         </TouchableOpacity>
 
@@ -307,13 +307,13 @@ export default function ShareScreen() {
           ) : (
             <TouchableOpacity style={s.uploadZone} onPress={() => pickImage(setImageA)}>
               <Ionicons name="camera-outline" size={34} color={theme.accent} />
-              <Text style={s.uploadText}>Fotoğraf Seç</Text>
+              <Text style={s.uploadText}>{t('create.selectPhoto')}</Text>
             </TouchableOpacity>
           )
         ) : (
           <View style={s.abRow}>
             <View style={s.abBox}>
-              <Text style={s.label}>SOL FOTOĞRAF (A)</Text>
+              <Text style={s.label}>{t('create.selectLeftPhotoUpper')}</Text>
               {imageA ? (
                 <TouchableOpacity onPress={() => pickImage(setImageA)}>
                   <Image source={{ uri: imageA }} style={s.previewImg} />
@@ -321,13 +321,13 @@ export default function ShareScreen() {
               ) : (
                 <TouchableOpacity style={s.uploadZone} onPress={() => pickImage(setImageA)}>
                   <Ionicons name="image-outline" size={28} color={theme.accent} />
-                  <Text style={s.uploadText}>Sol Fotoğrafı Seç</Text>
+                  <Text style={s.uploadText}>{t('create.selectLeftPhoto')}</Text>
                 </TouchableOpacity>
               )}
             </View>
 
             <View style={s.abBox}>
-              <Text style={s.label}>SAĞ FOTOĞRAF (B)</Text>
+              <Text style={s.label}>{t('create.selectRightPhotoUpper')}</Text>
               {imageB ? (
                 <TouchableOpacity onPress={() => pickImage(setImageB)}>
                   <Image source={{ uri: imageB }} style={s.previewImg} />
@@ -335,7 +335,7 @@ export default function ShareScreen() {
               ) : (
                 <TouchableOpacity style={s.uploadZone} onPress={() => pickImage(setImageB)}>
                   <Ionicons name="image-outline" size={28} color={theme.accent} />
-                  <Text style={s.uploadText}>Sağ Fotoğrafı Seç</Text>
+                  <Text style={s.uploadText}>{t('create.selectRightPhoto')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -354,7 +354,7 @@ export default function ShareScreen() {
           onSubmitEditing={Keyboard.dismiss}
         />
 
-        <Text style={s.label}>AÇIKLAMA</Text>
+        <Text style={s.label}>{t('create.descriptionUpper')}</Text>
         <TextInput
           style={[s.input, { height: 70 }]}
           value={description}
@@ -367,7 +367,7 @@ export default function ShareScreen() {
           onSubmitEditing={Keyboard.dismiss}
         />
 
-        <Text style={s.label}>KİM OYLASIN?</Text>
+        <Text style={s.label}>{t('create.whoVotesUpper')}</Text>
         <View style={s.audienceRow}>
           <TouchableOpacity
             style={[s.audienceBtn, audience === 'public' && s.audienceBtnActive, { flexDirection: 'row', justifyContent: 'center', gap: 6 }]}

@@ -45,6 +45,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setLanguageState(lang)
     try {
       await AsyncStorage.setItem('app_language', lang)
+      if (session?.user) {
+        supabase.auth.updateUser({ data: { preferred_language: lang } }).catch(() => null)
+      }
     } catch {}
   }
 

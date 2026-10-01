@@ -245,5 +245,64 @@ begin
 end;
 $$;
 
+-- ── 3. GÜVENLİ VE HİYERARŞİK ADMİN / KULLANICI ROL YÖNETİMİ ──
+create or replace function public.admin_set_user_role(target_user_id uuid, new_role text)
+returns jsonb
+language plpgsql
+security definer set search_path = public, auth
+as $$
+declare
+  caller_id uuid := auth.uid();
+  caller_role text;
+  caller_user text;
+  target_user text;
+begin
+  if caller_id is null then
+    return jsonb_build_object('success', false, 'error', 'Yetkisiz erişim');
+  end if;
+
+  select coalesce(role, 'user'), lower(coalesce(username, '')) into caller_role, caller_user
+  from public.profiles where id = caller_id;
+
+  select lower(coalesce(username, '')) into target_user
+  from public.profiles where id = target_user_id;
+
+  -- Yalnızca mehmetkarabul7tt veya admin rolündeki kullanıcılar işlem yapabilir
+  if caller_user <> 'mehmetkarabul7tt' and caller_role <> 'admin' then
+    return jsonb_build_object('success', false, 'error', 'Yönetici yetkisi gerekli');
+  end if;
+
+  -- Ana kurucu yöneticinin yetkisi kaldırılamaz veya banlanamaz
+  if target_user = 'mehmetkarabul7tt' then
+    return jsonb_build_object('success', false, 'error', 'Ana yöneticinin rolü değiştirilemez veya banlanamaz');
+  end if;
+
+  -- Başka bir kullanıcıya admin yetkisi vermeyi veya admin yetkisini kaldırmayı yalnızca kurucu yönetici (mehmetkarabul7tt) yapabilir
+  if (new_role = 'admin' or target_user_id in (select id from public.profiles where role = 'admin')) and caller_user <> 'mehmetkarabul7tt' then
+    return jsonb_build_object('success', false, 'error', 'Yalnızca kurucu ana yönetici admin yetkilerini değiştirebilir');
+  end if;
+
+  -- Hedef kullanıcının rolünü güncelle
+  update public.profiles set role = new_role where id = target_user_id;
+
+  -- Eğer banlandıysa gönderilerini inaktif et
+  if new_role = 'banned' then
+    update public.posts set is_active = false where user_id = target_user_id;
+  end if;
+
+  return jsonb_build_object('success', true, 'new_role', new_role);
+end;
+$$;
+
+-- RLS: Adminlerin diğer profilleri güncellemesine izin ver
+drop policy if exists "Admin profilleri güncelleyebilir" on public.profiles;
+create policy "Admin profilleri güncelleyebilir"
+  on public.profiles for update using (
+    public.is_admin(auth.uid()) or exists (
+      select 1 from public.profiles where id = auth.uid() and lower(username) = 'mehmetkarabul7tt'
+    )
+  );
+
 -- Botları hemen içeri bas:
 select public.seed_bots_and_posts();
+

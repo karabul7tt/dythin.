@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   View,
   Text,
@@ -30,16 +30,19 @@ import {
   adminDismissReport,
   adminSeedBots,
   adminClearBots,
+  SUPER_ADMIN_USERNAMES,
   AdminKPIs,
   ReportedPostItem,
   AdminUserItem,
 } from '../lib/admin'
+import { Theme } from '../lib/theme'
 
 const { width } = Dimensions.get('window')
 
 export default function AdminScreen() {
   const router = useRouter()
   const { session, theme } = useApp()
+  const s = useMemo(() => createStyles(theme), [theme])
 
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -59,6 +62,9 @@ export default function AdminScreen() {
   const [userFilter, setUserFilter] = useState<'all' | 'admins' | 'banned'>('all')
   const [isSeeding, setIsSeeding] = useState(false)
   const [isClearing, setIsClearing] = useState(false)
+
+  const currentUsername = (session?.user?.user_metadata?.username || '').toLowerCase().replace('@', '').trim()
+  const isCurrentUserSuperAdmin = SUPER_ADMIN_USERNAMES.includes(currentUsername)
 
   useEffect(() => {
     verifyAndLoad()
@@ -133,6 +139,12 @@ export default function AdminScreen() {
 
   function handleBanReportedUser(item: ReportedPostItem) {
     if (!item.post) return
+    const authorUser = item.post.authorUsername.toLowerCase().replace('@', '').trim()
+    if (SUPER_ADMIN_USERNAMES.includes(authorUser)) {
+      Alert.alert('Yetkisiz İşlem', 'Kurucu ana yönetici banlanamaz.')
+      return
+    }
+
     Alert.alert(
       'Kullanıcıyı Banla',
       `@${item.post.authorUsername} adlı kullanıcıyı banlamak istediğinize emin misiniz? Kullanıcının tüm gönderileri gizlenecek ve oturumu askıya alınacaktır.`,
@@ -181,7 +193,12 @@ export default function AdminScreen() {
 
   function handleUserPress(targetUser: AdminUserItem) {
     if (targetUser.isSuperAdmin) {
-      Alert.alert('Süper Yönetici', `@${targetUser.username} kurucu süper yöneticidir, yetkileri değiştirilemez.`)
+      Alert.alert('Süper Yönetici', `@${targetUser.username} kurucu ana yöneticidir, yetkileri değiştirilemez ve banlanamaz.`)
+      return
+    }
+
+    if (!isCurrentUserSuperAdmin && targetUser.isAdmin) {
+      Alert.alert('Yetkisiz İşlem', `@${targetUser.username} bir yöneticidir. Yöneticileri yalnızca ana yönetici (@mehmetkarabul7tt) değiştirebilir.`)
       return
     }
 
@@ -189,34 +206,49 @@ export default function AdminScreen() {
       { text: 'İptal', style: 'cancel' },
     ]
 
-    if (targetUser.isAdmin) {
-      options.push({
-        text: 'Admin Yetkisini Kaldır',
-        style: 'destructive',
-        onPress: async () => {
-          await adminRevokeUser(targetUser.id, targetUser.username, session!.user.id)
-          Alert.alert('Güncellendi', `@${targetUser.username} artık yönetici değil.`)
-          await loadData()
-        },
-      })
-    } else {
-      options.push({
-        text: 'Bu Kullanıcıyı Admin Yap',
-        onPress: async () => {
-          await adminPromoteUser(targetUser.id, targetUser.username, session!.user.id)
-          Alert.alert('Yönetici Atandı!', `@${targetUser.username} artık Yönetici yetkilerine sahip.`)
-          await loadData()
-        },
-      })
+    // Yalnızca Ana Süper Yönetici (Mehmet) başka birine admin rolü verebilir / kaldırabilir
+    if (isCurrentUserSuperAdmin) {
+      if (targetUser.isAdmin) {
+        options.push({
+          text: 'Admin Yetkisini Kaldır',
+          style: 'destructive',
+          onPress: async () => {
+            const ok = await adminRevokeUser(targetUser.id, targetUser.username, session!.user.id)
+            if (ok) {
+              Alert.alert('Yetki Kaldırıldı', `@${targetUser.username} artık yönetici değil.`)
+              await loadData()
+            } else {
+              Alert.alert('Hata', 'Yetki kaldırılamadı.')
+            }
+          },
+        })
+      } else {
+        options.push({
+          text: 'Bu Kullanıcıyı Admin Yap',
+          onPress: async () => {
+            const ok = await adminPromoteUser(targetUser.id, targetUser.username, session!.user.id)
+            if (ok) {
+              Alert.alert('Yönetici Atandı', `@${targetUser.username} artık Yönetici yetkilerine sahip ve kontrol paneline erişebilir.`)
+              await loadData()
+            } else {
+              Alert.alert('Hata', 'Yönetici yetkisi verilemedi.')
+            }
+          },
+        })
+      }
     }
 
     if (targetUser.isBanned) {
       options.push({
         text: 'Kullanıcının Banını Kaldır',
         onPress: async () => {
-          await adminUnbanUser(targetUser.id, targetUser.username, session!.user.id)
-          Alert.alert('Yasak Kaldırıldı', `@${targetUser.username} hesabı tekrar aktif edildi.`)
-          await loadData()
+          const ok = await adminUnbanUser(targetUser.id, targetUser.username, session!.user.id)
+          if (ok) {
+            Alert.alert('Yasak Kaldırıldı', `@${targetUser.username} hesabı tekrar aktif edildi.`)
+            await loadData()
+          } else {
+            Alert.alert('Hata', 'Ban kaldırılamadı.')
+          }
         },
       })
     } else {
@@ -224,9 +256,13 @@ export default function AdminScreen() {
         text: 'Kullanıcıyı Banla (Askıya Al)',
         style: 'destructive',
         onPress: async () => {
-          await adminBanUser(targetUser.id, targetUser.username, session!.user.id)
-          Alert.alert('Banlandı', `@${targetUser.username} askıya alındı.`)
-          await loadData()
+          const ok = await adminBanUser(targetUser.id, targetUser.username, session!.user.id)
+          if (ok) {
+            Alert.alert('Kullanıcı Banlandı', `@${targetUser.username} askıya alındı.`)
+            await loadData()
+          } else {
+            Alert.alert('Hata', 'Kullanıcı banlanamadı.')
+          }
         },
       })
     }
@@ -306,8 +342,8 @@ export default function AdminScreen() {
   if (loading) {
     return (
       <SafeAreaView style={[s.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color="#a855f7" />
-        <Text style={{ color: '#94a3b8', marginTop: 12, fontSize: 14 }}>Yönetici Paneli yükleniyor...</Text>
+        <ActivityIndicator size="large" color={theme.accent} />
+        <Text style={{ color: theme.textSub, marginTop: 12, fontSize: 14 }}>Yönetici Paneli yükleniyor...</Text>
       </SafeAreaView>
     )
   }
@@ -321,7 +357,7 @@ export default function AdminScreen() {
       {/* Top Header */}
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={22} color="#ffffff" />
+          <Ionicons name="arrow-back" size={20} color={theme.text} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -333,46 +369,46 @@ export default function AdminScreen() {
           <Text style={s.headerSub}>Dythin Moderasyon & Canlı Metrikler</Text>
         </View>
         <TouchableOpacity style={s.refreshBtn} onPress={handleRefresh} activeOpacity={0.7}>
-          <Ionicons name="refresh" size={20} color="#c084fc" />
+          <Ionicons name="refresh" size={18} color={theme.accent} />
         </TouchableOpacity>
       </View>
 
       <ScrollView
         style={s.scroll}
         contentContainerStyle={{ paddingBottom: 60 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#a855f7" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={theme.accent} />}
       >
         {/* KPI Metrics Dashboard Cards */}
         <View style={s.kpiGrid}>
           <View style={s.kpiCard}>
             <View style={s.kpiIconBox}>
-              <Ionicons name="people" size={20} color="#38bdf8" />
+              <Ionicons name="people-outline" size={18} color={theme.accent} />
             </View>
             <Text style={s.kpiNumber}>{kpis.totalUsers}</Text>
             <Text style={s.kpiLabel}>Toplam Kullanıcı</Text>
           </View>
 
           <View style={s.kpiCard}>
-            <View style={[s.kpiIconBox, { backgroundColor: '#a855f720' }]}>
-              <Ionicons name="images" size={20} color="#c084fc" />
+            <View style={s.kpiIconBox}>
+              <Ionicons name="images-outline" size={18} color={theme.accent} />
             </View>
             <Text style={s.kpiNumber}>{kpis.totalPosts}</Text>
             <Text style={s.kpiLabel}>Aktif Oylama</Text>
           </View>
 
           <View style={s.kpiCard}>
-            <View style={[s.kpiIconBox, { backgroundColor: '#10b98120' }]}>
-              <Ionicons name="stats-chart" size={20} color="#34d399" />
+            <View style={s.kpiIconBox}>
+              <Ionicons name="stats-chart-outline" size={18} color={theme.accent} />
             </View>
             <Text style={s.kpiNumber}>{kpis.totalVotes}</Text>
             <Text style={s.kpiLabel}>Toplam Oy</Text>
           </View>
 
           <View style={[s.kpiCard, kpis.pendingReports > 0 && { borderColor: '#f43f5e' }]}>
-            <View style={[s.kpiIconBox, { backgroundColor: kpis.pendingReports > 0 ? '#f43f5e30' : '#22c55e20' }]}>
+            <View style={[s.kpiIconBox, { backgroundColor: kpis.pendingReports > 0 ? '#f43f5e25' : theme.accentLight }]}>
               <Ionicons
-                name={kpis.pendingReports > 0 ? 'warning' : 'checkmark-circle'}
-                size={20}
+                name={kpis.pendingReports > 0 ? 'alert-circle-outline' : 'checkmark-circle-outline'}
+                size={18}
                 color={kpis.pendingReports > 0 ? '#f43f5e' : '#22c55e'}
               />
             </View>
@@ -394,7 +430,7 @@ export default function AdminScreen() {
             {isSeeding ? (
               <ActivityIndicator size="small" color="#ffffff" />
             ) : (
-              <Ionicons name="sparkles" size={18} color="#ffffff" />
+              <Ionicons name="cloud-upload-outline" size={18} color="#ffffff" />
             )}
             <Text style={s.seedBtnText}>
               {isSeeding ? 'Bot Verileri Yükleniyor...' : '12 Bot Profili & 8 Gönderi Bas / Yenile'}
@@ -426,9 +462,9 @@ export default function AdminScreen() {
             activeOpacity={0.8}
           >
             <Ionicons
-              name="alert-circle"
-              size={16}
-              color={activeTab === 'reports' ? '#ffffff' : '#94a3b8'}
+              name="shield-outline"
+              size={15}
+              color={activeTab === 'reports' ? '#ffffff' : theme.textSub}
             />
             <Text style={[s.tabBtnText, activeTab === 'reports' && s.tabBtnTextActive]}>
               Şikayetler ({reports.length})
@@ -441,9 +477,9 @@ export default function AdminScreen() {
             activeOpacity={0.8}
           >
             <Ionicons
-              name="people"
-              size={16}
-              color={activeTab === 'users' ? '#ffffff' : '#94a3b8'}
+              name="people-outline"
+              size={15}
+              color={activeTab === 'users' ? '#ffffff' : theme.textSub}
             />
             <Text style={[s.tabBtnText, activeTab === 'users' && s.tabBtnTextActive]}>
               Kullanıcı Yönetimi ({users.length})
@@ -451,12 +487,12 @@ export default function AdminScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ─── TAB 1: ŞİKAYETLER & RAPORLAR ───────────────────────────── */}
+        {/* TAB 1: ŞİKAYETLER & RAPORLAR */}
         {activeTab === 'reports' && (
           <View style={s.tabContent}>
             {reports.length === 0 ? (
               <View style={s.emptyBox}>
-                <Ionicons name="shield-checkmark" size={56} color="#22c55e" />
+                <Ionicons name="shield-checkmark-outline" size={48} color="#22c55e" />
                 <Text style={s.emptyTitle}>Tebrikler, Topluluk Temiz!</Text>
                 <Text style={s.emptySub}>
                   Şu anda bekleyen hiçbir uygunsuz içerik veya kullanıcı şikayeti bulunmuyor.
@@ -468,7 +504,7 @@ export default function AdminScreen() {
                   {/* Rapor Bilgisi */}
                   <View style={s.reportHeader}>
                     <View style={s.reportBadge}>
-                      <Ionicons name="warning" size={13} color="#f43f5e" />
+                      <Ionicons name="alert-circle-outline" size={13} color="#f43f5e" />
                       <Text style={s.reportBadgeText}>ŞİKAYET</Text>
                     </View>
                     <Text style={s.reportDate}>
@@ -482,11 +518,11 @@ export default function AdminScreen() {
                   </View>
 
                   <Text style={s.reportReason}>
-                    <Text style={{ fontWeight: '700', color: '#cbd5e1' }}>Sebep: </Text>
+                    <Text style={{ fontWeight: '700', color: theme.text }}>Sebep: </Text>
                     {item.reason}
                   </Text>
                   <Text style={s.reporterInfo}>
-                    Bildiren: <Text style={{ color: '#c084fc' }}>@{item.reporterUsername}</Text>
+                    Bildiren: <Text style={{ color: theme.accent }}>@{item.reporterUsername}</Text>
                   </Text>
 
                   {/* Gönderi Önizlemesi */}
@@ -503,10 +539,10 @@ export default function AdminScreen() {
                           </View>
                         )}
                         <View>
-                          <Text style={{ color: '#ffffff', fontWeight: '600', fontSize: 13 }}>
+                          <Text style={{ color: theme.text, fontWeight: '600', fontSize: 13 }}>
                             @{item.post.authorUsername}
                           </Text>
-                          <Text style={{ color: '#94a3b8', fontSize: 11 }}>
+                          <Text style={{ color: theme.textSub, fontSize: 11 }}>
                             {item.post.title || 'Başlıksız'}
                           </Text>
                         </View>
@@ -532,7 +568,7 @@ export default function AdminScreen() {
                     </View>
                   ) : (
                     <View style={s.reportedPostDeleted}>
-                      <Text style={{ color: '#94a3b8', fontSize: 12, fontStyle: 'italic' }}>
+                      <Text style={{ color: theme.textSub, fontSize: 12, fontStyle: 'italic' }}>
                         Bu gönderi daha önce silinmiş veya bulunamadı.
                       </Text>
                     </View>
@@ -547,7 +583,7 @@ export default function AdminScreen() {
                           onPress={() => handleDeleteReportedPost(item)}
                           activeOpacity={0.8}
                         >
-                          <Ionicons name="trash" size={15} color="#ffffff" />
+                          <Ionicons name="trash-outline" size={14} color="#ffffff" />
                           <Text style={s.actionBtnText}>Gönderiyi Sil</Text>
                         </TouchableOpacity>
 
@@ -556,7 +592,7 @@ export default function AdminScreen() {
                           onPress={() => handleBanReportedUser(item)}
                           activeOpacity={0.8}
                         >
-                          <Ionicons name="ban" size={15} color="#ffffff" />
+                          <Ionicons name="ban-outline" size={14} color="#ffffff" />
                           <Text style={s.actionBtnText}>Kullanıcıyı Banla</Text>
                         </TouchableOpacity>
                       </>
@@ -567,8 +603,8 @@ export default function AdminScreen() {
                       onPress={() => handleDismissReport(item)}
                       activeOpacity={0.8}
                     >
-                      <Ionicons name="checkmark-done" size={15} color="#94a3b8" />
-                      <Text style={[s.actionBtnText, { color: '#94a3b8' }]}>Kapat</Text>
+                      <Ionicons name="checkmark-outline" size={14} color={theme.textSub} />
+                      <Text style={[s.actionBtnText, { color: theme.textSub }]}>Kapat</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -577,23 +613,23 @@ export default function AdminScreen() {
           </View>
         )}
 
-        {/* ─── TAB 2: KULLANICI YÖNETİMİ & BAN ────────────────────────── */}
+        {/* TAB 2: KULLANICI YÖNETİMİ & BAN */}
         {activeTab === 'users' && (
           <View style={s.tabContent}>
             {/* Arama Barı */}
             <View style={s.searchContainer}>
-              <Ionicons name="search" size={18} color="#94a3b8" style={{ marginLeft: 12 }} />
+              <Ionicons name="search-outline" size={16} color={theme.textSub} style={{ marginLeft: 12 }} />
               <TextInput
                 style={s.searchInput}
                 placeholder="Kullanıcı adı veya isim ile ara..."
-                placeholderTextColor="#64748b"
+                placeholderTextColor={theme.textSub}
                 value={userSearch}
                 onChangeText={setUserSearch}
                 autoCapitalize="none"
               />
               {userSearch ? (
                 <TouchableOpacity onPress={() => setUserSearch('')} style={{ padding: 8 }}>
-                  <Ionicons name="close-circle" size={18} color="#94a3b8" />
+                  <Ionicons name="close-circle" size={16} color={theme.textSub} />
                 </TouchableOpacity>
               ) : null}
             </View>
@@ -631,7 +667,7 @@ export default function AdminScreen() {
             {/* Kullanıcı Listesi */}
             {filteredUsers.length === 0 ? (
               <View style={s.emptyBox}>
-                <Ionicons name="person-circle-outline" size={48} color="#64748b" />
+                <Ionicons name="person-outline" size={44} color={theme.textSub} />
                 <Text style={s.emptyTitle}>Kullanıcı Bulunamadı</Text>
                 <Text style={s.emptySub}>Arama kriterine uygun bir kullanıcı kaydı yok.</Text>
               </View>
@@ -666,8 +702,8 @@ export default function AdminScreen() {
                       )}
 
                       {!u.isSuperAdmin && u.isAdmin && (
-                        <View style={[s.roleBadge, { backgroundColor: '#a855f725', borderColor: '#a855f7' }]}>
-                          <Text style={[s.roleBadgeText, { color: '#c084fc' }]}>ADMİN</Text>
+                        <View style={[s.roleBadge, { backgroundColor: theme.accentLight, borderColor: theme.accent }]}>
+                          <Text style={[s.roleBadgeText, { color: theme.accent }]}>ADMİN</Text>
                         </View>
                       )}
 
@@ -688,7 +724,7 @@ export default function AdminScreen() {
                   </View>
 
                   <View style={{ alignItems: 'center', justifyContent: 'center', paddingLeft: 8 }}>
-                    <Ionicons name="ellipsis-vertical" size={18} color="#94a3b8" />
+                    <Ionicons name="ellipsis-vertical" size={16} color={theme.textSub} />
                   </View>
                 </TouchableOpacity>
               ))
@@ -700,388 +736,383 @@ export default function AdminScreen() {
   )
 }
 
-const s = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0a0a14',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#1e1b4b',
-    backgroundColor: '#0f0e24',
-    gap: 12,
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#1e1b4b',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  adminBadge: {
-    backgroundColor: '#a855f730',
-    borderColor: '#a855f7',
-    borderWidth: 1,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  adminBadgeText: {
-    color: '#c084fc',
-    fontSize: 10,
-    fontWeight: '800',
-  },
-  headerSub: {
-    fontSize: 12,
-    color: '#94a3b8',
-    marginTop: 2,
-  },
-  refreshBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#a855f715',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scroll: {
-    flex: 1,
-  },
-
-  kpiGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 14,
-    gap: 10,
-  },
-  kpiCard: {
-    width: (width - 38) / 2,
-    backgroundColor: '#13112b',
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 0.8,
-    borderColor: '#262354',
-  },
-  kpiIconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: '#38bdf820',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
-  kpiNumber: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#ffffff',
-  },
-  kpiLabel: {
-    fontSize: 12,
-    color: '#94a3b8',
-    marginTop: 4,
-    fontWeight: '500',
-  },
-
-  tabSwitcher: {
-    flexDirection: 'row',
-    marginHorizontal: 14,
-    marginBottom: 14,
-    backgroundColor: '#13112b',
-    borderRadius: 14,
-    padding: 4,
-    borderWidth: 0.5,
-    borderColor: '#262354',
-  },
-  tabBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  tabBtnActive: {
-    backgroundColor: '#a855f7',
-  },
-  tabBtnText: {
-    color: '#94a3b8',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  tabBtnTextActive: {
-    color: '#ffffff',
-  },
-  tabContent: {
-    paddingHorizontal: 14,
-  },
-
-  emptyBox: {
-    backgroundColor: '#13112b',
-    borderRadius: 20,
-    padding: 32,
-    alignItems: 'center',
-    borderWidth: 0.5,
-    borderColor: '#262354',
-    marginTop: 10,
-  },
-  emptyTitle: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '700',
-    marginTop: 14,
-  },
-  emptySub: {
-    color: '#94a3b8',
-    fontSize: 13,
-    textAlign: 'center',
-    marginTop: 6,
-    lineHeight: 18,
-  },
-
-  reportCard: {
-    backgroundColor: '#13112b',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#f43f5e40',
-  },
-  reportHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  reportBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#f43f5e25',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  reportBadgeText: {
-    color: '#f43f5e',
-    fontSize: 10,
-    fontWeight: '800',
-  },
-  reportDate: {
-    color: '#64748b',
-    fontSize: 11,
-  },
-  reportReason: {
-    color: '#f8fafc',
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 4,
-  },
-  reporterInfo: {
-    color: '#94a3b8',
-    fontSize: 12,
-    marginBottom: 10,
-  },
-  reportedPostBox: {
-    backgroundColor: '#0a0a14',
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 12,
-    borderWidth: 0.5,
-    borderColor: '#262354',
-  },
-  reportedPostDeleted: {
-    backgroundColor: '#0a0a14',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 12,
-  },
-  authorAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-  authorAvatarPlaceholder: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#a855f7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  postThumbnail: {
-    width: 70,
-    height: 90,
-    borderRadius: 8,
-    backgroundColor: '#1e1b4b',
-  },
-  actionRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  actionBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    paddingVertical: 9,
-    borderRadius: 10,
-  },
-  deleteBtn: {
-    backgroundColor: '#dc2626',
-  },
-  banBtn: {
-    backgroundColor: '#7c3aed',
-  },
-  dismissBtn: {
-    backgroundColor: '#1e1b4b',
-    flex: 0.7,
-  },
-  actionBtnText: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#13112b',
-    borderRadius: 12,
-    borderWidth: 0.5,
-    borderColor: '#262354',
-    marginBottom: 10,
-  },
-  searchInput: {
-    flex: 1,
-    color: '#ffffff',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    fontSize: 13,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  filterChip: {
-    backgroundColor: '#13112b',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 0.5,
-    borderColor: '#262354',
-  },
-  filterChipActive: {
-    backgroundColor: '#a855f7',
-    borderColor: '#a855f7',
-  },
-  filterChipText: {
-    color: '#94a3b8',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  filterChipTextActive: {
-    color: '#ffffff',
-    fontWeight: '700',
-  },
-  userCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#13112b',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 0.5,
-    borderColor: '#262354',
-  },
-  userAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
-  userAvatarPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#a855f7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  userName: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  userFullName: {
-    color: '#cbd5e1',
-    fontSize: 12,
-    marginTop: 2,
-  },
-  userJoined: {
-    color: '#64748b',
-    fontSize: 11,
-    marginTop: 3,
-  },
-  roleBadge: {
-    borderWidth: 0.8,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: 5,
-  },
-  roleBadgeText: {
-    fontSize: 9,
-    fontWeight: '800',
-  },
-  actionSection: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
-  seedBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#7c3aed',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 14,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: '#a855f7',
-  },
-  seedBtnText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  clearBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#1f132b',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 14,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: '#f43f5e50',
-    marginTop: 8,
-  },
-  clearBtnText: {
-    color: '#f43f5e',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-})
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.bg,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 0.5,
+      borderBottomColor: theme.border,
+      backgroundColor: theme.card,
+      gap: 12,
+    },
+    backBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: theme.accentLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerTitle: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: theme.text,
+    },
+    adminBadge: {
+      backgroundColor: theme.accentLight,
+      borderColor: theme.accent,
+      borderWidth: 1,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 6,
+    },
+    adminBadgeText: {
+      color: theme.accent,
+      fontSize: 10,
+      fontWeight: '800',
+    },
+    headerSub: {
+      fontSize: 11,
+      color: theme.textSub,
+      marginTop: 2,
+    },
+    refreshBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: theme.accentLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    scroll: {
+      flex: 1,
+    },
+    kpiGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      padding: 14,
+      gap: 10,
+    },
+    kpiCard: {
+      width: (width - 38) / 2,
+      backgroundColor: theme.card,
+      borderRadius: 16,
+      padding: 14,
+      borderWidth: 0.8,
+      borderColor: theme.border,
+    },
+    kpiIconBox: {
+      width: 32,
+      height: 32,
+      borderRadius: 10,
+      backgroundColor: theme.accentLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 10,
+    },
+    kpiNumber: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: theme.text,
+    },
+    kpiLabel: {
+      fontSize: 11,
+      color: theme.textSub,
+      marginTop: 4,
+      fontWeight: '500',
+    },
+    tabSwitcher: {
+      flexDirection: 'row',
+      marginHorizontal: 14,
+      marginBottom: 14,
+      backgroundColor: theme.card,
+      borderRadius: 14,
+      padding: 4,
+      borderWidth: 0.5,
+      borderColor: theme.border,
+    },
+    tabBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 10,
+      borderRadius: 10,
+    },
+    tabBtnActive: {
+      backgroundColor: theme.accent,
+    },
+    tabBtnText: {
+      color: theme.textSub,
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    tabBtnTextActive: {
+      color: '#ffffff',
+    },
+    tabContent: {
+      paddingHorizontal: 14,
+    },
+    emptyBox: {
+      backgroundColor: theme.card,
+      borderRadius: 20,
+      padding: 32,
+      alignItems: 'center',
+      borderWidth: 0.5,
+      borderColor: theme.border,
+      marginTop: 10,
+    },
+    emptyTitle: {
+      color: theme.text,
+      fontSize: 15,
+      fontWeight: '700',
+      marginTop: 14,
+    },
+    emptySub: {
+      color: theme.textSub,
+      fontSize: 12,
+      textAlign: 'center',
+      marginTop: 6,
+      lineHeight: 18,
+    },
+    reportCard: {
+      backgroundColor: theme.card,
+      borderRadius: 16,
+      padding: 14,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: '#f43f5e35',
+    },
+    reportHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    reportBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: '#f43f5e20',
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 6,
+    },
+    reportBadgeText: {
+      color: '#f43f5e',
+      fontSize: 10,
+      fontWeight: '800',
+    },
+    reportDate: {
+      color: theme.textSub,
+      fontSize: 11,
+    },
+    reportReason: {
+      color: theme.text,
+      fontSize: 13,
+      lineHeight: 18,
+      marginBottom: 4,
+    },
+    reporterInfo: {
+      color: theme.textSub,
+      fontSize: 11,
+      marginBottom: 10,
+    },
+    reportedPostBox: {
+      backgroundColor: theme.bg,
+      borderRadius: 12,
+      padding: 10,
+      marginBottom: 12,
+      borderWidth: 0.5,
+      borderColor: theme.border,
+    },
+    reportedPostDeleted: {
+      backgroundColor: theme.bg,
+      borderRadius: 8,
+      padding: 10,
+      marginBottom: 12,
+    },
+    authorAvatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+    },
+    authorAvatarPlaceholder: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: theme.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    postThumbnail: {
+      width: 70,
+      height: 90,
+      borderRadius: 8,
+      backgroundColor: theme.border,
+    },
+    actionRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    actionBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 5,
+      paddingVertical: 9,
+      borderRadius: 10,
+    },
+    deleteBtn: {
+      backgroundColor: '#dc2626',
+    },
+    banBtn: {
+      backgroundColor: '#9333ea',
+    },
+    dismissBtn: {
+      backgroundColor: theme.accentLight,
+      flex: 0.7,
+    },
+    actionBtnText: {
+      color: '#ffffff',
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.card,
+      borderRadius: 12,
+      borderWidth: 0.5,
+      borderColor: theme.border,
+      marginBottom: 10,
+    },
+    searchInput: {
+      flex: 1,
+      color: theme.text,
+      paddingVertical: 9,
+      paddingHorizontal: 10,
+      fontSize: 13,
+    },
+    filterRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginBottom: 12,
+    },
+    filterChip: {
+      backgroundColor: theme.card,
+      borderRadius: 20,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderWidth: 0.5,
+      borderColor: theme.border,
+    },
+    filterChipActive: {
+      backgroundColor: theme.accent,
+      borderColor: theme.accent,
+    },
+    filterChipText: {
+      color: theme.textSub,
+      fontSize: 12,
+      fontWeight: '500',
+    },
+    filterChipTextActive: {
+      color: '#ffffff',
+      fontWeight: '700',
+    },
+    userCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.card,
+      borderRadius: 14,
+      padding: 12,
+      marginBottom: 8,
+      borderWidth: 0.5,
+      borderColor: theme.border,
+    },
+    userAvatar: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+    },
+    userAvatarPlaceholder: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: theme.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    userName: {
+      color: theme.text,
+      fontSize: 13,
+      fontWeight: '700',
+    },
+    userFullName: {
+      color: theme.textSub,
+      fontSize: 11,
+      marginTop: 2,
+    },
+    userJoined: {
+      color: theme.textSub,
+      fontSize: 10,
+      marginTop: 3,
+    },
+    roleBadge: {
+      borderWidth: 0.8,
+      paddingHorizontal: 5,
+      paddingVertical: 1,
+      borderRadius: 5,
+    },
+    roleBadgeText: {
+      fontSize: 9,
+      fontWeight: '800',
+    },
+    actionSection: {
+      marginHorizontal: 14,
+      marginBottom: 14,
+    },
+    seedBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.accent,
+      paddingVertical: 13,
+      paddingHorizontal: 20,
+      borderRadius: 14,
+      gap: 8,
+    },
+    seedBtnText: {
+      color: '#ffffff',
+      fontSize: 13,
+      fontWeight: '700',
+    },
+    clearBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.card,
+      paddingVertical: 11,
+      paddingHorizontal: 20,
+      borderRadius: 14,
+      gap: 8,
+      borderWidth: 1,
+      borderColor: '#f43f5e40',
+      marginTop: 8,
+    },
+    clearBtnText: {
+      color: '#f43f5e',
+      fontSize: 12,
+      fontWeight: '700',
+    },
+  })
+}

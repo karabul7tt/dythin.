@@ -19,7 +19,7 @@ type Props = {
 }
 
 export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown }: Props) {
-  const { theme } = useApp()
+  const { theme, t } = useApp()
   const router = useRouter()
   const [zoomUri, setZoomUri] = useState('')
   const [zoomMounted, setZoomMounted] = useState(false)
@@ -307,19 +307,19 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
         {post.image_b_url ? (
           <>
             <Animated.View style={[s.badge, s.rightBadge, { opacity: likeOpacity }]}>
-              <Text style={[s.badgeText, s.rightText]}>Sağdaki Seçildi</Text>
+              <Text style={[s.badgeText, s.rightText]}>{t('feed.rightSelected')}</Text>
             </Animated.View>
             <Animated.View style={[s.badge, s.leftBadge, { opacity: nopeOpacity }]}>
-              <Text style={[s.badgeText, s.leftText]}>Soldaki Seçildi</Text>
+              <Text style={[s.badgeText, s.leftText]}>{t('feed.leftSelected')}</Text>
             </Animated.View>
           </>
         ) : (
           <>
             <Animated.View style={[s.badge, s.singleLikeBadge, { opacity: likeOpacity }]}>
-              <Text style={[s.badgeText, s.singleLikeText]}>Beğendim</Text>
+              <Text style={[s.badgeText, s.singleLikeText]}>{t('feed.like')}</Text>
             </Animated.View>
             <Animated.View style={[s.badge, s.singleNopeBadge, { opacity: nopeOpacity }]}>
-              <Text style={[s.badgeText, s.singleNopeText]}>Geçtim</Text>
+              <Text style={[s.badgeText, s.singleNopeText]}>{t('feed.dislike')}</Text>
             </Animated.View>
           </>
         )}
@@ -357,11 +357,11 @@ export default function SwipeCard({ post, onSwipeLeft, onSwipeRight, onSwipeDown
                   </Text>
                 ) : null}
               </View>
-              <Text style={s.profileHint}>Profili incele</Text>
+              <Text style={s.profileHint}>{t('feed.viewProfile')}</Text>
             </View>
 
             <View style={s.viewProfileBadge}>
-              <Text style={s.viewProfileText}>Profil</Text>
+              <Text style={s.viewProfileText}>{t('feed.profile')}</Text>
               <Ionicons name="chevron-forward" size={12} color={theme.accent} />
             </View>
           </TouchableOpacity>
