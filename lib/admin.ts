@@ -2,9 +2,6 @@ import { supabase } from './supabase'
 
 export const SUPER_ADMIN_USERNAMES = [
   'mehmetkarabul7tt',
-  'dythin',
-  'harakirikarabut',
-  'kdmdlsls',
 ]
 
 export type AdminKPIs = {
@@ -54,21 +51,51 @@ export async function checkIsAdmin(
 ): Promise<boolean> {
   if (!username && !userId) return false
 
-  const cleanUser = (username || '').toLowerCase().replace('@', '').trim()
-  if (SUPER_ADMIN_USERNAMES.includes(cleanUser)) return true
+  let cleanUser = (username || '').toLowerCase().replace('@', '').trim()
+
+  // 1. Ana yönetici (Super Admin) kontrolü - Yalnızca @mehmetkarabul7tt
+  if (cleanUser && SUPER_ADMIN_USERNAMES.includes(cleanUser)) return true
+
+  // 2. Veritabanından profil ve role kontrolü
+  if (userId) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, username')
+        .eq('id', userId)
+        .maybeSingle()
+
+      if (profile) {
+        const dbUser = (profile.username || '').toLowerCase().replace('@', '').trim()
+        if (dbUser && SUPER_ADMIN_USERNAMES.includes(dbUser)) return true
+        if (profile.role === 'admin') return true
+        if (dbUser) cleanUser = dbUser
+      }
+    } catch {}
+  }
+
   if (role === 'admin') return true
 
+  // 3. Mehmet'in admin panelinden yetkilendirdiği kullanıcılar
   try {
     const { data } = await supabase
       .from('reports')
-      .select('reason')
-      .like('reason', 'ADMIN_ACTION:PROMOTE_ADMIN:%')
+      .select('reason, created_at')
+      .or(`reason.like.ADMIN_ACTION:PROMOTE_ADMIN:%,reason.like.ADMIN_ACTION:REVOKE_ADMIN:%`)
       .order('created_at', { ascending: false })
 
     if (data && data.length > 0) {
       for (const row of data) {
-        if (cleanUser && row.reason.toLowerCase().includes(`:@${cleanUser}`)) return true
-        if (userId && row.reason.includes(`:${userId}:`)) return true
+        const isUserMatch = (cleanUser && row.reason.toLowerCase().includes(`:@${cleanUser}`)) ||
+                            (userId && row.reason.includes(`:${userId}:`))
+        if (isUserMatch) {
+          if (row.reason.startsWith('ADMIN_ACTION:REVOKE_ADMIN:')) {
+            return false
+          }
+          if (row.reason.startsWith('ADMIN_ACTION:PROMOTE_ADMIN:')) {
+            return true
+          }
+        }
       }
     }
   } catch {}
