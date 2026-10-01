@@ -382,14 +382,94 @@
     .bp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
     .phone-wrap { position: relative; display: flex; justify-content: center; padding: 3rem 1.5rem; }
     .phone-frame {
-      width: 250px; border-radius: 44px;
-      border: 2px solid var(--border); background: var(--bg);
+      width: 280px; height: 570px; border-radius: 46px;
+      border: 3px solid rgba(255,255,255,0.15); background: var(--bg);
       overflow: hidden;
-      box-shadow: 0 20px 80px -20px rgba(var(--accent-rgb), 0.45);
+      box-shadow: 0 25px 90px -20px rgba(var(--accent-rgb), 0.5);
       position: relative; flex-shrink: 0;
+      display: flex; flex-direction: column;
       transition: box-shadow 0.5s, border-color 0.5s, background 0.5s;
+      user-select: none;
     }
-    .phone-frame img { width: 100%; display: block; }
+    .phone-island {
+      width: 80px; height: 18px; background: #000; border-radius: 20px;
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      z-index: 20;
+    }
+    .phone-top-bar {
+      padding: 34px 14px 6px; display: flex; justify-content: space-between; align-items: center;
+      z-index: 10;
+    }
+    .phone-app-logo { font-size: 14px; font-weight: 800; color: var(--fg); }
+    .phone-app-logo span { color: var(--accent); }
+    .phone-msg-badge {
+      font-size: 9px; color: var(--fg); background: rgba(255,255,255,0.08);
+      padding: 4px 8px; border-radius: 20px; display: flex; align-items: center; gap: 4px;
+      border: 1px solid var(--border);
+    }
+    .phone-pills {
+      display: flex; justify-content: center; gap: 6px; padding: 4px 14px 8px;
+    }
+    .phone-pill {
+      font-size: 9px; font-weight: 600; padding: 3px 10px; border-radius: 12px;
+      background: rgba(255,255,255,0.06); color: var(--fg2);
+    }
+    .phone-pill.active {
+      background: var(--accent); color: #fff;
+    }
+    .phone-card {
+      flex: 1; margin: 0 12px; border-radius: 18px; overflow: hidden;
+      background: var(--bg3); border: 1px solid var(--border);
+      position: relative; display: flex; flex-direction: column;
+      transition: background 0.5s, border-color 0.5s;
+    }
+    .phone-photo-box {
+      width: 100%; height: 245px; position: relative; overflow: hidden;
+    }
+    .phone-photo-box img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center top;
+      display: block;
+    }
+    .phone-user-tag {
+      position: absolute; bottom: 8px; left: 8px; z-index: 2;
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(0,0,0,0.65); backdrop-filter: blur(8px);
+      padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .phone-avatar { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); }
+    .phone-username { font-size: 9px; font-weight: 700; color: #fff; }
+    .phone-question-box {
+      padding: 8px 10px 4px;
+    }
+    .phone-q-title { font-size: 11px; font-weight: 800; color: var(--fg); margin-bottom: 6px; }
+    .phone-actions {
+      display: flex; gap: 6px; padding: 0 8px 8px;
+    }
+    .phone-btn {
+      flex: 1; border-radius: 10px; padding: 6px 3px; text-align: center;
+      cursor: pointer; transition: transform 0.15s, opacity 0.2s, background 0.5s;
+    }
+    .phone-btn:active { transform: scale(0.96); }
+    .phone-btn-pass {
+      background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+      color: var(--fg);
+    }
+    .phone-btn-like {
+      background: var(--accent); color: #fff;
+    }
+    .phone-btn-main { font-size: 9px; font-weight: 700; display: block; }
+    .phone-btn-sub { font-size: 7px; opacity: 0.75; display: block; margin-top: 1px; }
+    .phone-tab-bar {
+      padding: 6px 12px 12px; display: flex; justify-content: space-around;
+      border-top: 1px solid var(--border); background: var(--bg);
+      transition: background 0.5s, border-color 0.5s;
+    }
+    .phone-tab-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      color: var(--fg3); font-size: 8px; font-weight: 600;
+    }
+    .phone-tab-item.active { color: var(--accent); }
+    .phone-tab-item i { font-size: 11px; }
     .anno { position: absolute; display: flex; flex-direction: column; z-index: 5; }
     .anno-lh { height: 1px; background: var(--accent); opacity: 0.45; transition: background 0.5s; }
     .anno-lv { width: 1px; background: var(--accent); opacity: 0.45; transition: background 0.5s; }
@@ -639,7 +719,49 @@
       <!-- Phone + technical annotations -->
       <div class="phone-wrap reveal-left">
         <div class="phone-frame">
-          <img src="live-voting.jpg" alt="Dythin Canlı Oylama Ekranı">
+          <div class="phone-island"></div>
+          
+          <div class="phone-top-bar">
+            <div class="phone-app-logo">dythin<span>.</span></div>
+            <div class="phone-msg-badge"><i class="fa-regular fa-comment-dots"></i> <span data-i18n="appTopMsg">Mesajlar</span></div>
+          </div>
+
+          <div class="phone-pills">
+            <div class="phone-pill active"><i class="fa-solid fa-globe"></i> <span data-i18n="appFeedPublic">Genel</span></div>
+            <div class="phone-pill"><i class="fa-solid fa-user-group"></i> <span data-i18n="appFeedFriends">Arkadaşlar</span></div>
+          </div>
+
+          <div class="phone-card">
+            <div class="phone-photo-box">
+              <img src="appstore_1.png" alt="Dythin Oylama Kombini" id="phone-demo-img">
+              <div class="phone-user-tag">
+                <div class="phone-avatar"></div>
+                <span class="phone-username">@dythin</span>
+              </div>
+            </div>
+
+            <div class="phone-question-box">
+              <div class="phone-q-title" id="phone-q-title" data-i18n="appQuestion">Do you think?</div>
+            </div>
+
+            <div class="phone-actions">
+              <div class="phone-btn phone-btn-pass" onclick="triggerPhoneVote('pass')">
+                <span class="phone-btn-main" data-i18n="appBtnPass">✕ Beğenmedim</span>
+                <span class="phone-btn-sub" data-i18n="appBtnPassHint">Geçtim (Sola)</span>
+              </div>
+              <div class="phone-btn phone-btn-like" onclick="triggerPhoneVote('like')">
+                <span class="phone-btn-main" data-i18n="appBtnLike">✓ Beğendim</span>
+                <span class="phone-btn-sub" data-i18n="appBtnLikeHint">Harika Seçim (Sağa)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="phone-tab-bar">
+            <div class="phone-tab-item active"><i class="fa-solid fa-wand-magic-sparkles"></i><span data-i18n="tabVote">Oyla</span></div>
+            <div class="phone-tab-item"><i class="fa-solid fa-circle-plus"></i><span data-i18n="tabCreate">Paylaş</span></div>
+            <div class="phone-tab-item"><i class="fa-solid fa-chart-simple"></i><span data-i18n="tabResults">Sonuçlar</span></div>
+            <div class="phone-tab-item"><i class="fa-solid fa-user"></i><span data-i18n="tabProfile">Profil</span></div>
+          </div>
         </div>
         <!-- Left annotation -->
         <div class="anno" style="left:-5%;top:28%;align-items:flex-end;">
@@ -794,6 +916,11 @@ const T = {
       ['Android için de var mı?','Şu an yalnızca iOS (App Store) için mevcuttur. Android versiyonu yakında yayınlanacak.'],
     ],
     ftPrivacy:'Gizlilik Politikası', ftTerms:'Kullanım Koşulları',
+    appTopMsg:'Mesajlar', appFeedPublic:'Genel', appFeedFriends:'Arkadaşlar',
+    appQuestion:'Sizce bu kombin nasıl?',
+    appBtnPass:'✕ Beğenmedim', appBtnPassHint:'Geçtim (Sola)',
+    appBtnLike:'✓ Beğendim', appBtnLikeHint:'Harika Seçim (Sağa)',
+    tabVote:'Oyla', tabCreate:'Paylaş', tabResults:'Sonuçlar', tabProfile:'Profil',
   },
   en: {
     navCta:'APP STORE', heroLabel:'[ SOCIAL VOTING PLATFORM ]',
@@ -839,6 +966,11 @@ const T = {
       ['Is there an Android version?','Currently iOS (App Store) only. Android version coming soon.'],
     ],
     ftPrivacy:'Privacy Policy', ftTerms:'Terms of Use',
+    appTopMsg:'Messages', appFeedPublic:'Public', appFeedFriends:'Friends',
+    appQuestion:'How does this outfit look?',
+    appBtnPass:'✕ Dislike', appBtnPassHint:'Pass (Swipe Left)',
+    appBtnLike:'✓ Like', appBtnLikeHint:'Great Choice (Swipe Right)',
+    tabVote:'Vote', tabCreate:'Create', tabResults:'Results', tabProfile:'Profile',
   },
   de: {
     navCta:'APP STORE', heroLabel:'[ SOZIALE ABSTIMMUNGSPLATTFORM ]',
@@ -884,6 +1016,11 @@ const T = {
       ['Gibt es eine Android-Version?','Derzeit nur iOS (App Store). Android kommt bald.'],
     ],
     ftPrivacy:'Datenschutz', ftTerms:'Nutzungsbedingungen',
+    appTopMsg:'Nachrichten', appFeedPublic:'Öffentlich', appFeedFriends:'Freunde',
+    appQuestion:'Wie gefällt dir das Outfit?',
+    appBtnPass:'✕ Nicht meins', appBtnPassHint:'Weiter (Links)',
+    appBtnLike:'✓ Gefällt mir', appBtnLikeHint:'Top Wahl (Rechts)',
+    tabVote:'Abstimmen', tabCreate:'Teilen', tabResults:'Ergebnisse', tabProfile:'Profil',
   },
 };
 
@@ -918,6 +1055,26 @@ function applyLang() {
     if (t[key] !== undefined && typeof t[key] === 'string') el.textContent = t[key];
   });
   buildFaqs();
+}
+
+/* ── PHONE DEMO INTERACTION ── */
+let phoneVotes = { pass: 14, like: 86 };
+function triggerPhoneVote(type) {
+  if (type === 'like') phoneVotes.like++; else phoneVotes.pass++;
+  const total = phoneVotes.like + phoneVotes.pass;
+  const pctLike = Math.round((phoneVotes.like / total) * 100);
+  const qTitle = document.getElementById('phone-q-title');
+  if (qTitle) {
+    const thanks = lang === 'tr' ? 'Oyunuz alındı! · %' + pctLike + ' Beğenildi' : lang === 'en' ? 'Vote saved! · ' + pctLike + '% Liked' : 'Abgestimmt! · ' + pctLike + '% Gefällt';
+    qTitle.textContent = thanks;
+    qTitle.style.color = 'var(--accent)';
+    setTimeout(() => {
+      if (T[lang] && T[lang].appQuestion) {
+        qTitle.textContent = T[lang].appQuestion;
+      }
+      qTitle.style.color = 'var(--fg)';
+    }, 2800);
+  }
 }
 
 /* ── FAQ ── */
