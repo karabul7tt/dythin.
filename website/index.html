@@ -8,70 +8,113 @@
   <meta name="keywords" content="dythin, oylama uygulaması, kombin seçimi, A/B karşılaştırma, sosyal oylama, kararsızlık uygulaması, ios, app store">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://dythin.com.tr" />
-
-  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://dythin.com.tr">
   <meta property="og:title" content="Dythin — Canlı Sosyal Oylama & Karar Platformu">
   <meta property="og:description" content="Kombinlerin ve kararsızlıkların için fotoğraflarınla anında canlı oy topla. iOS için ücretsiz!">
-  <meta property="og:image" content="https://dythin.com.tr/appstore_3.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-
-  <!-- Twitter Card -->
+  <meta property="og:image" content="https://dythin.com.tr/photo_2.jpg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://dythin.com.tr">
-  <meta name="twitter:title" content="Dythin — Canlı Sosyal Oylama">
-  <meta name="twitter:description" content="Kombinlerin ve kararsızlıkların için fotoğraflarınla anında canlı oy topla.">
-  <meta name="twitter:image" content="https://dythin.com.tr/appstore_3.png">
-
-  <!-- Schema.org -->
+  <meta name="twitter:image" content="https://dythin.com.tr/photo_2.jpg">
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://dythin.com.tr/#website","url":"https://dythin.com.tr","name":"Dythin","inLanguage":"tr-TR"},{"@type":"SoftwareApplication","@id":"https://dythin.com.tr/#app","name":"Dythin","operatingSystem":"iOS","applicationCategory":"SocialNetworkingApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"url":"https://apps.apple.com/app/dythin/id6805192895"}]}
+  {"@context":"https://schema.org","@graph":[{"@type":"WebSite","url":"https://dythin.com.tr","name":"Dythin","inLanguage":"tr-TR"},{"@type":"SoftwareApplication","name":"Dythin","operatingSystem":"iOS","applicationCategory":"SocialNetworkingApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"url":"https://apps.apple.com/app/dythin/id6805192895"}]}
   </script>
-
-  <!-- Favicons -->
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="manifest" href="/site.webmanifest">
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
-    /* ── THEMES ── */
-    :root, [data-theme="purple"] { --accent: #7F77DD; --accent-rgb: 127,119,221; }
-    [data-theme="gold"]    { --accent: #C9A84C; --accent-rgb: 201,168,76; }
-    [data-theme="rose"]    { --accent: #D4537E; --accent-rgb: 212,83,126; }
-    [data-theme="emerald"] { --accent: #3B6D11; --accent-rgb: 59,109,17; }
+    /* ═══════════════════════════════════════════
+       FULL THEME SYSTEM — TÜM RENKLER DEĞİŞİR
+    ═══════════════════════════════════════════ */
+    :root, [data-theme="purple"] {
+      --bg:       #0c0b18;
+      --bg2:      #08070f;
+      --bg3:      #100f22;
+      --fg:       #ffffff;
+      --fg2:      rgba(255,255,255,0.48);
+      --fg3:      rgba(255,255,255,0.25);
+      --border:   rgba(255,255,255,0.08);
+      --border2:  rgba(255,255,255,0.05);
+      --accent:   #7F77DD;
+      --accent-rgb: 127,119,221;
+      --wm:       rgba(255,255,255,0.035);
+      --nav-bg:   rgba(12,11,24,0.92);
+      --modal-bg: #100f20;
+    }
+    [data-theme="gold"] {
+      --bg:       #0e0d04;
+      --bg2:      #090800;
+      --bg3:      #131200;
+      --fg:       #ffffff;
+      --fg2:      rgba(255,255,255,0.48);
+      --fg3:      rgba(255,255,255,0.25);
+      --border:   rgba(255,255,255,0.08);
+      --border2:  rgba(255,255,255,0.05);
+      --accent:   #C9A84C;
+      --accent-rgb: 201,168,76;
+      --wm:       rgba(255,255,255,0.035);
+      --nav-bg:   rgba(14,13,4,0.92);
+      --modal-bg: #131200;
+    }
+    [data-theme="rose"] {
+      --bg:       #fdf6f0;
+      --bg2:      #f7ede4;
+      --bg3:      #f0e3d8;
+      --fg:       #1a080e;
+      --fg2:      rgba(26,8,14,0.5);
+      --fg3:      rgba(26,8,14,0.28);
+      --border:   rgba(26,8,14,0.1);
+      --border2:  rgba(26,8,14,0.06);
+      --accent:   #D4537E;
+      --accent-rgb: 212,83,126;
+      --wm:       rgba(26,8,14,0.04);
+      --nav-bg:   rgba(253,246,240,0.92);
+      --modal-bg: #f7ede4;
+    }
+    [data-theme="emerald"] {
+      --bg:       #f2f5ed;
+      --bg2:      #e7ede0;
+      --bg3:      #dde5d4;
+      --fg:       #0d1a09;
+      --fg2:      rgba(13,26,9,0.5);
+      --fg3:      rgba(13,26,9,0.28);
+      --border:   rgba(13,26,9,0.1);
+      --border2:  rgba(13,26,9,0.06);
+      --accent:   #3B6D11;
+      --accent-rgb: 59,109,17;
+      --wm:       rgba(13,26,9,0.04);
+      --nav-bg:   rgba(242,245,237,0.92);
+      --modal-bg: #e7ede0;
+    }
 
-    /* ── RESET ── */
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { background: #000; color: #fff; scroll-behavior: smooth; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+    html { background: var(--bg); color: var(--fg); scroll-behavior: smooth; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; transition: background 0.5s, color 0.5s; }
     img  { display: block; max-width: 100%; }
     a    { color: inherit; text-decoration: none; }
     button { cursor: pointer; font-family: inherit; }
-
-    /* ── SCROLLBAR ── */
     ::-webkit-scrollbar { width: 2px; }
-    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--accent); }
 
-    /* ── UTILITIES ── */
-    .mono { font-family: 'Space Grotesk', monospace; }
+    /* ═══════════════════════════════════════════
+       TYPOGRAPHY UTILITIES
+    ═══════════════════════════════════════════ */
     .label {
       font-family: 'Space Grotesk', monospace;
       font-size: 0.6rem;
       text-transform: uppercase;
       letter-spacing: 0.22em;
-      color: rgba(255,255,255,0.4);
+      color: var(--fg3);
+      transition: color 0.5s;
     }
     .la { color: var(--accent); }
     .wm {
@@ -80,16 +123,17 @@
       text-transform: uppercase;
       letter-spacing: -0.025em;
       line-height: 0.85;
-      color: rgba(255,255,255,0.038);
+      color: var(--wm);
       pointer-events: none;
       user-select: none;
       white-space: nowrap;
+      transition: color 0.5s;
     }
     .section-meta {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-top: 1px solid rgba(255,255,255,0.09);
+      border-top: 1px solid var(--border);
       padding-top: 1.5rem;
       margin-bottom: 5rem;
       flex-wrap: wrap;
@@ -101,163 +145,378 @@
       font-weight: 700;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: #fff;
+      color: var(--fg);
       border-bottom: 1px solid var(--accent);
       padding-bottom: 0.2rem;
       white-space: nowrap;
       transition: opacity 0.2s;
     }
     .text-link:hover { opacity: 0.6; }
-    .pain-item { display: flex; gap: 1.75rem; align-items: flex-start; padding: 1.35rem 0; }
-    .pain-item + .pain-item { border-top: 1px solid rgba(255,255,255,0.07); }
-    .pain-num { font-family: 'Space Grotesk', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
-    .pain-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
-    .pain-desc { font-size: 0.78rem; color: rgba(255,255,255,0.42); line-height: 1.65; }
 
-    /* ── NAV ── */
+    /* ═══════════════════════════════════════════
+       SCROLL ANIMATIONS
+    ═══════════════════════════════════════════ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: opacity 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .reveal-left.visible { opacity: 1; transform: translateX(0); }
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .reveal-right.visible { opacity: 1; transform: translateX(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.35s; }
+    .reveal-delay-4 { transition-delay: 0.5s; }
+
+    /* Hero entrance animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes slideRight {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+    .hero-h1 span { display: inline-block; }
+    .hero-h1 .l1 { animation: fadeUp 0.8s cubic-bezier(0.25,0.46,0.45,0.94) 0.1s both; }
+    .hero-h1 .l2 { animation: fadeUp 0.8s cubic-bezier(0.25,0.46,0.45,0.94) 0.22s both; }
+    .hero-h1 .l3 { animation: fadeUp 0.8s cubic-bezier(0.25,0.46,0.45,0.94) 0.34s both; }
+    .hero-label-anim { animation: fadeIn 0.8s 0.05s both; }
+    .hero-desc-anim  { animation: fadeUp 0.8s 0.5s both; }
+    .hero-cta-anim   { animation: fadeUp 0.8s 0.65s both; }
+    .hero-wm-anim    { animation: fadeIn 1.2s 0.2s both; }
+
+    /* Accent underline animation */
+    .accent-line {
+      display: block;
+      width: 60px;
+      height: 2px;
+      background: var(--accent);
+      transform-origin: left;
+      animation: slideRight 0.8s cubic-bezier(0.25,0.46,0.45,0.94) 0.8s both;
+    }
+
+    /* ═══════════════════════════════════════════
+       NAV
+    ═══════════════════════════════════════════ */
     #nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
       padding: 1.2rem 2.5rem;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      background: rgba(0,0,0,0.92);
-      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      transition: background 0.5s, border-color 0.5s;
     }
-    .nav-logo { font-family: 'Space Grotesk', monospace; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.18em; }
+    .nav-logo {
+      font-family: 'Space Grotesk', monospace;
+      font-weight: 700; font-size: 0.95rem; letter-spacing: 0.18em;
+      color: var(--fg);
+      transition: color 0.5s;
+    }
     .nav-r { display: flex; align-items: center; gap: 1.5rem; }
     .lang-sw { display: flex; align-items: center; gap: 0.2rem; }
-    .lang-btn { font-family: 'Space Grotesk', monospace; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); background: none; border: none; padding: 0.3rem 0.4rem; transition: color 0.2s; }
-    .lang-btn:hover, .lang-btn.active { color: #fff; }
-    .lang-sep { color: rgba(255,255,255,0.14); font-size: 0.7rem; }
+    .lang-btn {
+      font-family: 'Space Grotesk', monospace; font-size: 0.58rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--fg3); background: none; border: none;
+      padding: 0.3rem 0.4rem; transition: color 0.3s;
+    }
+    .lang-btn:hover, .lang-btn.active { color: var(--fg); }
+    .lang-sep { color: var(--border); font-size: 0.7rem; }
     .theme-sw { display: flex; align-items: center; gap: 0.4rem; }
-    .tdot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid transparent; transition: border-color 0.2s, transform 0.2s; cursor: pointer; }
-    .tdot.active { border-color: rgba(255,255,255,0.85); transform: scale(1.25); }
-    .nav-cta { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1.15rem; background: var(--accent); color: #000; font-family: 'Space Grotesk', monospace; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 100px; transition: opacity 0.2s; }
+    .tdot {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 1.5px solid transparent;
+      transition: border-color 0.2s, transform 0.2s; cursor: pointer;
+    }
+    .tdot.active { border-color: var(--fg); transform: scale(1.3); }
+    .nav-cta {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.55rem 1.15rem;
+      background: var(--accent); color: #fff;
+      font-family: 'Space Grotesk', monospace; font-size: 0.58rem;
+      font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+      border-radius: 100px; transition: opacity 0.2s, background 0.5s;
+    }
     .nav-cta:hover { opacity: 0.8; }
 
-    /* ── HERO ── */
-    #hero { min-height: 100vh; background: #000; display: flex; flex-direction: column; justify-content: flex-end; padding: 80px 2.5rem 5rem; position: relative; overflow: hidden; }
-    .hero-wm { position: absolute; top: 50%; left: -1%; transform: translateY(-53%); z-index: 0; }
-    .hero-meta { position: absolute; top: 5.5rem; left: 2.5rem; right: 2.5rem; display: flex; justify-content: space-between; z-index: 2; }
+    /* ═══════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════ */
+    #hero {
+      min-height: 100vh;
+      background: var(--bg2);
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 80px 2.5rem 5rem;
+      position: relative; overflow: hidden;
+      transition: background 0.5s;
+    }
+    .hero-wm {
+      position: absolute; top: 50%; left: -1%;
+      transform: translateY(-53%); z-index: 0;
+    }
+    .hero-meta {
+      position: absolute; top: 5.5rem; left: 2.5rem; right: 2.5rem;
+      display: flex; justify-content: space-between; z-index: 2;
+    }
     .hero-content { position: relative; z-index: 2; max-width: 1400px; width: 100%; margin: 0 auto; }
-    .hero-h1 { font-size: clamp(3.5rem, 12vw, 12rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.88; margin-bottom: 3.5rem; }
+    .hero-h1 {
+      font-size: clamp(3.5rem, 12vw, 12rem);
+      font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.03em; line-height: 0.88; margin-bottom: 3.5rem;
+      color: var(--fg); transition: color 0.5s;
+    }
     .hero-bottom { display: flex; gap: 5rem; align-items: flex-end; flex-wrap: wrap; }
-    .hero-desc { font-size: 0.92rem; color: rgba(255,255,255,0.5); max-width: 350px; line-height: 1.75; }
+    .hero-desc { font-size: 0.92rem; color: var(--fg2); max-width: 350px; line-height: 1.75; transition: color 0.5s; }
     .hero-scroll { position: absolute; bottom: 2rem; right: 2.5rem; z-index: 2; }
 
-    /* ── BANNER ── */
-    #banner { width: 100%; height: 65vh; position: relative; border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); overflow: hidden; }
-    #banner > img { width: 100%; height: 100%; object-fit: cover; object-position: center top; filter: brightness(0.6); }
+    /* ═══════════════════════════════════════════
+       BANNER
+    ═══════════════════════════════════════════ */
+    #banner {
+      width: 100%; height: 65vh; position: relative;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    #banner > img {
+      width: 100%; height: 100%; object-fit: cover;
+      object-position: center top; filter: brightness(0.65);
+      transition: transform 8s ease-out;
+    }
+    #banner:hover > img { transform: scale(1.03); }
     .banner-hl { position: absolute; top: 2.5rem; right: 3rem; text-align: right; z-index: 2; }
-    .banner-hl-line { font-size: clamp(2.5rem, 7vw, 6.5rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.92; }
+    .banner-hl-line {
+      font-size: clamp(2.5rem, 7vw, 6.5rem);
+      font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.03em; line-height: 0.92;
+      color: var(--fg); transition: color 0.5s;
+    }
     .banner-bl { position: absolute; bottom: 2.5rem; left: 3rem; z-index: 2; }
 
-    /* ── PROBLEM ── */
-    #problem { background: #000; padding: 8rem 2.5rem; position: relative; overflow: hidden; }
+    /* ═══════════════════════════════════════════
+       PROBLEM
+    ═══════════════════════════════════════════ */
+    #problem {
+      background: var(--bg); padding: 8rem 2.5rem;
+      position: relative; overflow: hidden;
+      transition: background 0.5s;
+    }
     .prob-wm { position: absolute; bottom: -4rem; left: -1%; z-index: 0; }
     .prob-inner { max-width: 1400px; margin: 0 auto; position: relative; z-index: 2; }
     .prob-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
-    .prob-h2 { font-size: clamp(2rem, 4.5vw, 4rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.025em; line-height: 1; margin-bottom: 2rem; }
-    .prob-desc { font-size: 0.88rem; color: rgba(255,255,255,0.48); line-height: 1.8; max-width: 420px; margin-bottom: 2.5rem; }
+    .prob-h2 {
+      font-size: clamp(2rem, 4.5vw, 4rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: -0.025em; line-height: 1;
+      margin-bottom: 2rem; color: var(--fg); transition: color 0.5s;
+    }
+    .prob-desc { font-size: 0.88rem; color: var(--fg2); line-height: 1.8; max-width: 420px; margin-bottom: 2.5rem; transition: color 0.5s; }
+    .pain-item { display: flex; gap: 1.75rem; align-items: flex-start; padding: 1.35rem 0; }
+    .pain-item + .pain-item { border-top: 1px solid var(--border2); }
+    .pain-num { font-family: 'Space Grotesk', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: var(--accent); flex-shrink: 0; margin-top: 2px; transition: color 0.5s; }
+    .pain-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--fg); transition: color 0.5s; }
+    .pain-desc2 { font-size: 0.78rem; color: var(--fg2); line-height: 1.65; transition: color 0.5s; }
     .photo-collage { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .photo-collage img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-collage img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+    .photo-collage img:hover { transform: scale(1.03); }
     .photo-collage .pb { margin-top: 3rem; }
 
-    /* ── BLUEPRINT ── */
-    #blueprint { background: #050505; border-top: 1px solid rgba(255,255,255,0.06); padding: 8rem 2.5rem; position: relative; overflow: hidden; }
+    /* ═══════════════════════════════════════════
+       BLUEPRINT
+    ═══════════════════════════════════════════ */
+    #blueprint {
+      background: var(--bg2); border-top: 1px solid var(--border);
+      padding: 8rem 2.5rem; position: relative; overflow: hidden;
+      transition: background 0.5s, border-color 0.5s;
+    }
     .bp-inner { max-width: 1400px; margin: 0 auto; }
     .bp-hl { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 6rem; }
-    .bp-word { font-size: clamp(3rem, 9.5vw, 9.5rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.9; }
+    .bp-word {
+      font-size: clamp(3rem, 9.5vw, 9.5rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.9;
+      color: var(--fg); transition: color 0.5s;
+    }
     .bp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
     .phone-wrap { position: relative; display: flex; justify-content: center; padding: 4rem 2rem; }
-    .phone-frame { width: 220px; border-radius: 42px; border: 1px solid rgba(255,255,255,0.12); background: #080808; overflow: hidden; box-shadow: 0 0 90px -25px rgba(var(--accent-rgb), 0.45); position: relative; flex-shrink: 0; }
+    .phone-frame {
+      width: 220px; border-radius: 42px;
+      border: 1px solid var(--border); background: var(--bg2);
+      overflow: hidden;
+      box-shadow: 0 0 90px -25px rgba(var(--accent-rgb), 0.45);
+      position: relative; flex-shrink: 0;
+      transition: box-shadow 0.5s, border-color 0.5s, background 0.5s;
+    }
     .phone-frame img { width: 100%; display: block; }
-    /* Blueprint annotations */
     .anno { position: absolute; display: flex; flex-direction: column; }
-    .anno-lh { height: 1px; background: var(--accent); opacity: 0.35; }
-    .anno-lv { width: 1px; background: var(--accent); opacity: 0.35; }
-    .anno-label { font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); white-space: nowrap; margin-top: 0.35rem; }
-    .anno-sub { font-size: 0.68rem; color: rgba(255,255,255,0.45); white-space: nowrap; margin-top: 0.2rem; }
+    .anno-lh { height: 1px; background: var(--accent); opacity: 0.35; transition: background 0.5s; }
+    .anno-lv { width: 1px; background: var(--accent); opacity: 0.35; transition: background 0.5s; }
+    .anno-label { font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); white-space: nowrap; margin-top: 0.35rem; transition: color 0.5s; }
+    .anno-sub { font-size: 0.68rem; color: var(--fg2); white-space: nowrap; margin-top: 0.2rem; transition: color 0.5s; }
     .qr-box { display: flex; gap: 2rem; align-items: center; margin-bottom: 3rem; }
     .qr-img-wrap { width: 115px; height: 115px; background: #fff; padding: 7px; flex-shrink: 0; }
     .qr-img-wrap img { width: 100%; height: 100%; object-fit: contain; }
-    .bp-desc { font-size: 0.88rem; color: rgba(255,255,255,0.48); line-height: 1.8; margin-bottom: 3rem; max-width: 420px; }
+    .bp-desc { font-size: 0.88rem; color: var(--fg2); line-height: 1.8; margin-bottom: 3rem; max-width: 420px; transition: color 0.5s; }
 
-    /* ── FLOW ── */
-    #flow { background: #000; border-top: 1px solid rgba(255,255,255,0.06); padding: 8rem 2.5rem; position: relative; overflow: hidden; }
+    /* ═══════════════════════════════════════════
+       FLOW
+    ═══════════════════════════════════════════ */
+    #flow {
+      background: var(--bg3); border-top: 1px solid var(--border);
+      padding: 8rem 2.5rem; position: relative; overflow: hidden;
+      transition: background 0.5s, border-color 0.5s;
+    }
     .flow-inner { max-width: 1400px; margin: 0 auto; }
-    .flow-h { font-size: clamp(3rem, 11vw, 11rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87; margin-bottom: 6rem; }
-    .flow-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1px solid rgba(255,255,255,0.07); }
-    .flow-cell { padding: 3rem 2.5rem; border-right: 1px solid rgba(255,255,255,0.07); }
+    .flow-h {
+      font-size: clamp(3rem, 11vw, 11rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87;
+      margin-bottom: 6rem; color: var(--fg); transition: color 0.5s;
+    }
+    .flow-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      border: 1px solid var(--border);
+      transition: border-color 0.5s;
+    }
+    .flow-cell {
+      padding: 3rem 2.5rem;
+      border-right: 1px solid var(--border);
+      transition: background 0.5s, border-color 0.5s;
+    }
     .flow-cell:last-child { border-right: none; }
-    .flow-cell.mid { background: rgba(255,255,255,0.018); position: relative; }
-    .flow-cell.mid::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 55%; height: 1px; background: var(--accent); opacity: 0.5; }
-    .flow-step-title { font-size: 1.2rem; font-weight: 800; margin: 0.7rem 0 0.6rem; }
-    .flow-step-desc { font-size: 0.78rem; color: rgba(255,255,255,0.42); line-height: 1.65; margin-bottom: 2rem; }
-    .flow-img { overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
+    .flow-cell.mid { background: rgba(var(--accent-rgb), 0.04); position: relative; }
+    .flow-cell.mid::after {
+      content: ''; position: absolute; bottom: 0; left: 50%;
+      transform: translateX(-50%); width: 55%; height: 1px;
+      background: var(--accent); opacity: 0.5;
+      transition: background 0.5s;
+    }
+    .flow-step-title { font-size: 1.2rem; font-weight: 800; margin: 0.7rem 0 0.6rem; color: var(--fg); transition: color 0.5s; }
+    .flow-step-desc { font-size: 0.78rem; color: var(--fg2); line-height: 1.65; margin-bottom: 2rem; transition: color 0.5s; }
+    .flow-img { overflow: hidden; border: 1px solid var(--border); transition: border-color 0.5s; }
     .flow-img img { width: 100%; display: block; transition: transform 0.5s; }
     .flow-img:hover img { transform: scale(1.03); }
     .flow-wm-wrap { text-align: right; margin-right: -1%; margin-top: -3rem; }
 
-    /* ── DEMO ── */
-    #demo { background: #050505; border-top: 1px solid rgba(255,255,255,0.06); padding: 8rem 2.5rem 0; }
+    /* ═══════════════════════════════════════════
+       DEMO
+    ═══════════════════════════════════════════ */
+    #demo {
+      background: var(--bg2); border-top: 1px solid var(--border);
+      padding: 8rem 2.5rem 0;
+      transition: background 0.5s, border-color 0.5s;
+    }
     .demo-inner { max-width: 1400px; margin: 0 auto; }
-    .demo-h { font-size: clamp(2.5rem, 9vw, 8.5rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87; margin-bottom: 4rem; }
-    .demo-panel { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid rgba(255,255,255,0.07); max-width: 1400px; margin: 0 auto; }
+    .demo-h {
+      font-size: clamp(2.5rem, 9vw, 8.5rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87;
+      margin-bottom: 4rem; color: var(--fg); transition: color 0.5s;
+    }
+    .demo-panel {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--border);
+      max-width: 1400px; margin: 0 auto;
+      transition: border-color 0.5s;
+    }
     .demo-opt { cursor: pointer; position: relative; overflow: hidden; height: 62vh; }
-    .demo-opt + .demo-opt { border-left: 1px solid rgba(255,255,255,0.07); }
-    .demo-opt img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .demo-opt + .demo-opt { border-left: 1px solid var(--border); }
+    .demo-opt img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
     .demo-opt:hover img { transform: scale(1.04); }
-    .demo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.05) 55%, transparent 100%); }
-    .demo-top-label { position: absolute; top: 1.5rem; font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+    .demo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.04) 55%, transparent 100%); }
+    .demo-top-label { position: absolute; top: 1.5rem; font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
     .demo-a .demo-top-label { left: 1.5rem; }
     .demo-b .demo-top-label { right: 1.5rem; }
     .demo-hint { position: absolute; font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; }
-    .demo-a .demo-hint { bottom: 5.5rem; left: 2rem; color: rgba(255,255,255,0.4); }
-    .demo-b .demo-hint { bottom: 5.5rem; right: 2rem; color: rgba(var(--accent-rgb), 0.65); }
+    .demo-a .demo-hint { bottom: 5.5rem; left: 2rem; color: rgba(255,255,255,0.5); }
+    .demo-b .demo-hint { bottom: 5.5rem; right: 2rem; color: rgba(var(--accent-rgb), 0.7); }
     .demo-pct { position: absolute; bottom: 2rem; font-family: 'Space Grotesk', monospace; font-size: 3.25rem; font-weight: 700; line-height: 1; }
     .demo-a .demo-pct { left: 2rem; color: #fff; }
     .demo-b .demo-pct { right: 2rem; color: var(--accent); }
-    .demo-bar-wrap { height: 3px; background: rgba(255,255,255,0.07); display: flex; max-width: 1400px; margin: 0 auto; }
-    .demo-bar-a { height: 100%; background: #fff; transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-    .demo-bar-b { height: 100%; background: var(--accent); transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .demo-bar-wrap { height: 3px; background: var(--border); display: flex; max-width: 1400px; margin: 0 auto; transition: background 0.5s; }
+    .demo-bar-a { height: 100%; background: var(--fg); transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94), background 0.5s; }
+    .demo-bar-b { height: 100%; background: var(--accent); transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94), background 0.5s; }
     .demo-footer-row { display: flex; justify-content: space-between; padding: 0.85rem 0 6rem; max-width: 1400px; margin: 0 auto; }
 
-    /* ── FAQ ── */
-    #faq { background: #000; border-top: 1px solid rgba(255,255,255,0.06); padding: 8rem 2.5rem; }
+    /* ═══════════════════════════════════════════
+       FAQ
+    ═══════════════════════════════════════════ */
+    #faq {
+      background: var(--bg); border-top: 1px solid var(--border);
+      padding: 8rem 2.5rem;
+      transition: background 0.5s, border-color 0.5s;
+    }
     .faq-inner { max-width: 900px; margin: 0 auto; }
-    .faq-h { font-size: clamp(3rem, 10vw, 9rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87; margin-bottom: 5rem; }
-    .faq-item { border-top: 1px solid rgba(255,255,255,0.08); }
-    .faq-item:last-child { border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .faq-btn { width: 100%; text-align: left; background: none; border: none; color: #fff; display: flex; justify-content: space-between; align-items: center; padding: 1.7rem 0; font-size: 1rem; font-weight: 700; gap: 2rem; transition: opacity 0.2s; }
+    .faq-h {
+      font-size: clamp(3rem, 10vw, 9rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87;
+      margin-bottom: 5rem; color: var(--fg); transition: color 0.5s;
+    }
+    .faq-item { border-top: 1px solid var(--border); transition: border-color 0.5s; }
+    .faq-item:last-child { border-bottom: 1px solid var(--border); }
+    .faq-btn { width: 100%; text-align: left; background: none; border: none; color: var(--fg); display: flex; justify-content: space-between; align-items: center; padding: 1.7rem 0; font-size: 1rem; font-weight: 700; gap: 2rem; transition: opacity 0.2s, color 0.5s; }
     .faq-btn:hover { opacity: 0.7; }
-    .faq-icon { font-family: 'Space Grotesk', monospace; font-size: 1.3rem; color: rgba(255,255,255,0.35); flex-shrink: 0; line-height: 1; }
-    .faq-ans { display: none; padding-bottom: 1.7rem; font-size: 0.875rem; color: rgba(255,255,255,0.52); line-height: 1.82; max-width: 660px; }
+    .faq-icon { font-family: 'Space Grotesk', monospace; font-size: 1.3rem; color: var(--fg3); flex-shrink: 0; line-height: 1; transition: color 0.3s; }
+    .faq-ans { display: none; padding-bottom: 1.7rem; font-size: 0.875rem; color: var(--fg2); line-height: 1.82; max-width: 660px; transition: color 0.5s; }
     .faq-ans.open { display: block; }
 
-    /* ── FOOTER ── */
-    footer { border-top: 1px solid rgba(255,255,255,0.07); padding: 2.75rem 2.5rem; background: #000; }
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    footer {
+      border-top: 1px solid var(--border); padding: 2.75rem 2.5rem;
+      background: var(--bg2);
+      transition: background 0.5s, border-color 0.5s;
+    }
     .footer-inner { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; }
-    .footer-logo { font-family: 'Space Grotesk', monospace; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.18em; }
+    .footer-logo { font-family: 'Space Grotesk', monospace; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.18em; color: var(--fg); transition: color 0.5s; }
     .footer-links { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
-    .footer-link { font-family: 'Space Grotesk', monospace; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); background: none; border: none; transition: color 0.2s; }
-    .footer-link:hover { color: #fff; }
-    .footer-copy { font-family: 'Space Grotesk', monospace; font-size: 0.58rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.2); text-transform: uppercase; }
+    .footer-link { font-family: 'Space Grotesk', monospace; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg3); background: none; border: none; transition: color 0.2s; }
+    .footer-link:hover { color: var(--fg); }
+    .footer-copy { font-family: 'Space Grotesk', monospace; font-size: 0.58rem; letter-spacing: 0.1em; color: var(--fg3); text-transform: uppercase; transition: color 0.5s; }
 
-    /* ── MODALS ── */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center; padding: 2rem; }
+    /* ═══════════════════════════════════════════
+       MODALS
+    ═══════════════════════════════════════════ */
+    .modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88); z-index: 1000;
+      align-items: center; justify-content: center; padding: 2rem;
+    }
     .modal.open { display: flex; }
-    .modal-box { background: #080808; border: 1px solid rgba(255,255,255,0.1); max-width: 560px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 3rem; position: relative; }
-    .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: rgba(255,255,255,0.35); font-size: 1.5rem; transition: color 0.2s; }
-    .modal-close:hover { color: #fff; }
-    .modal-title { font-size: 1.5rem; font-weight: 800; margin: 0.75rem 0 1.5rem; }
-    .modal-body { font-size: 0.875rem; color: rgba(255,255,255,0.5); line-height: 1.85; }
+    .modal-box {
+      background: var(--modal-bg); border: 1px solid var(--border);
+      max-width: 580px; width: 100%; max-height: 80vh;
+      overflow-y: auto; padding: 3rem; position: relative;
+      transition: background 0.5s, border-color 0.5s;
+    }
+    .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: var(--fg3); font-size: 1.5rem; transition: color 0.2s; }
+    .modal-close:hover { color: var(--fg); }
+    .modal-title { font-size: 1.5rem; font-weight: 800; margin: 0.75rem 0 1.5rem; color: var(--fg); transition: color 0.5s; }
+    .modal-body { font-size: 0.875rem; color: var(--fg2); line-height: 1.85; transition: color 0.5s; }
+    .modal-body p { margin-bottom: 1rem; }
+    .modal-body p:last-child { margin-bottom: 0; }
+    .modal-body strong { color: var(--fg); font-weight: 700; }
 
-    /* ── SMOOTH THEME TRANSITION ── */
-    *, *::before, *::after { transition: color 0.35s, background-color 0.35s, border-color 0.35s, box-shadow 0.35s; }
-    img, .wm, .hero-wm, .prob-wm, .flow-wm-wrap { transition: none !important; }
-
-    /* ── RESPONSIVE ── */
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
     @media (max-width: 960px) {
       #nav { padding: 1rem 1.25rem; }
       .theme-sw { display: none; }
@@ -276,19 +535,20 @@
       .anno { display: none; }
       #flow { padding: 5rem 1.25rem; }
       .flow-grid { grid-template-columns: 1fr; }
-      .flow-cell { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); }
+      .flow-cell { border-right: none; border-bottom: 1px solid var(--border); }
       .flow-cell:last-child { border-bottom: none; }
       .flow-wm-wrap { display: none; }
       #demo { padding: 5rem 1.25rem 0; }
       .demo-panel { grid-template-columns: 1fr; }
       .demo-opt { height: 48vh; }
-      .demo-opt + .demo-opt { border-left: none; border-top: 1px solid rgba(255,255,255,0.07); }
+      .demo-opt + .demo-opt { border-left: none; border-top: 1px solid var(--border); }
       .demo-b .demo-pct { right: auto; left: 2rem; }
       .demo-b .demo-hint { right: auto; left: 2rem; }
       .demo-b .demo-top-label { right: auto; left: 1.5rem; }
       #faq { padding: 5rem 1.25rem; }
       footer { padding: 2rem 1.25rem; }
       .section-meta { margin-bottom: 3rem; }
+      .reveal, .reveal-left, .reveal-right { opacity: 1; transform: none; }
     }
     @media (max-width: 480px) {
       .nav-cta span { display: none; }
@@ -323,22 +583,25 @@
 
 <!-- ════════ HERO ════════ -->
 <section id="hero">
-  <div class="hero-wm">
+  <div class="hero-wm hero-wm-anim">
     <div class="wm">DYTHIN</div>
   </div>
   <div class="hero-meta">
-    <span class="label la" data-i18n="heroLabel">[ SOSYAL OYLAMA PLATFORMU ]</span>
-    <span class="label">dythin.com.tr</span>
+    <span class="label la hero-label-anim" data-i18n="heroLabel">[ SOSYAL OYLAMA PLATFORMU ]</span>
+    <span class="label hero-label-anim">dythin.com.tr</span>
   </div>
   <div class="hero-content">
+    <div style="margin-bottom:1.5rem">
+      <span class="accent-line"></span>
+    </div>
     <h1 class="hero-h1">
-      <span data-i18n="h1a">KARARSIZ</span><br>
-      <span data-i18n="h1b">KALMAYA</span><br>
-      <span style="color:var(--accent)" data-i18n="h1c">SON.</span>
+      <span class="l1" data-i18n="h1a">KARARSIZ</span><br>
+      <span class="l2" data-i18n="h1b">KALMAYA</span><br>
+      <span class="l3" style="color:var(--accent)" data-i18n="h1c">SON.</span>
     </h1>
     <div class="hero-bottom">
-      <p class="hero-desc" data-i18n="heroDesc">Fotoğraflarını yükle, topluluğun ve arkadaşlarının oylarıyla anında karar ver. iOS için ücretsiz.</p>
-      <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener" class="text-link" data-i18n="heroLink">APP STORE'DAN İNDİR →</a>
+      <p class="hero-desc hero-desc-anim" data-i18n="heroDesc">Fotoğraflarını yükle, topluluğun ve arkadaşlarının oylarıyla anında karar ver. iOS için ücretsiz.</p>
+      <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener" class="text-link hero-cta-anim" data-i18n="heroLink">APP STORE'DAN İNDİR →</a>
     </div>
   </div>
   <div class="hero-scroll"><span class="label">SCROLL ↓</span></div>
@@ -346,8 +609,8 @@
 
 <!-- ════════ FULL-WIDTH BANNER ════════ -->
 <div id="banner">
-  <img src="/appstore_3.png" alt="Dythin App">
-  <div class="banner-hl">
+  <img src="/photo_2.jpg" alt="Dythin App">
+  <div class="banner-hl reveal">
     <div class="banner-hl-line" data-i18n="bnHl1">OY VER.</div>
     <div class="banner-hl-line" style="color:var(--accent)" data-i18n="bnHl2">KARAR AL.</div>
   </div>
@@ -360,45 +623,45 @@
 <section id="problem">
   <div class="prob-wm wm">KARAR</div>
   <div class="prob-inner">
-    <div class="section-meta">
+    <div class="section-meta reveal">
       <span class="label" data-i18n="prob01meta">PROBLEM SPACE · PAIN POINTS</span>
       <span class="label">01</span>
     </div>
     <div class="prob-grid">
-      <div>
+      <div class="reveal-left">
         <h2 class="prob-h2">
           <span data-i18n="probH2a">KARARSIZLİK</span><br>
           <span data-i18n="probH2b">HERKESİN</span><br>
           <span data-i18n="probH2c">PROBLEMİ.</span>
         </h2>
         <p class="prob-desc" data-i18n="probDesc">Aynanın karşısında dakikalarca iki kıyafet arasında kalmak. Mağazada alışveriş yaparken arkadaşlarından yanıt beklemek. Bunlar tarihe karışıyor.</p>
-        <div style="border-top:1px solid rgba(255,255,255,0.08)">
+        <div style="border-top:1px solid var(--border2)">
           <div class="pain-item">
             <span class="pain-num">01</span>
             <div>
               <div class="pain-title" data-i18n="p1t">Anlık Geri Bildirim Yok</div>
-              <div class="pain-desc" data-i18n="p1d">Arkadaşlarından saat bekler, karar gecikir.</div>
+              <div class="pain-desc2" data-i18n="p1d">Arkadaşlarından saat bekler, karar gecikir.</div>
             </div>
           </div>
           <div class="pain-item">
             <span class="pain-num">02</span>
             <div>
               <div class="pain-title" data-i18n="p2t">Geniş Topluluk Erişimi Yok</div>
-              <div class="pain-desc" data-i18n="p2d">Sadece arkadaş çevreni değil, tüm topluluğu dinle.</div>
+              <div class="pain-desc2" data-i18n="p2d">Sadece arkadaş çevreni değil, tüm topluluğu dinle.</div>
             </div>
           </div>
           <div class="pain-item">
             <span class="pain-num">03</span>
             <div>
               <div class="pain-title" data-i18n="p3t">Sonuç Takibi Yok</div>
-              <div class="pain-desc" data-i18n="p3d">Oylar gerçek zamanlı akar, 24 saat canlı sayaç.</div>
+              <div class="pain-desc2" data-i18n="p3d">Oylar gerçek zamanlı akar, 24 saat canlı sayaç.</div>
             </div>
           </div>
         </div>
       </div>
-      <div class="photo-collage">
-        <img src="/appstore_1.png" alt="Dythin Screenshot 1">
-        <img src="/appstore_2.png" alt="Dythin Screenshot 2" class="pb">
+      <div class="photo-collage reveal-right">
+        <img src="/photo_1.jpg" alt="Dythin Oylama">
+        <img src="/photo_3.png" alt="Dythin Profil" class="pb">
       </div>
     </div>
   </div>
@@ -407,42 +670,37 @@
 <!-- ════════ BLUEPRINT / SCAN TO DOWNLOAD ════════ -->
 <section id="blueprint">
   <div class="bp-inner">
-    <div class="section-meta">
+    <div class="section-meta reveal">
       <span class="label" data-i18n="bpMeta">SCAN TO DOWNLOAD · APP STORE</span>
       <span class="label">02</span>
     </div>
-    <div class="bp-hl">
+    <div class="bp-hl reveal">
       <span class="bp-word" data-i18n="bpH1">KAMERANI</span>
       <span class="bp-word" style="color:var(--accent)" data-i18n="bpH2">DOĞRULT.</span>
     </div>
     <div class="bp-grid">
-      <!-- Phone + blueprint annotations -->
-      <div class="phone-wrap">
+      <div class="phone-wrap reveal-left">
         <div class="phone-frame">
-          <img src="/appstore_4.png" alt="Dythin App Screen">
+          <img src="/photo_4.png" alt="Dythin App Screen">
         </div>
-        <!-- Left annotation -->
         <div class="anno" style="left:2%;top:28%;align-items:flex-end;">
           <div class="anno-lv" style="height:55px;margin-left:auto;"></div>
           <div class="anno-lh" style="width:52px;"></div>
           <div class="anno-label" data-i18n="an1l">[ A/B KIYAS ]</div>
           <div class="anno-sub" data-i18n="an1s">Tek dokunuş</div>
         </div>
-        <!-- Right annotation -->
         <div class="anno" style="right:2%;top:54%;align-items:flex-start;">
           <div class="anno-lv" style="height:55px;"></div>
           <div class="anno-lh" style="width:52px;"></div>
           <div class="anno-label" data-i18n="an2l">[ CANLI SONUÇ ]</div>
           <div class="anno-sub" data-i18n="an2s">24h sayaç</div>
         </div>
-        <!-- Bottom annotation -->
         <div class="anno" style="left:50%;bottom:7%;transform:translateX(-50%);align-items:center;">
           <div class="anno-lv" style="height:38px;"></div>
           <div class="anno-label" data-i18n="an3l">[ DM SOHBET ]</div>
         </div>
       </div>
-      <!-- Right: desc + QR -->
-      <div>
+      <div class="reveal-right">
         <p class="bp-desc" data-i18n="bpDesc">Telefonunun kamerasını aşağıdaki QR koda doğrult ve doğrudan Apple App Store sayfasına ulaş. Ücretsiz. Reklam yok.</p>
         <div class="qr-box">
           <div class="qr-img-wrap">
@@ -450,8 +708,8 @@
           </div>
           <div>
             <div class="label la" style="margin-bottom:0.4rem" data-i18n="qrLabel">[ RESMİ APP STORE ]</div>
-            <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.4rem" data-i18n="qrTitle">iOS için %100 Ücretsiz</div>
-            <div style="font-size:0.78rem;color:rgba(255,255,255,0.42);line-height:1.6" data-i18n="qrSub">iPhone ve iPad ile tam uyumlu.</div>
+            <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.4rem;color:var(--fg)" data-i18n="qrTitle">iOS için %100 Ücretsiz</div>
+            <div style="font-size:0.78rem;color:var(--fg2);line-height:1.6" data-i18n="qrSub">iPhone ve iPad ile tam uyumlu.</div>
           </div>
         </div>
         <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener" class="text-link" data-i18n="bpLink">APP STORE'DA AÇ →</a>
@@ -463,32 +721,32 @@
 <!-- ════════ 3-PHONE FLOW ════════ -->
 <section id="flow">
   <div class="flow-inner">
-    <div class="section-meta">
+    <div class="section-meta reveal">
       <span class="label" data-i18n="flowMeta">CORE EXPERIENCE FLOW · 3 AŞAMA</span>
       <span class="label">03</span>
     </div>
-    <div class="flow-h">
+    <div class="flow-h reveal">
       <span data-i18n="flowH1">KUSURSUZ</span><br>
       <span data-i18n="flowH2">AKIŞ.</span>
     </div>
     <div class="flow-grid">
-      <div class="flow-cell">
+      <div class="flow-cell reveal reveal-delay-1">
         <div class="label la" data-i18n="s1lbl">AŞAMA 01</div>
         <div class="flow-step-title" data-i18n="s1t">Akış &amp; Oyla</div>
         <div class="flow-step-desc" data-i18n="s1d">Sonsuz oylama akışında gezin, beğendiğine oy ver.</div>
-        <div class="flow-img"><img src="/appstore_5.png" alt="Akış"></div>
+        <div class="flow-img"><img src="/photo_5.png" alt="Akış"></div>
       </div>
-      <div class="flow-cell mid">
+      <div class="flow-cell mid reveal reveal-delay-2">
         <div class="label la" data-i18n="s2lbl">AŞAMA 02</div>
         <div class="flow-step-title" data-i18n="s2t">Yükle &amp; Paylaş</div>
         <div class="flow-step-desc" data-i18n="s2d">İki fotoğraf seç, A/B oylaması başlat.</div>
-        <div class="flow-img"><img src="/appstore_6.png" alt="Paylaş"></div>
+        <div class="flow-img"><img src="/photo_1.jpg" alt="Paylaş"></div>
       </div>
-      <div class="flow-cell">
+      <div class="flow-cell reveal reveal-delay-3">
         <div class="label la" data-i18n="s3lbl">AŞAMA 03</div>
         <div class="flow-step-title" data-i18n="s3t">Sonuç &amp; Sohbet</div>
         <div class="flow-step-desc" data-i18n="s3d">Canlı yüzde dağılımını gör, mesajlaş.</div>
-        <div class="flow-img"><img src="/appstore_1.png" alt="Sonuç"></div>
+        <div class="flow-img"><img src="/photo_3.png" alt="Sonuç"></div>
       </div>
     </div>
     <div class="flow-wm-wrap"><div class="wm">FLOW</div></div>
@@ -498,25 +756,25 @@
 <!-- ════════ INTERACTIVE DEMO ════════ -->
 <section id="demo">
   <div class="demo-inner">
-    <div class="section-meta">
+    <div class="section-meta reveal">
       <span class="label" data-i18n="demoMeta">INTERACTIVE DEMO · OY KULLAN</span>
       <span class="label">04</span>
     </div>
-    <div class="demo-h">
+    <div class="demo-h reveal">
       <span data-i18n="demoH1">DENEMEDEN</span><br>
       <span style="color:var(--accent)" data-i18n="demoH2">KARAR VERME.</span>
     </div>
   </div>
   <div class="demo-panel">
     <div class="demo-opt demo-a" onclick="castVote('A')">
-      <img src="/appstore_1.png" alt="A">
+      <img src="/photo_1.jpg" alt="A">
       <div class="demo-overlay"></div>
       <div class="demo-top-label" data-i18n="dLblA">[ A · SOL SEÇENEK ]</div>
       <div class="demo-hint" data-i18n="dHint">TIKLAYARAK OY VER</div>
       <div class="demo-pct" id="pct-a">%74</div>
     </div>
     <div class="demo-opt demo-b" onclick="castVote('B')">
-      <img src="/appstore_2.png" alt="B">
+      <img src="/photo_2.jpg" alt="B">
       <div class="demo-overlay"></div>
       <div class="demo-top-label" data-i18n="dLblB">[ B · SAĞ SEÇENEK ]</div>
       <div class="demo-hint" data-i18n="dHint">TIKLAYARAK OY VER</div>
@@ -538,11 +796,11 @@
 <!-- ════════ FAQ ════════ -->
 <section id="faq">
   <div class="faq-inner">
-    <div class="section-meta">
+    <div class="section-meta reveal">
       <span class="label" data-i18n="faqMeta">SIKÇA SORULAN SORULAR</span>
       <span class="label">05</span>
     </div>
-    <div class="faq-h">
+    <div class="faq-h reveal">
       <span data-i18n="faqH1">MERAK</span><br>
       <span data-i18n="faqH2">EDİLENLER.</span>
     </div>
@@ -556,33 +814,51 @@
     <div class="footer-logo">DYTHIN</div>
     <div class="footer-links">
       <a href="https://instagram.com/dythinapp" target="_blank" class="footer-link">Instagram</a>
-      <button onclick="openModal('m-privacy')" class="footer-link" data-i18n="ftPrivacy">Gizlilik</button>
-      <button onclick="openModal('m-terms')"   class="footer-link" data-i18n="ftTerms">Kullanım</button>
+      <button onclick="openModal('m-privacy')" class="footer-link" data-i18n="ftPrivacy">Gizlilik Politikası</button>
+      <button onclick="openModal('m-terms')"   class="footer-link" data-i18n="ftTerms">Kullanım Koşulları</button>
     </div>
-    <div class="footer-copy">&copy; 2026 DYTHIN</div>
+    <div class="footer-copy">&copy; 2026 DYTHIN. TÜM HAKLARI SAKLIDIR.</div>
   </div>
 </footer>
 
-<!-- ════════ MODALS ════════ -->
+<!-- ════════ MODAL: GİZLİLİK ════════ -->
 <div class="modal" id="m-privacy">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('m-privacy')">&times;</button>
-    <div class="label la" data-i18n="mpLabel">[ GİZLİLİK POLİTİKASI ]</div>
-    <div class="modal-title" data-i18n="mpTitle">Gizlilik Politikası</div>
-    <div class="modal-body" data-i18n="mpBody">Dythin, kullanıcı gizliliğine önem verir. Uygulama içinde yüklenen fotoğraflar yalnızca oylama amaçlı kullanılır. Kişisel veriler üçüncü taraflarla paylaşılmaz. Hesabınızı dilediğiniz zaman silebilirsiniz.</div>
+    <div class="label la">[ GİZLİLİK POLİTİKASI ]</div>
+    <div class="modal-title">Gizlilik Politikası (Privacy Policy)</div>
+    <div class="modal-body">
+      <p><strong>Dythin Gizlilik Politikası</strong> — Son Güncelleme: 1 Ekim 2026</p>
+      <p>Dythin, kullanıcılarının kişisel verilerinin korunmasına en üst düzeyde önem verir.</p>
+      <p><strong>1. Veri Toplama:</strong> Yalnızca temel hizmet için gerekli profil bilgileri (kullanıcı adı, e-posta) ve oylama içerikleri (fotoğraflar, başlıklar) işlenir. Uygulama, üçüncü taraf reklam SDK'sı veya izleme kütüphanesi kullanmaz.</p>
+      <p><strong>2. Güvenlik:</strong> Verileriniz PostgreSQL Row-Level Security (RLS) ve SSL/TLS şifreleme ile korunmaktadır. Şifreler asla düz metin olarak saklanmaz.</p>
+      <p><strong>3. Veri Paylaşımı:</strong> Kişisel verileriniz hiçbir üçüncü tarafla ticari amaçla paylaşılmaz. Yalnızca yasal zorunluluk halinde yetkili makamlarla paylaşılabilir.</p>
+      <p><strong>4. Veri Silme:</strong> Uygulama içindeki Ayarlar bölümünden hesabınızı ve tüm oylama geçmişinizi dilediğiniz an kalıcı olarak silebilirsiniz.</p>
+      <p><strong>5. İletişim:</strong> Gizlilik ile ilgili sorularınız için: <span style="color:var(--accent)">dythinapp@gmail.com</span></p>
+    </div>
   </div>
 </div>
+
+<!-- ════════ MODAL: KULLANIM KOŞULLARI ════════ -->
 <div class="modal" id="m-terms">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('m-terms')">&times;</button>
-    <div class="label la" data-i18n="mtLabel">[ KULLANIM KOŞULLARI ]</div>
-    <div class="modal-title" data-i18n="mtTitle">Kullanım Koşulları</div>
-    <div class="modal-body" data-i18n="mtBody">Dythin'i kullanarak bu koşulları kabul etmiş sayılırsınız. Uygunsuz içerik yüklemek yasaktır. İhlal durumunda hesabınız kapatılabilir. Uygulama iOS cihazlar için ücretsiz sunulmaktadır.</div>
+    <div class="label la">[ KULLANIM KOŞULLARI ]</div>
+    <div class="modal-title">Kullanım Koşulları (EULA)</div>
+    <div class="modal-body">
+      <p>Dythin platformunu kullanarak aşağıdaki temel kuralları kabul etmiş sayılırsınız:</p>
+      <p><strong>1. İçerik Sorumluluğu:</strong> Paylaşılan oylamaların telif hakkı ve içerik sorumluluğu kullanıcıya aittir. Başkalarına ait fotoğrafları izinsiz paylaşmak yasaktır.</p>
+      <p><strong>2. Topluluk İlkeleri:</strong> Rahatsız edici, sakıncalı, nefret içeren veya yanıltıcı içerikler moderasyon ekibi tarafından 24 saat içinde incelenir. Bu kuralları ihlal eden hesaplar süresiz olarak askıya alınır.</p>
+      <p><strong>3. Yaş Sınırı:</strong> Dythin'i kullanmak için en az 13 yaşında olmanız gerekmektedir.</p>
+      <p><strong>4. Hizmet Değişiklikleri:</strong> Dythin, herhangi bir zamanda hizmet koşullarını güncelleme veya platformu değiştirme hakkını saklı tutar.</p>
+      <p><strong>5. Sorumluluk Sınırlaması:</strong> Dythin, kullanıcıların oluşturduğu içeriklerden doğan zararlardan sorumlu tutulamaz.</p>
+    </div>
   </div>
 </div>
 
 <!-- ════════ SCRIPT ════════ -->
 <script>
+/* ── TRANSLATIONS ── */
 const T = {
   tr: {
     navCta:'APP STORE', heroLabel:'[ SOSYAL OYLAMA PLATFORMU ]',
@@ -612,14 +888,11 @@ const T = {
     faqs:[
       ['Dythin tamamen ücretsiz mi?','Evet, Dythin %100 ücretsizdir. Fotoğraf yüklemek, oylama başlatmak, arkadaş eklemek ve canlı sonuçları takip etmek için hiçbir abonelik veya gizli ücret ödemezsiniz.'],
       ['Oylamalarımı sadece arkadaşlarıma özel yapabilir miyim?','Evet. Yeni oylama oluştururken hedef kitleyi "Sadece Arkadaşlarım" olarak belirleyebilir ya da profilinizi gizliye alabilirsiniz.'],
-      ['Oylamalar ne kadar süre aktif kalıyor?','Her oylama 24 saat boyunca aktiftir. Süre dolduğunda oylama otomatik olarak arşive alınır.'],
+      ['Oylamalar ne kadar süre aktif kalıyor?','Her oylama 24 saat boyunca aktiftir. Süre dolduğunda oylama otomatik olarak arşive alınır ve profilinde görüntülenebilir.'],
+      ['Yüklediğim fotoğraflar güvende mi?','Evet. Tüm veriler SSL/TLS ile şifrelenir ve PostgreSQL RLS ile korunur. Fotoğraflarınız yalnızca oylama amaçlı kullanılır.'],
       ['Android için de var mı?','Şu an yalnızca iOS (App Store) için mevcuttur. Android versiyonu yakında yayınlanacak.'],
     ],
-    ftPrivacy:'Gizlilik', ftTerms:'Kullanım',
-    mpLabel:'[ GİZLİLİK POLİTİKASI ]', mpTitle:'Gizlilik Politikası',
-    mpBody:'Dythin, kullanıcı gizliliğine önem verir. Uygulama içinde yüklenen fotoğraflar yalnızca oylama amaçlı kullanılır. Kişisel veriler üçüncü taraflarla paylaşılmaz. Hesabınızı dilediğiniz zaman silebilirsiniz.',
-    mtLabel:'[ KULLANIM KOŞULLARI ]', mtTitle:'Kullanım Koşulları',
-    mtBody:"Dythin'i kullanarak bu koşulları kabul etmiş sayılırsınız. Uygunsuz içerik yüklemek yasaktır. İhlal durumunda hesabınız kapatılabilir.",
+    ftPrivacy:'Gizlilik Politikası', ftTerms:'Kullanım Koşulları',
   },
   en: {
     navCta:'APP STORE', heroLabel:'[ SOCIAL VOTING PLATFORM ]',
@@ -649,14 +922,11 @@ const T = {
     faqs:[
       ['Is Dythin completely free?','Yes, Dythin is 100% free. No subscriptions or hidden fees to upload photos, start polls, add friends, or track live results.'],
       ['Can I make my polls private?','Yes. When creating a poll, set the audience to "Friends Only", or set your profile to private.'],
-      ['How long are polls active?','Each poll is active for 24 hours, then automatically archived.'],
-      ['Is there an Android version?','Currently iOS (App Store) only. Android coming soon.'],
+      ['How long are polls active?','Each poll is active for 24 hours, then automatically archived and visible on your profile.'],
+      ['Are my photos safe?','Yes. All data is SSL/TLS encrypted and protected by PostgreSQL RLS. Your photos are used only for voting.'],
+      ['Is there an Android version?','Currently iOS (App Store) only. Android version coming soon.'],
     ],
-    ftPrivacy:'Privacy', ftTerms:'Terms',
-    mpLabel:'[ PRIVACY POLICY ]', mpTitle:'Privacy Policy',
-    mpBody:'Dythin values user privacy. Photos uploaded within the app are used only for voting. Personal data is never shared with third parties. You can delete your account at any time.',
-    mtLabel:'[ TERMS OF USE ]', mtTitle:'Terms of Use',
-    mtBody:'By using Dythin you agree to these terms. Uploading inappropriate content is prohibited. Violations may result in account suspension.',
+    ftPrivacy:'Privacy Policy', ftTerms:'Terms of Use',
   },
   de: {
     navCta:'APP STORE', heroLabel:'[ SOZIALE ABSTIMMUNGSPLATTFORM ]',
@@ -685,15 +955,12 @@ const T = {
     faqMeta:'HÄUFIG GESTELLTE FRAGEN', faqH1:'HÄUFIGE', faqH2:'FRAGEN.',
     faqs:[
       ['Ist Dythin komplett kostenlos?','Ja, Dythin ist 100% kostenlos. Keine Abonnements oder versteckten Gebühren.'],
-      ['Kann ich meine Umfragen privat machen?','Ja. Beim Erstellen kannst du die Zielgruppe auf "Nur Freunde" beschränken.'],
-      ['Wie lange sind Umfragen aktiv?','Jede Umfrage ist 24 Stunden lang aktiv und wird danach automatisch archiviert.'],
+      ['Kann ich meine Umfragen privat machen?','Ja. Beim Erstellen einer Umfrage kannst du "Nur Freunde" auswählen oder dein Profil auf privat stellen.'],
+      ['Wie lange sind Umfragen aktiv?','Jede Umfrage ist 24 Stunden lang aktiv und wird dann automatisch archiviert.'],
+      ['Sind meine Fotos sicher?','Ja. Alle Daten werden mit SSL/TLS verschlüsselt und durch PostgreSQL RLS geschützt.'],
       ['Gibt es eine Android-Version?','Derzeit nur iOS (App Store). Android kommt bald.'],
     ],
     ftPrivacy:'Datenschutz', ftTerms:'Nutzungsbedingungen',
-    mpLabel:'[ DATENSCHUTZERKLÄRUNG ]', mpTitle:'Datenschutzerklärung',
-    mpBody:'Dythin legt großen Wert auf den Schutz deiner Daten. Hochgeladene Fotos werden nur für Abstimmungszwecke verwendet. Keine Weitergabe an Dritte.',
-    mtLabel:'[ NUTZUNGSBEDINGUNGEN ]', mtTitle:'Nutzungsbedingungen',
-    mtBody:'Durch die Nutzung von Dythin stimmst du diesen Bedingungen zu. Das Hochladen unangemessener Inhalte ist verboten.',
   },
 };
 
@@ -701,6 +968,7 @@ let lang  = localStorage.getItem('dythin-lang')  || 'tr';
 let theme = localStorage.getItem('dythin-theme') || 'purple';
 let vA = 74, vB = 26, totalV = 24;
 
+/* ── THEME ── */
 function switchTheme(t) {
   theme = t;
   document.documentElement.setAttribute('data-theme', t);
@@ -710,6 +978,7 @@ function switchTheme(t) {
   if (el) el.classList.add('active');
 }
 
+/* ── LANGUAGE ── */
 function switchLang(l) {
   lang = l;
   localStorage.setItem('dythin-lang', l);
@@ -729,6 +998,7 @@ function applyLang() {
   buildFaqs();
 }
 
+/* ── FAQ ── */
 function buildFaqs() {
   const t = T[lang];
   const list = document.getElementById('faq-list');
@@ -736,10 +1006,12 @@ function buildFaqs() {
   list.innerHTML = '';
   t.faqs.forEach(([q, a], i) => {
     const item = document.createElement('div');
-    item.className = 'faq-item';
+    item.className = 'faq-item reveal reveal-delay-' + (i % 4 + 1);
     item.innerHTML = `<button class="faq-btn" onclick="toggleFaq(${i})"><span>${q}</span><span class="faq-icon" id="fi-${i}">+</span></button><div class="faq-ans" id="fa-${i}">${a}</div>`;
     list.appendChild(item);
   });
+  /* Re-observe new elements */
+  list.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 }
 
 function toggleFaq(i) {
@@ -747,7 +1019,7 @@ function toggleFaq(i) {
   const icon = document.getElementById('fi-' + i);
   const open = ans.classList.contains('open');
   document.querySelectorAll('.faq-ans').forEach(el => el.classList.remove('open'));
-  document.querySelectorAll('.faq-icon').forEach(el => { el.textContent = '+'; el.style.color = 'rgba(255,255,255,0.35)'; });
+  document.querySelectorAll('.faq-icon').forEach(el => { el.textContent = '+'; el.style.color = 'var(--fg3)'; });
   if (!open) {
     ans.classList.add('open');
     icon.textContent = '−';
@@ -755,6 +1027,7 @@ function toggleFaq(i) {
   }
 }
 
+/* ── DEMO VOTE ── */
 function castVote(side) {
   totalV++;
   if (side === 'A') vA += 2; else vB += 2;
@@ -765,20 +1038,36 @@ function castVote(side) {
   document.getElementById('pct-b').textContent = '%' + pB;
   document.getElementById('bar-a').style.width = pA + '%';
   document.getElementById('bar-b').style.width = pB + '%';
-  const suffix = lang === 'tr' ? ' OY TOPLANDI · TIKLA OY VER' : lang === 'en' ? ' VOTES CAST · CLICK TO VOTE' : ' STIMMEN · KLICKEN';
+  const suffix = lang === 'tr' ? ' OY TOPLANDI' : lang === 'en' ? ' VOTES CAST' : ' STIMMEN';
   document.getElementById('votes-label').textContent = totalV + suffix;
 }
 
+/* ── MODALS ── */
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
 document.addEventListener('click', e => {
   if (e.target.classList.contains('modal')) e.target.classList.remove('open');
 });
 
+/* ── SCROLL REVEAL ── */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+/* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
   switchTheme(theme);
   switchLang(lang);
+
+  /* Observe all reveal elements */
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => {
+    observer.observe(el);
+  });
 });
 </script>
 </body>
