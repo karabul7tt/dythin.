@@ -334,3 +334,15 @@ export async function adminDismissReport(reportId: string): Promise<boolean> {
     return false
   }
 }
+
+export async function adminSeedBots(): Promise<{ success: boolean; message: string }> {
+  try {
+    const { data, error } = await supabase.rpc('seed_bots_and_posts')
+    if (error) throw error
+    return { success: true, message: data || 'Bot verileri başarıyla yüklendi.' }
+  } catch (err: any) {
+    console.warn('adminSeedBots error:', err)
+    return { success: false, message: err?.message || 'İşlem başarısız.' }
+  }
+}
+

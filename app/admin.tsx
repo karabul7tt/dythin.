@@ -28,6 +28,7 @@ import {
   adminPromoteUser,
   adminRevokeUser,
   adminDismissReport,
+  adminSeedBots,
   AdminKPIs,
   ReportedPostItem,
   AdminUserItem,
@@ -55,6 +56,7 @@ export default function AdminScreen() {
   const [users, setUsers] = useState<AdminUserItem[]>([])
   const [userSearch, setUserSearch] = useState('')
   const [userFilter, setUserFilter] = useState<'all' | 'admins' | 'banned'>('all')
+  const [isSeeding, setIsSeeding] = useState(false)
 
   useEffect(() => {
     verifyAndLoad()
@@ -230,6 +232,34 @@ export default function AdminScreen() {
     Alert.alert(`@${targetUser.username}`, 'Bu kullanıcı üzerinde hangi işlemi yapmak istiyorsunuz?', options)
   }
 
+  async function handleSeedBots() {
+    Alert.alert(
+      'Bot Verilerini Yükle / Yenile',
+      'Veritabanına 12 aktif bot profili, 8 adet şık karşılaştırma gönderisi ve hazır yorumlar/oylar yüklenecektir. Onaylıyor musunuz?',
+      [
+        { text: 'Vazgeç', style: 'cancel' },
+        {
+          text: 'Yükle',
+          style: 'default',
+          onPress: async () => {
+            setIsSeeding(true)
+            const res = await adminSeedBots()
+            setIsSeeding(false)
+            if (res.success) {
+              Alert.alert('Başarılı', res.message)
+              await loadData()
+            } else {
+              Alert.alert(
+                'Bilgi',
+                'Bot fonksiyonu veritabanında henüz hazır olmayabilir. Lütfen Supabase SQL Editor üzerinden supabase-seed-bots.sql scriptini bir kez RUN edin.\n\nDetay: ' + res.message
+              )
+            }
+          },
+        },
+      ]
+    )
+  }
+
   const filteredUsers = users.filter(u => {
     const q = userSearch.toLowerCase().replace('@', '').trim()
     const matchesQuery = !q ||
@@ -321,6 +351,25 @@ export default function AdminScreen() {
             </Text>
             <Text style={s.kpiLabel}>Bekleyen Şikayet</Text>
           </View>
+        </View>
+
+        {/* Hızlı İşlem: Bot & İçerik Basma */}
+        <View style={s.actionSection}>
+          <TouchableOpacity
+            style={s.seedBtn}
+            onPress={handleSeedBots}
+            disabled={isSeeding}
+            activeOpacity={0.8}
+          >
+            {isSeeding ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Ionicons name="sparkles" size={18} color="#ffffff" />
+            )}
+            <Text style={s.seedBtnText}>
+              {isSeeding ? 'Bot Verileri Yükleniyor...' : '12 Bot Profili & 8 Gönderi Bas / Yenile'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Tab Navigation */}
@@ -949,5 +998,26 @@ const s = StyleSheet.create({
   roleBadgeText: {
     fontSize: 9,
     fontWeight: '800',
+  },
+  actionSection: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  seedBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#7c3aed',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#a855f7',
+  },
+  seedBtnText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
   },
 })
