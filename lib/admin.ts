@@ -2,6 +2,10 @@ import { supabase } from './supabase'
 
 export const SUPER_ADMIN_USERNAMES = [
   'mehmetkarabul7tt',
+  'karabul1',
+  'karabul7tt',
+  'dythin',
+  'dythin.app',
 ]
 
 export function isSuperAdminUser(username?: string | null): boolean {

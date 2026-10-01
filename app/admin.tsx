@@ -206,36 +206,34 @@ export default function AdminScreen() {
       { text: t('common.cancel'), style: 'cancel' },
     ]
 
-    // Yalnızca Ana Süper Yönetici (Mehmet) başka birine admin rolü verebilir / kaldırabilir
-    if (isCurrentUserSuperAdmin) {
-      if (targetUser.isAdmin) {
-        options.push({
-          text: t('admin.revokeAdmin'),
-          style: 'destructive',
-          onPress: async () => {
-            const ok = await adminRevokeUser(targetUser.id, targetUser.username, session!.user.id)
-            if (ok) {
-              Alert.alert(t('common.success'), t('admin.revokeAdminSuccess', { username: targetUser.username }))
-              await loadData()
-            } else {
-              Alert.alert(t('common.error'), t('admin.revokeAdminError'))
-            }
-          },
-        })
-      } else {
-        options.push({
-          text: t('admin.makeAdmin'),
-          onPress: async () => {
-            const ok = await adminPromoteUser(targetUser.id, targetUser.username, session!.user.id)
-            if (ok) {
-              Alert.alert(t('common.success'), t('admin.makeAdminSuccess', { username: targetUser.username }))
-              await loadData()
-            } else {
-              Alert.alert(t('common.error'), t('admin.makeAdminError'))
-            }
-          },
-        })
-      }
+    // Yönetici Rolü Atama / Kaldırma (Her zaman erişilebilir)
+    if (targetUser.isAdmin) {
+      options.push({
+        text: '👑 ' + t('admin.revokeAdmin'),
+        style: 'destructive',
+        onPress: async () => {
+          const ok = await adminRevokeUser(targetUser.id, targetUser.username, session!.user.id)
+          if (ok) {
+            Alert.alert(t('common.success'), t('admin.revokeAdminSuccess', { username: targetUser.username }))
+            await loadData()
+          } else {
+            Alert.alert(t('common.error'), t('admin.revokeAdminError'))
+          }
+        },
+      })
+    } else {
+      options.push({
+        text: '👑 ' + t('admin.makeAdmin'),
+        onPress: async () => {
+          const ok = await adminPromoteUser(targetUser.id, targetUser.username, session!.user.id)
+          if (ok) {
+            Alert.alert(t('common.success'), t('admin.makeAdminSuccess', { username: targetUser.username }))
+            await loadData()
+          } else {
+            Alert.alert(t('common.error'), t('admin.makeAdminError'))
+          }
+        },
+      })
     }
 
     if (targetUser.isBanned) {
@@ -356,8 +354,18 @@ export default function AdminScreen() {
     <SafeAreaView style={s.container}>
       {/* Top Header */}
       <View style={s.header}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={20} color={theme.text} />
+        <TouchableOpacity
+          style={s.backBtn}
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back()
+            } else {
+              router.replace('/(tabs)/profile')
+            }
+          }}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="chevron-back" size={24} color={theme.text} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -753,10 +761,12 @@ function createStyles(theme: Theme) {
       gap: 12,
     },
     backBtn: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: theme.accentLight,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.card,
+      borderWidth: 1,
+      borderColor: theme.border,
       alignItems: 'center',
       justifyContent: 'center',
     },
