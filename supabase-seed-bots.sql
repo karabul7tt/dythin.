@@ -241,5 +241,39 @@ begin
 end;
 $$;
 
--- Fonksiyonu hemen çalıştırıp verileri içeri bas:
+-- ── 5. TÜM BOTLARI VE VERİLERİNİ KALICI TEMİZLEME FONKSİYONU ─────────
+create or replace function public.clear_all_bots()
+returns text
+language plpgsql
+security definer set search_path = public, auth
+as $$
+begin
+  -- 1. Bot oylarını ve bot gönderilerine atılan oyları sil
+  delete from public.votes 
+  where voter_id in (select id from auth.users where email like '%@dythin.internal')
+     or voter_id::text like 'b0000000%'
+     or post_id::text like 'c0000000%';
+
+  -- 2. Bot gönderilerini sil
+  delete from public.posts 
+  where user_id in (select id from auth.users where email like '%@dythin.internal')
+     or user_id::text like 'b0000000%'
+     or id::text like 'c0000000%';
+
+  -- 3. Bot profillerini sil
+  delete from public.profiles 
+  where id in (select id from auth.users where email like '%@dythin.internal')
+     or id::text like 'b0000000%';
+
+  -- 4. Bot auth kullanıcılarını auth.users tablosundan sil
+  delete from auth.users 
+  where email like '%@dythin.internal'
+     or id::text like 'b0000000%';
+
+  return 'Tüm botlar, bot profilleri, gönderileri ve oyları veritabanından tamamen silindi.';
+end;
+$$;
+
+-- Fonksiyonu hemen çalıştırıp botları içeri bas:
 select public.seed_bots_and_posts();
+

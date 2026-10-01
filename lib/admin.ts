@@ -346,3 +346,15 @@ export async function adminSeedBots(): Promise<{ success: boolean; message: stri
   }
 }
 
+export async function adminClearBots(): Promise<{ success: boolean; message: string }> {
+  try {
+    const { data, error } = await supabase.rpc('clear_all_bots')
+    if (error) throw error
+    return { success: true, message: data || 'Tüm botlar ve bot verileri başarıyla temizlendi.' }
+  } catch (err: any) {
+    console.warn('adminClearBots error:', err)
+    return { success: false, message: err?.message || 'Silme işlemi başarısız.' }
+  }
+}
+
+

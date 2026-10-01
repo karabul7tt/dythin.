@@ -29,6 +29,7 @@ import {
   adminRevokeUser,
   adminDismissReport,
   adminSeedBots,
+  adminClearBots,
   AdminKPIs,
   ReportedPostItem,
   AdminUserItem,
@@ -57,6 +58,7 @@ export default function AdminScreen() {
   const [userSearch, setUserSearch] = useState('')
   const [userFilter, setUserFilter] = useState<'all' | 'admins' | 'banned'>('all')
   const [isSeeding, setIsSeeding] = useState(false)
+  const [isClearing, setIsClearing] = useState(false)
 
   useEffect(() => {
     verifyAndLoad()
@@ -260,6 +262,34 @@ export default function AdminScreen() {
     )
   }
 
+  async function handleClearBots() {
+    Alert.alert(
+      'Botları Tamamen Sil',
+      'Tüm bot profilleri, bot gönderileri ve oyları veritabanından kalıcı olarak silinecektir. Veritabanında hiç yer kaplamayacaktır. Onaylıyor musunuz?',
+      [
+        { text: 'Vazgeç', style: 'cancel' },
+        {
+          text: 'Tamamen Sil',
+          style: 'destructive',
+          onPress: async () => {
+            setIsClearing(true)
+            const res = await adminClearBots()
+            setIsClearing(false)
+            if (res.success) {
+              Alert.alert('Başarılı', res.message)
+              await loadData()
+            } else {
+              Alert.alert(
+                'Hata',
+                'Silme fonksiyonu veritabanında hazır olmayabilir. Lütfen Supabase SQL Editor üzerinden supabase-seed-bots.sql scriptini bir kez RUN edin.\n\nDetay: ' + res.message
+              )
+            }
+          },
+        },
+      ]
+    )
+  }
+
   const filteredUsers = users.filter(u => {
     const q = userSearch.toLowerCase().replace('@', '').trim()
     const matchesQuery = !q ||
@@ -353,12 +383,12 @@ export default function AdminScreen() {
           </View>
         </View>
 
-        {/* Hızlı İşlem: Bot & İçerik Basma */}
+        {/* Hızlı İşlem: Bot & İçerik Basma / Silme */}
         <View style={s.actionSection}>
           <TouchableOpacity
             style={s.seedBtn}
             onPress={handleSeedBots}
-            disabled={isSeeding}
+            disabled={isSeeding || isClearing}
             activeOpacity={0.8}
           >
             {isSeeding ? (
@@ -368,6 +398,22 @@ export default function AdminScreen() {
             )}
             <Text style={s.seedBtnText}>
               {isSeeding ? 'Bot Verileri Yükleniyor...' : '12 Bot Profili & 8 Gönderi Bas / Yenile'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={s.clearBtn}
+            onPress={handleClearBots}
+            disabled={isSeeding || isClearing}
+            activeOpacity={0.8}
+          >
+            {isClearing ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Ionicons name="trash-outline" size={18} color="#f43f5e" />
+            )}
+            <Text style={s.clearBtnText}>
+              {isClearing ? 'Botlar Siliniyor...' : 'Tüm Botları Kalıcı Olarak Sil'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -1018,6 +1064,24 @@ const s = StyleSheet.create({
   seedBtnText: {
     color: '#ffffff',
     fontSize: 14,
+    fontWeight: '700',
+  },
+  clearBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1f132b',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#f43f5e50',
+    marginTop: 8,
+  },
+  clearBtnText: {
+    color: '#f43f5e',
+    fontSize: 13,
     fontWeight: '700',
   },
 })
