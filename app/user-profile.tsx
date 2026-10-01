@@ -25,7 +25,7 @@ import ZoomablePhoto from '../components/ZoomablePhoto'
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
 
 export default function UserProfileScreen() {
-  const { theme, session } = useApp()
+  const { theme, session, t } = useApp()
   const { userId } = useLocalSearchParams<{ userId: string }>()
   const router = useRouter()
 
@@ -462,7 +462,7 @@ export default function UserProfileScreen() {
                     friendshipStatus === 'pending' && { color: theme.accent },
                   ]}
                 >
-                  {friendshipStatus === 'accepted' ? 'Arkadaş Listende' : friendshipStatus === 'pending' ? 'İstek Gönderildi' : '+ Arkadaş Ekle'}
+                  {friendshipStatus === 'accepted' ? t('profile.inFriendsList') : friendshipStatus === 'pending' ? t('profile.requestSent') : t('profile.addFriendBtn')}
                 </Text>
               </TouchableOpacity>
 
@@ -477,7 +477,7 @@ export default function UserProfileScreen() {
                 }}
                 activeOpacity={0.8}
               >
-                <Text style={s.actionBtnText}>Mesaj Gönder</Text>
+                <Text style={s.actionBtnText}>{t('profile.sendMessageBtn')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -487,15 +487,15 @@ export default function UserProfileScreen() {
         <View style={s.statsRow}>
           <View style={s.statCard}>
             <Text style={s.statNum}>{stats.posts}</Text>
-            <Text style={s.statLabel}>Paylaşım</Text>
+            <Text style={s.statLabel}>{t('profile.statsPosts')}</Text>
           </View>
           <View style={s.statCard}>
             <Text style={s.statNum}>{stats.votes}</Text>
-            <Text style={s.statLabel}>Oy</Text>
+            <Text style={s.statLabel}>{t('profile.statsVotes')}</Text>
           </View>
           <View style={s.statCard}>
             <Text style={s.statNum}>{stats.friends}</Text>
-            <Text style={s.statLabel}>Arkadaş</Text>
+            <Text style={s.statLabel}>{t('profile.statsFriends')}</Text>
           </View>
         </View>
 
@@ -503,16 +503,16 @@ export default function UserProfileScreen() {
         {!isSelf && profile?.is_private && friendshipStatus !== 'accepted' ? (
           <View style={{ backgroundColor: theme.card, borderRadius: 16, padding: 30, alignItems: 'center', borderWidth: 0.5, borderColor: theme.border, marginTop: 10 }}>
             <Ionicons name="lock-closed-outline" size={36} color={theme.textSub} style={{ marginBottom: 10 }} />
-            <Text style={{ fontSize: 16, fontWeight: '700', color: theme.text, marginBottom: 6 }}>Bu Hesap Gizli</Text>
+            <Text style={{ fontSize: 16, fontWeight: '700', color: theme.text, marginBottom: 6 }}>{t('profile.privateAccountTitle')}</Text>
             <Text style={{ fontSize: 13, color: theme.textSub, textAlign: 'center', lineHeight: 18 }}>
-              Bu kullanıcının paylaşımlarını ve oylamalarını görebilmek için arkadaş olmalısınız.
+              {t('profile.privateAccountSub')}
             </Text>
           </View>
         ) : (
           <>
-            <Text style={s.sectionTitle}>Oylamaları ({posts.length})</Text>
+            <Text style={s.sectionTitle}>{t('profile.userPolls', { count: posts.length })}</Text>
             {posts.length === 0 ? (
-              <Text style={s.emptyPosts}>Henüz paylaştığı bir oylama bulunmuyor.</Text>
+              <Text style={s.emptyPosts}>{t('profile.noUserPolls')}</Text>
             ) : (
               posts.map(p => {
                 const votes = (p.votes ?? []) as Vote[]
@@ -555,15 +555,15 @@ export default function UserProfileScreen() {
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
                           <Text style={s.barText}>
-                            {p.image_b_url ? `Soldaki: %${pctA} (${countA} oy)` : `Beğenildi: %${likePct} (${likeCount} oy)`}
+                            {p.image_b_url ? `${t('feed.optionLeft')}: %${pctA} (${countA} ${t('results.votes')})` : `${t('results.likedBar')}: %${likePct} (${likeCount} ${t('results.votes')})`}
                           </Text>
                           <Text style={s.barText}>
-                            {p.image_b_url ? `Sağdaki: %${pctB} (${countB} oy)` : `Beğenilmedi: %${dislikePct} (${dislikeCount} oy)`}
+                            {p.image_b_url ? `${t('feed.optionRight')}: %${pctB} (${countB} ${t('results.votes')})` : `${t('results.dislikedBar')}: %${dislikePct} (${dislikeCount} ${t('results.votes')})`}
                           </Text>
                         </View>
                         {isExpired && !userVote && (
                           <Text style={{ fontSize: 10, color: theme.textSub, textAlign: 'center', marginTop: 6 }}>
-                            Oylama süresi sona erdi (24 saat tamamlandı)
+                            {t('profile.pollExpiredNotice')}
                           </Text>
                         )}
                       </View>
@@ -579,7 +579,7 @@ export default function UserProfileScreen() {
                           {isVoting ? (
                             <ActivityIndicator size="small" color="#C9A84C" />
                           ) : (
-                            <Text style={s.voteBtnTextA}>{p.image_b_url ? 'Soldaki' : 'Beğenmedim'}</Text>
+                            <Text style={s.voteBtnTextA}>{p.image_b_url ? t('feed.optionLeft') : t('feed.dislike')}</Text>
                           )}
                         </TouchableOpacity>
 
@@ -592,7 +592,7 @@ export default function UserProfileScreen() {
                           {isVoting ? (
                             <ActivityIndicator size="small" color="#ffffff" />
                           ) : (
-                            <Text style={s.voteBtnTextB}>{p.image_b_url ? 'Sağdaki' : 'Beğendim'}</Text>
+                            <Text style={s.voteBtnTextB}>{p.image_b_url ? t('feed.optionRight') : t('feed.like')}</Text>
                           )}
                         </TouchableOpacity>
                       </View>

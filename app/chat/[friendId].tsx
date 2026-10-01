@@ -25,7 +25,7 @@ import { sendPushNotificationToUser } from '../../lib/notifications'
 import ZoomablePhoto from '../../components/ZoomablePhoto'
 
 export default function ChatScreen() {
-  const { theme, session } = useApp()
+  const { theme, session, t } = useApp()
   const { friendId } = useLocalSearchParams<{ friendId: string }>()
   const router = useRouter()
 
@@ -155,15 +155,15 @@ export default function ChatScreen() {
     if (uploadingImage || sending || !session?.user.id || !friendId) return
 
     Alert.alert(
-      'Fotoğraf Gönder',
-      'Bir yöntem seçin',
+      t('chat.addPhoto'),
+      t('chat.optionsPrompt', { name: friendProfile?.username || '' }),
       [
         {
-          text: 'Fotoğraf Çek (Kamera)',
+          text: t('chat.takePhoto'),
           onPress: async () => {
             const { status } = await ImagePicker.requestCameraPermissionsAsync()
             if (status !== 'granted') {
-              Alert.alert('İzin Gerekli', 'Fotoğraf çekebilmek için kamera erişim izni vermelisiniz.')
+              Alert.alert(t('chat.camPermTitle'), t('chat.camPermMsg'))
               return
             }
             const result = await ImagePicker.launchCameraAsync({
@@ -178,11 +178,11 @@ export default function ChatScreen() {
           },
         },
         {
-          text: 'Galeriden Seç',
+          text: t('chat.chooseGallery'),
           onPress: async () => {
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
             if (status !== 'granted') {
-              Alert.alert('İzin Gerekli', 'Fotoğraf seçebilmek için galeri erişim izni vermelisiniz.')
+              Alert.alert(t('chat.galleryPermTitle'), t('chat.galleryPermMsg'))
               return
             }
             const result = await ImagePicker.launchImageLibraryAsync({
@@ -196,7 +196,7 @@ export default function ChatScreen() {
             }
           },
         },
-        { text: 'Vazgeç', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
       ]
     )
   }
@@ -338,27 +338,39 @@ export default function ChatScreen() {
 
   function handleChatOptions() {
     Alert.alert(
-      friendProfile?.full_name || `@${friendProfile?.username || 'kullanici'}`,
-      'Bir işlem seçin:',
+      t('chat.optionsTitle'),
+      t('chat.optionsPrompt', { name: friendProfile?.username || friendProfile?.full_name || 'kullanici' }),
       [
         {
-          text: 'Kullanıcıyı Bildir',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert('Bildirim Alındı', 'Şikayetiniz inceleme ekibimize iletildi. Sakıncalı içerikler ve kullanıcılar 24 saat içinde incelenir ve kuralları ihlal edenler sistemden engellenir.')
-          },
-        },
-        {
-          text: 'Kullanıcıyı Engelle',
+          text: t('chat.reportOption'),
           style: 'destructive',
           onPress: () => {
             Alert.alert(
-              'Kullanıcıyı Engelle',
-              'Bu kullanıcıyı engellemek istediğinize emin misiniz? Gönderileri ve mesajları artık görünmeyecektir.',
+              t('chat.reportTitle'),
+              t('chat.reportMsg'),
               [
-                { text: 'İptal', style: 'cancel' },
+                { text: t('common.cancel'), style: 'cancel' },
                 {
-                  text: 'Engelle',
+                  text: t('common.ok'),
+                  onPress: () => {
+                    Alert.alert(t('chat.reportSent'), t('chat.reportSentMsg'))
+                  },
+                },
+              ]
+            )
+          },
+        },
+        {
+          text: t('chat.blockOption'),
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              t('chat.blockTitle'),
+              t('chat.blockMsg'),
+              [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                  text: t('common.ok'),
                   style: 'destructive',
                   onPress: async () => {
                     if (!session?.user.id || !friendId) return
@@ -366,7 +378,7 @@ export default function ChatScreen() {
                       blocker_id: session.user.id,
                       blocked_id: friendId,
                     })
-                    Alert.alert('Engellendi', 'Kullanıcı engellendi.')
+                    Alert.alert(t('chat.blockedSuccess'), t('chat.blockedSuccessMsg'))
                     router.back()
                   },
                 },
@@ -375,23 +387,23 @@ export default function ChatScreen() {
           },
         },
         {
-          text: 'Sohbeti Sil',
+          text: t('chat.deleteOption'),
           style: 'destructive',
           onPress: handleDeleteChat,
         },
-        { text: 'Vazgeç', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
       ]
     )
   }
 
   function handleDeleteChat() {
     Alert.alert(
-      'Sohbeti Sil',
-      'Bu kişiyle olan tüm mesajlaşma geçmişiniz silinecek. Emin misiniz?',
+      t('chat.clearChatTitle'),
+      t('chat.clearChatMsg'),
       [
-        { text: 'Vazgeç', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Sohbeti Sil',
+          text: t('common.ok'),
           style: 'destructive',
           onPress: async () => {
             if (!session?.user.id || !friendId) return
@@ -403,10 +415,10 @@ export default function ChatScreen() {
 
             setLoading(false)
             if (error) {
-              Alert.alert('Hata', 'Sohbet silinemedi.')
+              Alert.alert(t('common.error'), t('messages.deleteChatError'))
             } else {
               setMessages([])
-              Alert.alert('Sohbet Silindi', 'Mesaj geçmişi temizlendi.')
+              Alert.alert(t('chat.chatCleared'), t('chat.chatClearedMsg'))
             }
           },
         },
@@ -633,7 +645,7 @@ export default function ChatScreen() {
             showsVerticalScrollIndicator={false}
           >
             {messages.length === 0 ? (
-              <Text style={s.emptyText}>Henüz mesajınız yok. İlk mesajı siz gönderin!</Text>
+              <Text style={s.emptyText}>{t('chat.noMessagesYet')}</Text>
             ) : (
               messages.map(m => {
                 const isMine = m.sender_id === session?.user.id
@@ -740,7 +752,7 @@ export default function ChatScreen() {
             style={s.input}
             value={inputText}
             onChangeText={setInputText}
-            placeholder="Mesaj yazın..."
+            placeholder={t('chat.inputPlaceholder')}
             placeholderTextColor={theme.textSub}
             multiline
             returnKeyType="default"
@@ -773,7 +785,7 @@ export default function ChatScreen() {
               >
                 <Ionicons name="close" size={24} color="#fff" />
               </TouchableOpacity>
-              <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>Fotoğrafı Gönder</Text>
+              <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>{t('chat.addPhoto')}</Text>
               <View style={{ width: 40 }} />
             </View>
 
@@ -809,7 +821,7 @@ export default function ChatScreen() {
                   }}
                   value={photoCaption}
                   onChangeText={setPhotoCaption}
-                  placeholder="Mesaj ekleyin... (isteğe bağlı)"
+                  placeholder={t('chat.inputPlaceholder')}
                   placeholderTextColor="rgba(255,255,255,0.4)"
                   returnKeyType="send"
                   onSubmitEditing={handleSendPendingPhoto}

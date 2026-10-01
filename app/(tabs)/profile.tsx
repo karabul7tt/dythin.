@@ -709,10 +709,10 @@ export default function ProfileScreen() {
           >
             <View>
               <Text style={{ color: theme.text, fontSize: 14, fontWeight: '600' }}>
-                Yönetici Paneli
+                {t('profile.adminPanel')}
               </Text>
               <Text style={{ color: theme.textSub, fontSize: 12, marginTop: 2 }}>
-                Şikayetler, Kullanıcı Yönetimi & Metrikler
+                {t('profile.adminPanelSub')}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={theme.textSub} />
@@ -795,7 +795,7 @@ export default function ProfileScreen() {
                 style={[s.input, { flex: 1, marginBottom: 0 }]}
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Kullanıcı adı ara..."
+                placeholder={t('profile.searchPlaceholder')}
                 placeholderTextColor={theme.textSub}
                 autoCapitalize="none"
                 returnKeyType="search"
@@ -803,7 +803,7 @@ export default function ProfileScreen() {
                 onSubmitEditing={searchUser}
               />
               <TouchableOpacity style={s.searchBtn} onPress={searchUser} disabled={searching} activeOpacity={0.8}>
-                {searching ? <ActivityIndicator color={theme.bg} size="small" /> : <Text style={s.searchBtnText}>Ara</Text>}
+                {searching ? <ActivityIndicator color={theme.bg} size="small" /> : <Text style={s.searchBtnText}>{t('profile.searchBtn')}</Text>}
               </TouchableOpacity>
             </View>
 
@@ -818,16 +818,16 @@ export default function ProfileScreen() {
                   : <View style={s.friendAvatarPlaceholder}><Text style={{ fontSize: 16, fontWeight: '700', color: theme.textSub }}>{searchResult.username[0].toUpperCase()}</Text></View>}
                 <Text style={s.friendName}>{searchResult.username}</Text>
                 <TouchableOpacity style={s.addBtn} onPress={() => sendRequest((searchResult as Profile).id)}>
-                  <Text style={s.addBtnText}>+ Ekle</Text>
+                  <Text style={s.addBtnText}>{t('profile.add')}</Text>
                 </TouchableOpacity>
               </TouchableOpacity>
             )}
-            {searchResult === 'not_found' && <Text style={s.empty}>Aradığınız kullanıcı bulunamadı</Text>}
+            {searchResult === 'not_found' && <Text style={s.empty}>{t('profile.userNotFound')}</Text>}
 
             {/* Bekleyen istekler */}
             {requests.length > 0 && (
               <>
-                <Text style={s.sectionLabel}>ARKADAŞLIK İSTEKLERİ</Text>
+                <Text style={s.sectionLabel}>{t('profile.friendRequests')}</Text>
                 {requests.map(r => (
                   <TouchableOpacity
                     key={r.friendship_id}
@@ -840,10 +840,10 @@ export default function ProfileScreen() {
                       : <View style={s.friendAvatarPlaceholder}><Text style={{ fontSize: 16, fontWeight: '700', color: theme.textSub }}>{r.username[0].toUpperCase()}</Text></View>}
                     <Text style={s.friendName}>{r.username}</Text>
                     <TouchableOpacity style={s.rejectBtn} onPress={() => rejectRequest(r.friendship_id)}>
-                      <Text style={s.rejectBtnText}>Reddet</Text>
+                      <Text style={s.rejectBtnText}>{t('profile.reject')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={s.acceptBtn} onPress={() => acceptRequest(r.friendship_id, r.id)}>
-                      <Text style={s.acceptBtnText}>Kabul Et</Text>
+                      <Text style={s.acceptBtnText}>{t('profile.accept')}</Text>
                     </TouchableOpacity>
                   </TouchableOpacity>
                 ))}
@@ -851,9 +851,9 @@ export default function ProfileScreen() {
             )}
 
             {/* Arkadaş listesi */}
-            <Text style={s.sectionLabel}>ARKADAŞLARIM ({friends.length})</Text>
+            <Text style={s.sectionLabel}>{t('profile.myFriends', { count: friends.length })}</Text>
             {friends.length === 0 ? (
-              <Text style={s.empty}>Henüz listenizde arkadaşınız yok.{'\n'}Kullanıcı adıyla arayıp arkadaş ekleyebilirsiniz!</Text>
+              <Text style={s.empty}>{t('profile.noFriendsYet')}</Text>
             ) : friends.map(f => (
               <TouchableOpacity
                 key={f.friendship_id}
@@ -870,10 +870,10 @@ export default function ProfileScreen() {
                   onPress={() => router.push({ pathname: '/chat/[friendId]', params: { friendId: f.id } })}
                 >
                   <Ionicons name="chatbubbles-outline" size={13} color={theme.bg} />
-                  <Text style={s.acceptBtnText}>Mesaj</Text>
+                  <Text style={s.acceptBtnText}>{t('profile.message')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={s.removeBtn} onPress={() => removeFriend(f.friendship_id)}>
-                  <Text style={s.removeBtnText}>Çıkar</Text>
+                  <Text style={s.removeBtnText}>{t('profile.remove')}</Text>
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}

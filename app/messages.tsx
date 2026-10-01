@@ -23,7 +23,7 @@ type ChatItem = {
 }
 
 export default function MessagesInboxScreen() {
-  const { theme, session } = useApp()
+  const { theme, session, t } = useApp()
   const router = useRouter()
   const isDark = theme.bg === '#0e0e1a' || theme.bg === '#111108'
   const refreshColor = isDark ? '#ffffff' : '#555555'
@@ -89,12 +89,12 @@ export default function MessagesInboxScreen() {
 
   function handleDeleteChat(friendId: string, friendName: string) {
     Alert.alert(
-      'Sohbeti Sil',
-      `${friendName} ile olan tüm sohbet geçmişiniz kalıcı olarak silinecek. Emin misiniz?`,
+      t('messages.deleteChatTitle'),
+      t('messages.deleteChatConfirm', { name: friendName }),
       [
-        { text: 'Vazgeç', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Sil',
+          text: t('common.ok'),
           style: 'destructive',
           onPress: async () => {
             const userId = session?.user.id
@@ -105,7 +105,7 @@ export default function MessagesInboxScreen() {
               .or(`and(sender_id.eq.${userId},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${userId})`)
 
             if (error) {
-              Alert.alert('Hata', 'Sohbet silinemedi.')
+              Alert.alert(t('common.error'), t('messages.deleteChatError'))
             } else {
               setChats(prev => prev.filter(c => c.friend.id !== friendId))
             }
@@ -175,7 +175,7 @@ export default function MessagesInboxScreen() {
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color={theme.text} />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Mesajlar</Text>
+        <Text style={s.headerTitle}>{t('messages.title')}</Text>
       </View>
 
       <ScrollView
@@ -197,7 +197,7 @@ export default function MessagesInboxScreen() {
       >
         {chats.length === 0 && !loading ? (
           <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, paddingTop: 60 }}>
-              <Text style={s.emptyText}>Henüz hiç mesajınız yok.{'\n'}Arkadaşlarınızın profilinden sohbet başlatabilirsiniz!</Text>
+              <Text style={s.emptyText}>{t('messages.noMessages')}</Text>
             </View>
           ) : (
             chats.map(item => {
@@ -226,8 +226,8 @@ export default function MessagesInboxScreen() {
                       <Text style={s.timeText}>{formatTime(item.lastMessage.created_at)}</Text>
                     </View>
                     <Text style={s.lastMsgText} numberOfLines={1}>
-                      {item.lastMessage.sender_id === session?.user.id ? 'Sen: ' : ''}
-                      {(item.lastMessage.image_url || item.lastMessage.content?.startsWith('[PHOTO]:')) ? 'Fotoğraf' : item.lastMessage.content}
+                      {item.lastMessage.sender_id === session?.user.id ? `${t('messages.you')}: ` : ''}
+                      {(item.lastMessage.image_url || item.lastMessage.content?.startsWith('[PHOTO]:')) ? t('messages.photo') : item.lastMessage.content}
                     </Text>
                   </View>
                 </TouchableOpacity>

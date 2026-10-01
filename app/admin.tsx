@@ -41,7 +41,7 @@ const { width } = Dimensions.get('window')
 
 export default function AdminScreen() {
   const router = useRouter()
-  const { session, theme } = useApp()
+  const { session, theme, t } = useApp()
   const s = useMemo(() => createStyles(theme), [theme])
 
   const [loading, setLoading] = useState(true)
@@ -79,9 +79,9 @@ export default function AdminScreen() {
       setIsAdminAuthorized(false)
       setLoading(false)
       Alert.alert(
-        'Yetkisiz Erişim',
-        'Bu sayfaya yalnızca sistem yöneticileri erişebilir.',
-        [{ text: 'Tamam', onPress: () => router.back() }]
+        t('admin.unauthorizedTitle'),
+        t('admin.unauthorizedMsg'),
+        [{ text: t('common.ok'), onPress: () => router.back() }]
       )
       return
     }
@@ -115,21 +115,21 @@ export default function AdminScreen() {
   function handleDeleteReportedPost(item: ReportedPostItem) {
     if (!item.post) return
     Alert.alert(
-      'Gönderiyi Sil',
-      `"${item.post.title}" başlıklı gönderiyi tüm sistemden silmek istediğinize emin misiniz?`,
+      t('admin.deletePostConfirmTitle'),
+      t('admin.deletePostConfirmMsg', { title: item.post.title }),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Evet, Sil',
+          text: t('admin.deletePostBtn'),
           style: 'destructive',
           onPress: async () => {
             const ok = await adminDeletePost(item.post!.id, session!.user.id)
             if (ok) {
               await adminDismissReport(item.reportId)
-              Alert.alert('Başarılı', 'Gönderi akıştan ve sistemden tamamen kaldırıldı.')
+              Alert.alert(t('common.success'), t('admin.deleteSuccessMsg'))
               await loadData()
             } else {
-              Alert.alert('Hata', 'Gönderi silinemedi.')
+              Alert.alert(t('common.error'), t('admin.deleteErrorMsg'))
             }
           },
         },
@@ -141,17 +141,17 @@ export default function AdminScreen() {
     if (!item.post) return
     const authorUser = item.post.authorUsername.toLowerCase().replace('@', '').trim()
     if (SUPER_ADMIN_USERNAMES.includes(authorUser)) {
-      Alert.alert('Yetkisiz İşlem', 'Kurucu ana yönetici banlanamaz.')
+      Alert.alert(t('admin.unauthorizedActionTitle'), t('admin.cannotBanSuperAdmin'))
       return
     }
 
     Alert.alert(
-      'Kullanıcıyı Banla',
-      `@${item.post.authorUsername} adlı kullanıcıyı banlamak istediğinize emin misiniz? Kullanıcının tüm gönderileri gizlenecek ve oturumu askıya alınacaktır.`,
+      t('admin.banUserConfirmTitle'),
+      t('admin.banUserConfirmMsg', { username: item.post.authorUsername }),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Kullanıcıyı Banla',
+          text: t('admin.banUserBtn'),
           style: 'destructive',
           onPress: async () => {
             const ok = await adminBanUser(
@@ -162,10 +162,10 @@ export default function AdminScreen() {
             if (ok) {
               await adminDeletePost(item.post!.id, session!.user.id)
               await adminDismissReport(item.reportId)
-              Alert.alert('Kullanıcı Banlandı', `@${item.post.authorUsername} askıya alındı ve içeriği temizlendi.`)
+              Alert.alert(t('common.success'), t('admin.banSuccessMsg', { username: item.post!.authorUsername }))
               await loadData()
             } else {
-              Alert.alert('Hata', 'Kullanıcı banlanırken aksama oluştu.')
+              Alert.alert(t('common.error'), t('admin.banErrorMsg'))
             }
           },
         },
@@ -175,15 +175,15 @@ export default function AdminScreen() {
 
   function handleDismissReport(item: ReportedPostItem) {
     Alert.alert(
-      'Raporu Kapat',
-      'Bu şikayeti incelediniz ve içeriğin kurallara uygun olduğuna karar verdiniz mi?',
+      t('admin.dismissReportConfirmTitle'),
+      t('admin.dismissReportConfirmMsg'),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Raporu Kapat',
+          text: t('admin.dismissBtn'),
           onPress: async () => {
             await adminDismissReport(item.reportId)
-            Alert.alert('Kapatıldı', 'Şikayet arşive kaldırıldı.')
+            Alert.alert(t('common.success'), t('admin.dismissSuccessMsg'))
             await loadData()
           },
         },
@@ -193,45 +193,45 @@ export default function AdminScreen() {
 
   function handleUserPress(targetUser: AdminUserItem) {
     if (targetUser.isSuperAdmin) {
-      Alert.alert('Süper Yönetici', `@${targetUser.username} kurucu ana yöneticidir, yetkileri değiştirilemez ve banlanamaz.`)
+      Alert.alert(t('admin.superAdminAlertTitle'), t('admin.superAdminAlertMsg', { username: targetUser.username }))
       return
     }
 
     if (!isCurrentUserSuperAdmin && targetUser.isAdmin) {
-      Alert.alert('Yetkisiz İşlem', `@${targetUser.username} bir yöneticidir. Yöneticileri yalnızca ana yönetici (@mehmetkarabul7tt) değiştirebilir.`)
+      Alert.alert(t('admin.unauthorizedActionTitle'), t('admin.unauthorizedActionMsg', { username: targetUser.username }))
       return
     }
 
     const options: { text: string; style?: 'default' | 'cancel' | 'destructive'; onPress?: () => void }[] = [
-      { text: 'İptal', style: 'cancel' },
+      { text: t('common.cancel'), style: 'cancel' },
     ]
 
     // Yalnızca Ana Süper Yönetici (Mehmet) başka birine admin rolü verebilir / kaldırabilir
     if (isCurrentUserSuperAdmin) {
       if (targetUser.isAdmin) {
         options.push({
-          text: 'Admin Yetkisini Kaldır',
+          text: t('admin.revokeAdmin'),
           style: 'destructive',
           onPress: async () => {
             const ok = await adminRevokeUser(targetUser.id, targetUser.username, session!.user.id)
             if (ok) {
-              Alert.alert('Yetki Kaldırıldı', `@${targetUser.username} artık yönetici değil.`)
+              Alert.alert(t('common.success'), t('admin.revokeAdminSuccess', { username: targetUser.username }))
               await loadData()
             } else {
-              Alert.alert('Hata', 'Yetki kaldırılamadı.')
+              Alert.alert(t('common.error'), t('admin.revokeAdminError'))
             }
           },
         })
       } else {
         options.push({
-          text: 'Bu Kullanıcıyı Admin Yap',
+          text: t('admin.makeAdmin'),
           onPress: async () => {
             const ok = await adminPromoteUser(targetUser.id, targetUser.username, session!.user.id)
             if (ok) {
-              Alert.alert('Yönetici Atandı', `@${targetUser.username} artık Yönetici yetkilerine sahip ve kontrol paneline erişebilir.`)
+              Alert.alert(t('common.success'), t('admin.makeAdminSuccess', { username: targetUser.username }))
               await loadData()
             } else {
-              Alert.alert('Hata', 'Yönetici yetkisi verilemedi.')
+              Alert.alert(t('common.error'), t('admin.makeAdminError'))
             }
           },
         })
@@ -240,56 +240,56 @@ export default function AdminScreen() {
 
     if (targetUser.isBanned) {
       options.push({
-        text: 'Kullanıcının Banını Kaldır',
+        text: t('admin.unbanUser'),
         onPress: async () => {
           const ok = await adminUnbanUser(targetUser.id, targetUser.username, session!.user.id)
           if (ok) {
-            Alert.alert('Yasak Kaldırıldı', `@${targetUser.username} hesabı tekrar aktif edildi.`)
+            Alert.alert(t('common.success'), t('admin.unbanSuccess', { username: targetUser.username }))
             await loadData()
           } else {
-            Alert.alert('Hata', 'Ban kaldırılamadı.')
+            Alert.alert(t('common.error'), t('admin.unbanError'))
           }
         },
       })
     } else {
       options.push({
-        text: 'Kullanıcıyı Banla (Askıya Al)',
+        text: t('admin.banUserSuspend'),
         style: 'destructive',
         onPress: async () => {
           const ok = await adminBanUser(targetUser.id, targetUser.username, session!.user.id)
           if (ok) {
-            Alert.alert('Kullanıcı Banlandı', `@${targetUser.username} askıya alındı.`)
+            Alert.alert(t('common.success'), t('admin.bannedSuccess', { username: targetUser.username }))
             await loadData()
           } else {
-            Alert.alert('Hata', 'Kullanıcı banlanamadı.')
+            Alert.alert(t('common.error'), t('admin.bannedError'))
           }
         },
       })
     }
 
-    Alert.alert(`@${targetUser.username}`, 'Bu kullanıcı üzerinde hangi işlemi yapmak istiyorsunuz?', options)
+    Alert.alert(`@${targetUser.username}`, t('admin.userActionPrompt'), options)
   }
 
   async function handleSeedBots() {
     Alert.alert(
-      'Bot Verilerini Yükle / Yenile',
-      'Veritabanına 12 aktif bot profili, 8 adet şık karşılaştırma gönderisi ve hazır yorumlar/oylar yüklenecektir. Onaylıyor musunuz?',
+      t('admin.seedConfirmTitle'),
+      t('admin.seedConfirmMsg'),
       [
-        { text: 'Vazgeç', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Yükle',
+          text: t('common.ok'),
           style: 'default',
           onPress: async () => {
             setIsSeeding(true)
             const res = await adminSeedBots()
             setIsSeeding(false)
             if (res.success) {
-              Alert.alert('Başarılı', res.message)
+              Alert.alert(t('common.success'), res.message)
               await loadData()
             } else {
               Alert.alert(
-                'Bilgi',
-                'Bot fonksiyonu veritabanında henüz hazır olmayabilir. Lütfen Supabase SQL Editor üzerinden supabase-seed-bots.sql scriptini bir kez RUN edin.\n\nDetay: ' + res.message
+                t('common.error'),
+                t('admin.seedInstallTip') + res.message
               )
             }
           },
@@ -300,24 +300,24 @@ export default function AdminScreen() {
 
   async function handleClearBots() {
     Alert.alert(
-      'Botları Tamamen Sil',
-      'Tüm bot profilleri, bot gönderileri ve oyları veritabanından kalıcı olarak silinecektir. Veritabanında hiç yer kaplamayacaktır. Onaylıyor musunuz?',
+      t('admin.clearConfirmTitle'),
+      t('admin.clearConfirmMsg'),
       [
-        { text: 'Vazgeç', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Tamamen Sil',
+          text: t('common.ok'),
           style: 'destructive',
           onPress: async () => {
             setIsClearing(true)
             const res = await adminClearBots()
             setIsClearing(false)
             if (res.success) {
-              Alert.alert('Başarılı', res.message)
+              Alert.alert(t('common.success'), res.message)
               await loadData()
             } else {
               Alert.alert(
-                'Hata',
-                'Silme fonksiyonu veritabanında hazır olmayabilir. Lütfen Supabase SQL Editor üzerinden supabase-seed-bots.sql scriptini bir kez RUN edin.\n\nDetay: ' + res.message
+                t('common.error'),
+                t('admin.clearInstallTip') + res.message
               )
             }
           },
@@ -343,7 +343,7 @@ export default function AdminScreen() {
     return (
       <SafeAreaView style={[s.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={theme.accent} />
-        <Text style={{ color: theme.textSub, marginTop: 12, fontSize: 14 }}>Yönetici Paneli yükleniyor...</Text>
+        <Text style={{ color: theme.textSub, marginTop: 12, fontSize: 14 }}>{t('admin.loading')}</Text>
       </SafeAreaView>
     )
   }
@@ -361,12 +361,12 @@ export default function AdminScreen() {
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Text style={s.headerTitle}>Yönetici Paneli</Text>
+            <Text style={s.headerTitle}>{t('admin.panelTitle')}</Text>
             <View style={s.adminBadge}>
-              <Text style={s.adminBadgeText}>ADMİN</Text>
+              <Text style={s.adminBadgeText}>{t('admin.adminBadge')}</Text>
             </View>
           </View>
-          <Text style={s.headerSub}>Dythin Moderasyon & Canlı Metrikler</Text>
+          <Text style={s.headerSub}>{t('admin.panelSub')}</Text>
         </View>
         <TouchableOpacity style={s.refreshBtn} onPress={handleRefresh} activeOpacity={0.7}>
           <Ionicons name="refresh" size={18} color={theme.accent} />
@@ -385,7 +385,7 @@ export default function AdminScreen() {
               <Ionicons name="people-outline" size={18} color={theme.accent} />
             </View>
             <Text style={s.kpiNumber}>{kpis.totalUsers}</Text>
-            <Text style={s.kpiLabel}>Toplam Kullanıcı</Text>
+            <Text style={s.kpiLabel}>{t('admin.totalUsers')}</Text>
           </View>
 
           <View style={s.kpiCard}>
@@ -393,7 +393,7 @@ export default function AdminScreen() {
               <Ionicons name="images-outline" size={18} color={theme.accent} />
             </View>
             <Text style={s.kpiNumber}>{kpis.totalPosts}</Text>
-            <Text style={s.kpiLabel}>Aktif Oylama</Text>
+            <Text style={s.kpiLabel}>{t('admin.activePolls')}</Text>
           </View>
 
           <View style={s.kpiCard}>
@@ -401,7 +401,7 @@ export default function AdminScreen() {
               <Ionicons name="stats-chart-outline" size={18} color={theme.accent} />
             </View>
             <Text style={s.kpiNumber}>{kpis.totalVotes}</Text>
-            <Text style={s.kpiLabel}>Toplam Oy</Text>
+            <Text style={s.kpiLabel}>{t('admin.totalVotes')}</Text>
           </View>
 
           <View style={[s.kpiCard, kpis.pendingReports > 0 && { borderColor: '#f43f5e' }]}>
@@ -415,7 +415,7 @@ export default function AdminScreen() {
             <Text style={[s.kpiNumber, kpis.pendingReports > 0 && { color: '#f43f5e' }]}>
               {kpis.pendingReports}
             </Text>
-            <Text style={s.kpiLabel}>Bekleyen Şikayet</Text>
+            <Text style={s.kpiLabel}>{t('admin.pendingReports')}</Text>
           </View>
         </View>
 
@@ -433,7 +433,7 @@ export default function AdminScreen() {
               <Ionicons name="cloud-upload-outline" size={18} color="#ffffff" />
             )}
             <Text style={s.seedBtnText}>
-              {isSeeding ? 'Bot Verileri Yükleniyor...' : '12 Bot Profili & 8 Gönderi Bas / Yenile'}
+              {isSeeding ? t('admin.seeding') : t('admin.seedBtn')}
             </Text>
           </TouchableOpacity>
 
@@ -449,7 +449,7 @@ export default function AdminScreen() {
               <Ionicons name="trash-outline" size={18} color="#f43f5e" />
             )}
             <Text style={s.clearBtnText}>
-              {isClearing ? 'Botlar Siliniyor...' : 'Tüm Botları Kalıcı Olarak Sil'}
+              {isClearing ? t('admin.clearing') : t('admin.clearBtn')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -467,7 +467,7 @@ export default function AdminScreen() {
               color={activeTab === 'reports' ? '#ffffff' : theme.textSub}
             />
             <Text style={[s.tabBtnText, activeTab === 'reports' && s.tabBtnTextActive]}>
-              Şikayetler ({reports.length})
+              {t('admin.tabReports', { count: reports.length })}
             </Text>
           </TouchableOpacity>
 
@@ -482,7 +482,7 @@ export default function AdminScreen() {
               color={activeTab === 'users' ? '#ffffff' : theme.textSub}
             />
             <Text style={[s.tabBtnText, activeTab === 'users' && s.tabBtnTextActive]}>
-              Kullanıcı Yönetimi ({users.length})
+              {t('admin.tabUsers', { count: users.length })}
             </Text>
           </TouchableOpacity>
         </View>
@@ -493,9 +493,9 @@ export default function AdminScreen() {
             {reports.length === 0 ? (
               <View style={s.emptyBox}>
                 <Ionicons name="shield-checkmark-outline" size={48} color="#22c55e" />
-                <Text style={s.emptyTitle}>Tebrikler, Topluluk Temiz!</Text>
+                <Text style={s.emptyTitle}>{t('admin.cleanCommunityTitle')}</Text>
                 <Text style={s.emptySub}>
-                  Şu anda bekleyen hiçbir uygunsuz içerik veya kullanıcı şikayeti bulunmuyor.
+                  {t('admin.cleanCommunitySub')}
                 </Text>
               </View>
             ) : (
@@ -505,10 +505,10 @@ export default function AdminScreen() {
                   <View style={s.reportHeader}>
                     <View style={s.reportBadge}>
                       <Ionicons name="alert-circle-outline" size={13} color="#f43f5e" />
-                      <Text style={s.reportBadgeText}>ŞİKAYET</Text>
+                      <Text style={s.reportBadgeText}>{t('admin.reportBadge')}</Text>
                     </View>
                     <Text style={s.reportDate}>
-                      {new Date(item.createdAt).toLocaleDateString('tr-TR', {
+                      {new Date(item.createdAt).toLocaleDateString(undefined, {
                         day: 'numeric',
                         month: 'short',
                         hour: '2-digit',
@@ -518,11 +518,11 @@ export default function AdminScreen() {
                   </View>
 
                   <Text style={s.reportReason}>
-                    <Text style={{ fontWeight: '700', color: theme.text }}>Sebep: </Text>
+                    <Text style={{ fontWeight: '700', color: theme.text }}>{t('admin.reasonLabel')} </Text>
                     {item.reason}
                   </Text>
                   <Text style={s.reporterInfo}>
-                    Bildiren: <Text style={{ color: theme.accent }}>@{item.reporterUsername}</Text>
+                    {t('admin.reporterLabel')} <Text style={{ color: theme.accent }}>@{item.reporterUsername}</Text>
                   </Text>
 
                   {/* Gönderi Önizlemesi */}
@@ -569,7 +569,7 @@ export default function AdminScreen() {
                   ) : (
                     <View style={s.reportedPostDeleted}>
                       <Text style={{ color: theme.textSub, fontSize: 12, fontStyle: 'italic' }}>
-                        Bu gönderi daha önce silinmiş veya bulunamadı.
+                        {t('admin.postDeletedOrNotFound')}
                       </Text>
                     </View>
                   )}
@@ -584,7 +584,7 @@ export default function AdminScreen() {
                           activeOpacity={0.8}
                         >
                           <Ionicons name="trash-outline" size={14} color="#ffffff" />
-                          <Text style={s.actionBtnText}>Gönderiyi Sil</Text>
+                          <Text style={s.actionBtnText}>{t('admin.deletePostBtn')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -593,7 +593,7 @@ export default function AdminScreen() {
                           activeOpacity={0.8}
                         >
                           <Ionicons name="ban-outline" size={14} color="#ffffff" />
-                          <Text style={s.actionBtnText}>Kullanıcıyı Banla</Text>
+                          <Text style={s.actionBtnText}>{t('admin.banUserBtn')}</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -604,7 +604,7 @@ export default function AdminScreen() {
                       activeOpacity={0.8}
                     >
                       <Ionicons name="checkmark-outline" size={14} color={theme.textSub} />
-                      <Text style={[s.actionBtnText, { color: theme.textSub }]}>Kapat</Text>
+                      <Text style={[s.actionBtnText, { color: theme.textSub }]}>{t('admin.dismissBtn')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -621,7 +621,7 @@ export default function AdminScreen() {
               <Ionicons name="search-outline" size={16} color={theme.textSub} style={{ marginLeft: 12 }} />
               <TextInput
                 style={s.searchInput}
-                placeholder="Kullanıcı adı veya isim ile ara..."
+                placeholder={t('admin.searchPlaceholder')}
                 placeholderTextColor={theme.textSub}
                 value={userSearch}
                 onChangeText={setUserSearch}
@@ -641,7 +641,7 @@ export default function AdminScreen() {
                 onPress={() => setUserFilter('all')}
               >
                 <Text style={[s.filterChipText, userFilter === 'all' && s.filterChipTextActive]}>
-                  Tümü ({users.length})
+                  {t('admin.filterAll', { count: users.length })}
                 </Text>
               </TouchableOpacity>
 
@@ -650,7 +650,7 @@ export default function AdminScreen() {
                 onPress={() => setUserFilter('admins')}
               >
                 <Text style={[s.filterChipText, userFilter === 'admins' && s.filterChipTextActive]}>
-                  Yöneticiler ({users.filter(u => u.isAdmin).length})
+                  {t('admin.filterAdmins', { count: users.filter(u => u.isAdmin).length })}
                 </Text>
               </TouchableOpacity>
 
@@ -659,7 +659,7 @@ export default function AdminScreen() {
                 onPress={() => setUserFilter('banned')}
               >
                 <Text style={[s.filterChipText, userFilter === 'banned' && s.filterChipTextActive]}>
-                  Banlılar ({users.filter(u => u.isBanned).length})
+                  {t('admin.filterBanned', { count: users.filter(u => u.isBanned).length })}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -668,8 +668,8 @@ export default function AdminScreen() {
             {filteredUsers.length === 0 ? (
               <View style={s.emptyBox}>
                 <Ionicons name="person-outline" size={44} color={theme.textSub} />
-                <Text style={s.emptyTitle}>Kullanıcı Bulunamadı</Text>
-                <Text style={s.emptySub}>Arama kriterine uygun bir kullanıcı kaydı yok.</Text>
+                <Text style={s.emptyTitle}>{t('admin.userNotFoundTitle')}</Text>
+                <Text style={s.emptySub}>{t('admin.userNotFoundSub')}</Text>
               </View>
             ) : (
               filteredUsers.map((u) => (
@@ -697,19 +697,19 @@ export default function AdminScreen() {
 
                       {u.isSuperAdmin && (
                         <View style={[s.roleBadge, { backgroundColor: '#f59e0b25', borderColor: '#f59e0b' }]}>
-                          <Text style={[s.roleBadgeText, { color: '#fbbf24' }]}>KURUCU</Text>
+                          <Text style={[s.roleBadgeText, { color: '#fbbf24' }]}>{t('admin.superAdminBadge')}</Text>
                         </View>
                       )}
 
                       {!u.isSuperAdmin && u.isAdmin && (
                         <View style={[s.roleBadge, { backgroundColor: theme.accentLight, borderColor: theme.accent }]}>
-                          <Text style={[s.roleBadgeText, { color: theme.accent }]}>ADMİN</Text>
+                          <Text style={[s.roleBadgeText, { color: theme.accent }]}>{t('admin.adminRoleBadge')}</Text>
                         </View>
                       )}
 
                       {u.isBanned && (
                         <View style={[s.roleBadge, { backgroundColor: '#f43f5e25', borderColor: '#f43f5e' }]}>
-                          <Text style={[s.roleBadgeText, { color: '#f43f5e' }]}>BANLI</Text>
+                          <Text style={[s.roleBadgeText, { color: '#f43f5e' }]}>{t('admin.bannedRoleBadge')}</Text>
                         </View>
                       )}
                     </View>
@@ -719,7 +719,7 @@ export default function AdminScreen() {
                     ) : null}
 
                     <Text style={s.userJoined}>
-                      Kayıt: {new Date(u.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {t('admin.registered')} {new Date(u.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
                     </Text>
                   </View>
 
