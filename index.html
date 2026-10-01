@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="tr" class="scroll-smooth" data-theme="purple">
+<html lang="tr" data-theme="purple">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dythin — Kombin ve Kararsızlıklar İçin Canlı Sosyal Oylama</title>
-  <meta name="description" content="Kombinlerin, ürün kıyaslamaların ve kararsızlıkların için fotoğraflarını yükle; topluluktan ve arkadaşlarından anında oy topla. iOS (App Store) için %100 Ücretsiz!">
-  <meta name="keywords" content="dythin, oylama uygulaması, kombin seçimi, A/B karşılaştırma, sosyal oylama, kararsızlık uygulaması, moda tavsiyesi, ios, app store, outfit chooser">
+  <meta name="description" content="Kombinlerin, ürün kıyaslamaların ve kararsızlıkların için fotoğraflarını yükle; topluluktan ve arkadaşlarından anında oy topla. iOS için %100 Ücretsiz!">
+  <meta name="keywords" content="dythin, oylama uygulaması, kombin seçimi, A/B karşılaştırma, sosyal oylama, kararsızlık uygulaması, ios, app store">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://dythin.com.tr" />
-  
+
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://dythin.com.tr">
   <meta property="og:title" content="Dythin — Canlı Sosyal Oylama & Karar Platformu">
-  <meta property="og:description" content="Kombinlerin ve kararsızlıkların için fotoğraflarınla anında canlı oy topla. iOS (App Store) için ücretsiz indir!">
+  <meta property="og:description" content="Kombinlerin ve kararsızlıkların için fotoğraflarınla anında canlı oy topla. iOS için ücretsiz!">
   <meta property="og:image" content="https://dythin.com.tr/appstore_3.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -22,37 +22,12 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://dythin.com.tr">
   <meta name="twitter:title" content="Dythin — Canlı Sosyal Oylama">
-  <meta name="twitter:description" content="Kombinlerin ve kararsızlıkların için fotoğraflarınla anında canlı oy topla. App Store için ücretsiz indir!">
+  <meta name="twitter:description" content="Kombinlerin ve kararsızlıkların için fotoğraflarınla anında canlı oy topla.">
   <meta name="twitter:image" content="https://dythin.com.tr/appstore_3.png">
 
-  <!-- Schema.org JSON-LD -->
+  <!-- Schema.org -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": "https://dythin.com.tr/#website",
-        "url": "https://dythin.com.tr",
-        "name": "Dythin",
-        "description": "Kombinlerin ve kararsızlıkların için fotoğraflarınla anında canlı oy topla. iOS sosyal oylama uygulaması.",
-        "inLanguage": "tr-TR"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "@id": "https://dythin.com.tr/#app",
-        "name": "Dythin",
-        "operatingSystem": "iOS",
-        "applicationCategory": "SocialNetworkingApplication",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "TRY"
-        },
-        "url": "https://apps.apple.com/app/dythin/id6805192895"
-      }
-    ]
-  }
+  {"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://dythin.com.tr/#website","url":"https://dythin.com.tr","name":"Dythin","inLanguage":"tr-TR"},{"@type":"SoftwareApplication","@id":"https://dythin.com.tr/#app","name":"Dythin","operatingSystem":"iOS","applicationCategory":"SocialNetworkingApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"url":"https://apps.apple.com/app/dythin/id6805192895"}]}
   </script>
 
   <!-- Favicons -->
@@ -60,1011 +35,751 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="manifest" href="/site.webmanifest">
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Google Fonts: Plus Jakarta Sans & Space Grotesk -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- FontAwesome 6 Icons -->
+
+  <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-            mono: ['"Space Grotesk"', 'monospace'],
-          }
-        }
-      }
-    }
-  </script>
-
   <style>
-    /* ─── 4 UYGULAMA TEMASI (CSS VARIABLES) ─── */
-    :root, [data-theme="purple"] {
-      --bg-primary: #07070d;
-      --bg-surface: #0e0e1a;
-      --bg-card: #141424;
-      --bg-card-hover: #19192e;
-      --accent: #7F77DD;
-      --accent-hover: #968ff2;
-      --accent-glow: rgba(127, 119, 221, 0.45);
-      --accent-glow-subtle: rgba(127, 119, 221, 0.15);
-      --border-color: rgba(127, 119, 221, 0.22);
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --text-main: #f5f5f7;
-      --text-sub: #8e8ea0;
-      --text-accent: #AFA9EC;
-      --watermark: rgba(127, 119, 221, 0.04);
-      --badge-bg: rgba(127, 119, 221, 0.15);
-    }
+    /* ── THEMES ── */
+    :root, [data-theme="purple"] { --accent: #7F77DD; --accent-rgb: 127,119,221; }
+    [data-theme="gold"]    { --accent: #C9A84C; --accent-rgb: 201,168,76; }
+    [data-theme="rose"]    { --accent: #D4537E; --accent-rgb: 212,83,126; }
+    [data-theme="emerald"] { --accent: #3B6D11; --accent-rgb: 59,109,17; }
 
-    [data-theme="gold"] {
-      --bg-primary: #090905;
-      --bg-surface: #12120a;
-      --bg-card: #1a1910;
-      --bg-card-hover: #222116;
-      --accent: #C9A84C;
-      --accent-hover: #dfbf65;
-      --accent-glow: rgba(201, 168, 76, 0.45);
-      --accent-glow-subtle: rgba(201, 168, 76, 0.15);
-      --border-color: rgba(201, 168, 76, 0.25);
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --text-main: #f8f6f0;
-      --text-sub: #9e9885;
-      --text-accent: #e5cb7f;
-      --watermark: rgba(201, 168, 76, 0.04);
-      --badge-bg: rgba(201, 168, 76, 0.15);
-    }
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: #000; color: #fff; scroll-behavior: smooth; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+    img  { display: block; max-width: 100%; }
+    a    { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font-family: inherit; }
 
-    [data-theme="rose"] {
-      --bg-primary: #0d060a;
-      --bg-surface: #170b13;
-      --bg-card: #20101b;
-      --bg-card-hover: #2a1523;
-      --accent: #D4537E;
-      --accent-hover: #e86b95;
-      --accent-glow: rgba(212, 83, 126, 0.45);
-      --accent-glow-subtle: rgba(212, 83, 126, 0.15);
-      --border-color: rgba(212, 83, 126, 0.25);
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --text-main: #fcf4f7;
-      --text-sub: #a18894;
-      --text-accent: #f08cb0;
-      --watermark: rgba(212, 83, 126, 0.04);
-      --badge-bg: rgba(212, 83, 126, 0.15);
-    }
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 2px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: var(--accent); }
 
-    [data-theme="emerald"] {
-      --bg-primary: #040d06;
-      --bg-surface: #0a180d;
-      --bg-card: #102214;
-      --bg-card-hover: #162e1b;
-      --accent: #22c55e;
-      --accent-hover: #4ade80;
-      --accent-glow: rgba(34, 197, 94, 0.45);
-      --accent-glow-subtle: rgba(34, 197, 94, 0.15);
-      --border-color: rgba(34, 197, 94, 0.25);
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --text-main: #f0fdf4;
-      --text-sub: #86a58f;
-      --text-accent: #86efac;
-      --watermark: rgba(34, 197, 94, 0.04);
-      --badge-bg: rgba(34, 197, 94, 0.15);
-    }
-
-    /* Base Body & Fluid Transitions */
-    body {
-      background-color: var(--bg-primary);
-      color: var(--text-main);
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      overflow-x: hidden;
-      transition: background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.5s ease;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* Big Typographic Backdrop (Behance DOPPLE 360 Style) */
-    .hero-watermark {
-      font-size: clamp(8rem, 24vw, 24rem);
-      font-weight: 900;
-      letter-spacing: -0.05em;
-      line-height: 0.85;
+    /* ── UTILITIES ── */
+    .mono { font-family: 'Space Grotesk', monospace; }
+    .label {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 0.6rem;
       text-transform: uppercase;
-      color: transparent;
-      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.06);
-      position: absolute;
-      left: 50%;
-      top: 48%;
-      transform: translate(-50%, -50%);
-      white-space: nowrap;
+      letter-spacing: 0.22em;
+      color: rgba(255,255,255,0.4);
+    }
+    .la { color: var(--accent); }
+    .wm {
+      font-size: clamp(5rem, 19vw, 19rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.025em;
+      line-height: 0.85;
+      color: rgba(255,255,255,0.038);
       pointer-events: none;
       user-select: none;
-      z-index: 1;
-      opacity: 0.85;
-      transition: all 0.6s ease;
+      white-space: nowrap;
     }
-
-    .hero-watermark-glow {
-      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 68%);
-      filter: blur(80px);
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: clamp(340px, 60vw, 850px);
-      height: clamp(340px, 60vw, 850px);
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.85;
-      transition: background 0.6s ease;
-    }
-
-    /* iPhone 16 Pro Premium Chassis */
-    .iphone-pro-frame {
-      width: 320px;
-      height: 650px;
-      background: #000;
-      border-radius: 54px;
-      border: 11px solid #1c1c1e;
-      position: relative;
-      box-shadow: 0 40px 120px -20px var(--accent-glow), 0 0 0 1px rgba(255, 255, 255, 0.12);
-      overflow: hidden;
-      z-index: 10;
-      transition: box-shadow 0.5s ease, border-color 0.5s ease;
-    }
-    @media (min-width: 768px) {
-      .iphone-pro-frame {
-        width: 345px;
-        height: 700px;
-        border-radius: 56px;
-        border-width: 12px;
-      }
-    }
-
-    .dynamic-island {
-      width: 95px;
-      height: 26px;
-      background: #000;
-      border-radius: 18px;
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 50;
+    .section-meta {
       display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-right: 8px;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-top: 1px solid rgba(255,255,255,0.09);
+      padding-top: 1.5rem;
+      margin-bottom: 5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
-    .camera-lens {
-      width: 10px;
-      height: 10px;
-      background: #0d0d12;
-      border-radius: 50%;
-      border: 1px solid #1f1f2a;
-    }
-
-    /* Blueprint Technical Indicator Lines */
-    .tech-wire {
-      position: absolute;
-      border-color: var(--accent);
-      opacity: 0.7;
-      pointer-events: none;
-      transition: border-color 0.5s ease;
-    }
-    .tech-badge {
-      background: rgba(10, 10, 18, 0.88);
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(16px);
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 11px;
+    .text-link {
       font-family: 'Space Grotesk', monospace;
-      color: var(--text-main);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-      transition: border-color 0.5s ease;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #fff;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 0.2rem;
+      white-space: nowrap;
+      transition: opacity 0.2s;
     }
+    .text-link:hover { opacity: 0.6; }
+    .pain-item { display: flex; gap: 1.75rem; align-items: flex-start; padding: 1.35rem 0; }
+    .pain-item + .pain-item { border-top: 1px solid rgba(255,255,255,0.07); }
+    .pain-num { font-family: 'Space Grotesk', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+    .pain-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .pain-desc { font-size: 0.78rem; color: rgba(255,255,255,0.42); line-height: 1.65; }
 
-    /* Glass Panels */
-    .apple-glass {
-      background: rgba(10, 10, 18, 0.75);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--border-subtle);
+    /* ── NAV ── */
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 2.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(10px);
     }
-    .apple-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .apple-card:hover {
-      border-color: var(--border-color);
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px -15px var(--accent-glow-subtle);
-    }
+    .nav-logo { font-family: 'Space Grotesk', monospace; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.18em; }
+    .nav-r { display: flex; align-items: center; gap: 1.5rem; }
+    .lang-sw { display: flex; align-items: center; gap: 0.2rem; }
+    .lang-btn { font-family: 'Space Grotesk', monospace; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); background: none; border: none; padding: 0.3rem 0.4rem; transition: color 0.2s; }
+    .lang-btn:hover, .lang-btn.active { color: #fff; }
+    .lang-sep { color: rgba(255,255,255,0.14); font-size: 0.7rem; }
+    .theme-sw { display: flex; align-items: center; gap: 0.4rem; }
+    .tdot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid transparent; transition: border-color 0.2s, transform 0.2s; cursor: pointer; }
+    .tdot.active { border-color: rgba(255,255,255,0.85); transform: scale(1.25); }
+    .nav-cta { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1.15rem; background: var(--accent); color: #000; font-family: 'Space Grotesk', monospace; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 100px; transition: opacity 0.2s; }
+    .nav-cta:hover { opacity: 0.8; }
 
-    /* Dynamic Theme Pill Button */
-    .theme-pill {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      position: relative;
-    }
-    .theme-pill.active {
-      transform: scale(1.18);
-      border-color: #ffffff;
-      box-shadow: 0 0 12px var(--accent);
-    }
+    /* ── HERO ── */
+    #hero { min-height: 100vh; background: #000; display: flex; flex-direction: column; justify-content: flex-end; padding: 80px 2.5rem 5rem; position: relative; overflow: hidden; }
+    .hero-wm { position: absolute; top: 50%; left: -1%; transform: translateY(-53%); z-index: 0; }
+    .hero-meta { position: absolute; top: 5.5rem; left: 2.5rem; right: 2.5rem; display: flex; justify-content: space-between; z-index: 2; }
+    .hero-content { position: relative; z-index: 2; max-width: 1400px; width: 100%; margin: 0 auto; }
+    .hero-h1 { font-size: clamp(3.5rem, 12vw, 12rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.88; margin-bottom: 3.5rem; }
+    .hero-bottom { display: flex; gap: 5rem; align-items: flex-end; flex-wrap: wrap; }
+    .hero-desc { font-size: 0.92rem; color: rgba(255,255,255,0.5); max-width: 350px; line-height: 1.75; }
+    .hero-scroll { position: absolute; bottom: 2rem; right: 2.5rem; z-index: 2; }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #000; }
-    ::-webkit-scrollbar-thumb { background: #262633; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #3d3d52; }
+    /* ── BANNER ── */
+    #banner { width: 100%; height: 65vh; position: relative; border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); overflow: hidden; }
+    #banner > img { width: 100%; height: 100%; object-fit: cover; object-position: center top; filter: brightness(0.6); }
+    .banner-hl { position: absolute; top: 2.5rem; right: 3rem; text-align: right; z-index: 2; }
+    .banner-hl-line { font-size: clamp(2.5rem, 7vw, 6.5rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.92; }
+    .banner-bl { position: absolute; bottom: 2.5rem; left: 3rem; z-index: 2; }
+
+    /* ── PROBLEM ── */
+    #problem { background: #000; padding: 8rem 2.5rem; position: relative; overflow: hidden; }
+    .prob-wm { position: absolute; bottom: -4rem; left: -1%; z-index: 0; }
+    .prob-inner { max-width: 1400px; margin: 0 auto; position: relative; z-index: 2; }
+    .prob-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+    .prob-h2 { font-size: clamp(2rem, 4.5vw, 4rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.025em; line-height: 1; margin-bottom: 2rem; }
+    .prob-desc { font-size: 0.88rem; color: rgba(255,255,255,0.48); line-height: 1.8; max-width: 420px; margin-bottom: 2.5rem; }
+    .photo-collage { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .photo-collage img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-collage .pb { margin-top: 3rem; }
+
+    /* ── BLUEPRINT ── */
+    #blueprint { background: #050505; border-top: 1px solid rgba(255,255,255,0.06); padding: 8rem 2.5rem; position: relative; overflow: hidden; }
+    .bp-inner { max-width: 1400px; margin: 0 auto; }
+    .bp-hl { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 6rem; }
+    .bp-word { font-size: clamp(3rem, 9.5vw, 9.5rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.9; }
+    .bp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+    .phone-wrap { position: relative; display: flex; justify-content: center; padding: 4rem 2rem; }
+    .phone-frame { width: 220px; border-radius: 42px; border: 1px solid rgba(255,255,255,0.12); background: #080808; overflow: hidden; box-shadow: 0 0 90px -25px rgba(var(--accent-rgb), 0.45); position: relative; flex-shrink: 0; }
+    .phone-frame img { width: 100%; display: block; }
+    /* Blueprint annotations */
+    .anno { position: absolute; display: flex; flex-direction: column; }
+    .anno-lh { height: 1px; background: var(--accent); opacity: 0.35; }
+    .anno-lv { width: 1px; background: var(--accent); opacity: 0.35; }
+    .anno-label { font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); white-space: nowrap; margin-top: 0.35rem; }
+    .anno-sub { font-size: 0.68rem; color: rgba(255,255,255,0.45); white-space: nowrap; margin-top: 0.2rem; }
+    .qr-box { display: flex; gap: 2rem; align-items: center; margin-bottom: 3rem; }
+    .qr-img-wrap { width: 115px; height: 115px; background: #fff; padding: 7px; flex-shrink: 0; }
+    .qr-img-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .bp-desc { font-size: 0.88rem; color: rgba(255,255,255,0.48); line-height: 1.8; margin-bottom: 3rem; max-width: 420px; }
+
+    /* ── FLOW ── */
+    #flow { background: #000; border-top: 1px solid rgba(255,255,255,0.06); padding: 8rem 2.5rem; position: relative; overflow: hidden; }
+    .flow-inner { max-width: 1400px; margin: 0 auto; }
+    .flow-h { font-size: clamp(3rem, 11vw, 11rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87; margin-bottom: 6rem; }
+    .flow-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1px solid rgba(255,255,255,0.07); }
+    .flow-cell { padding: 3rem 2.5rem; border-right: 1px solid rgba(255,255,255,0.07); }
+    .flow-cell:last-child { border-right: none; }
+    .flow-cell.mid { background: rgba(255,255,255,0.018); position: relative; }
+    .flow-cell.mid::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 55%; height: 1px; background: var(--accent); opacity: 0.5; }
+    .flow-step-title { font-size: 1.2rem; font-weight: 800; margin: 0.7rem 0 0.6rem; }
+    .flow-step-desc { font-size: 0.78rem; color: rgba(255,255,255,0.42); line-height: 1.65; margin-bottom: 2rem; }
+    .flow-img { overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
+    .flow-img img { width: 100%; display: block; transition: transform 0.5s; }
+    .flow-img:hover img { transform: scale(1.03); }
+    .flow-wm-wrap { text-align: right; margin-right: -1%; margin-top: -3rem; }
+
+    /* ── DEMO ── */
+    #demo { background: #050505; border-top: 1px solid rgba(255,255,255,0.06); padding: 8rem 2.5rem 0; }
+    .demo-inner { max-width: 1400px; margin: 0 auto; }
+    .demo-h { font-size: clamp(2.5rem, 9vw, 8.5rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87; margin-bottom: 4rem; }
+    .demo-panel { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid rgba(255,255,255,0.07); max-width: 1400px; margin: 0 auto; }
+    .demo-opt { cursor: pointer; position: relative; overflow: hidden; height: 62vh; }
+    .demo-opt + .demo-opt { border-left: 1px solid rgba(255,255,255,0.07); }
+    .demo-opt img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .demo-opt:hover img { transform: scale(1.04); }
+    .demo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.05) 55%, transparent 100%); }
+    .demo-top-label { position: absolute; top: 1.5rem; font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+    .demo-a .demo-top-label { left: 1.5rem; }
+    .demo-b .demo-top-label { right: 1.5rem; }
+    .demo-hint { position: absolute; font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; }
+    .demo-a .demo-hint { bottom: 5.5rem; left: 2rem; color: rgba(255,255,255,0.4); }
+    .demo-b .demo-hint { bottom: 5.5rem; right: 2rem; color: rgba(var(--accent-rgb), 0.65); }
+    .demo-pct { position: absolute; bottom: 2rem; font-family: 'Space Grotesk', monospace; font-size: 3.25rem; font-weight: 700; line-height: 1; }
+    .demo-a .demo-pct { left: 2rem; color: #fff; }
+    .demo-b .demo-pct { right: 2rem; color: var(--accent); }
+    .demo-bar-wrap { height: 3px; background: rgba(255,255,255,0.07); display: flex; max-width: 1400px; margin: 0 auto; }
+    .demo-bar-a { height: 100%; background: #fff; transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .demo-bar-b { height: 100%; background: var(--accent); transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .demo-footer-row { display: flex; justify-content: space-between; padding: 0.85rem 0 6rem; max-width: 1400px; margin: 0 auto; }
+
+    /* ── FAQ ── */
+    #faq { background: #000; border-top: 1px solid rgba(255,255,255,0.06); padding: 8rem 2.5rem; }
+    .faq-inner { max-width: 900px; margin: 0 auto; }
+    .faq-h { font-size: clamp(3rem, 10vw, 9rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87; margin-bottom: 5rem; }
+    .faq-item { border-top: 1px solid rgba(255,255,255,0.08); }
+    .faq-item:last-child { border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .faq-btn { width: 100%; text-align: left; background: none; border: none; color: #fff; display: flex; justify-content: space-between; align-items: center; padding: 1.7rem 0; font-size: 1rem; font-weight: 700; gap: 2rem; transition: opacity 0.2s; }
+    .faq-btn:hover { opacity: 0.7; }
+    .faq-icon { font-family: 'Space Grotesk', monospace; font-size: 1.3rem; color: rgba(255,255,255,0.35); flex-shrink: 0; line-height: 1; }
+    .faq-ans { display: none; padding-bottom: 1.7rem; font-size: 0.875rem; color: rgba(255,255,255,0.52); line-height: 1.82; max-width: 660px; }
+    .faq-ans.open { display: block; }
+
+    /* ── FOOTER ── */
+    footer { border-top: 1px solid rgba(255,255,255,0.07); padding: 2.75rem 2.5rem; background: #000; }
+    .footer-inner { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; }
+    .footer-logo { font-family: 'Space Grotesk', monospace; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.18em; }
+    .footer-links { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
+    .footer-link { font-family: 'Space Grotesk', monospace; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); background: none; border: none; transition: color 0.2s; }
+    .footer-link:hover { color: #fff; }
+    .footer-copy { font-family: 'Space Grotesk', monospace; font-size: 0.58rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.2); text-transform: uppercase; }
+
+    /* ── MODALS ── */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center; padding: 2rem; }
+    .modal.open { display: flex; }
+    .modal-box { background: #080808; border: 1px solid rgba(255,255,255,0.1); max-width: 560px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 3rem; position: relative; }
+    .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: rgba(255,255,255,0.35); font-size: 1.5rem; transition: color 0.2s; }
+    .modal-close:hover { color: #fff; }
+    .modal-title { font-size: 1.5rem; font-weight: 800; margin: 0.75rem 0 1.5rem; }
+    .modal-body { font-size: 0.875rem; color: rgba(255,255,255,0.5); line-height: 1.85; }
+
+    /* ── SMOOTH THEME TRANSITION ── */
+    *, *::before, *::after { transition: color 0.35s, background-color 0.35s, border-color 0.35s, box-shadow 0.35s; }
+    img, .wm, .hero-wm, .prob-wm, .flow-wm-wrap { transition: none !important; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      #nav { padding: 1rem 1.25rem; }
+      .theme-sw { display: none; }
+      #hero { padding: 70px 1.25rem 4rem; }
+      .hero-meta { left: 1.25rem; right: 1.25rem; }
+      .hero-bottom { gap: 2rem; }
+      #banner { height: 48vh; }
+      .banner-hl { right: 1.5rem; top: 1.5rem; }
+      .banner-bl { left: 1.5rem; bottom: 1.5rem; }
+      #problem { padding: 5rem 1.25rem; }
+      .prob-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .prob-wm { display: none; }
+      #blueprint { padding: 5rem 1.25rem; }
+      .bp-hl { flex-direction: column; margin-bottom: 3rem; }
+      .bp-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .anno { display: none; }
+      #flow { padding: 5rem 1.25rem; }
+      .flow-grid { grid-template-columns: 1fr; }
+      .flow-cell { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); }
+      .flow-cell:last-child { border-bottom: none; }
+      .flow-wm-wrap { display: none; }
+      #demo { padding: 5rem 1.25rem 0; }
+      .demo-panel { grid-template-columns: 1fr; }
+      .demo-opt { height: 48vh; }
+      .demo-opt + .demo-opt { border-left: none; border-top: 1px solid rgba(255,255,255,0.07); }
+      .demo-b .demo-pct { right: auto; left: 2rem; }
+      .demo-b .demo-hint { right: auto; left: 2rem; }
+      .demo-b .demo-top-label { right: auto; left: 1.5rem; }
+      #faq { padding: 5rem 1.25rem; }
+      footer { padding: 2rem 1.25rem; }
+      .section-meta { margin-bottom: 3rem; }
+    }
+    @media (max-width: 480px) {
+      .nav-cta span { display: none; }
+    }
   </style>
 </head>
-<body class="selection:bg-white selection:text-black">
+<body>
 
-  <!-- ─── TOP NAVIGATION BAR ─── -->
-  <header class="fixed top-0 left-0 right-0 z-50 apple-glass border-b border-white/10 transition-colors duration-500">
-    <div class="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
-      
-      <!-- Brand Logo -->
-      <a href="#" class="flex items-center gap-2 group">
-        <span class="text-2xl font-black tracking-tight text-white font-sans">dythin<span style="color: var(--accent);" class="transition-colors duration-500">.</span></span>
-      </a>
-
-      <!-- Desktop Nav Links -->
-      <nav class="hidden lg:flex items-center gap-8 text-xs font-mono tracking-wider uppercase text-white/70">
-        <a href="#experience" class="hover:text-white transition-colors">[ 01 · DENEYİM ]</a>
-        <a href="#blueprint" class="hover:text-white transition-colors">[ 02 · MİMARİ ]</a>
-        <a href="#flow" class="hover:text-white transition-colors">[ 03 · İŞLEYİŞ ]</a>
-        <a href="#download" class="hover:text-white transition-colors">[ 04 · İNDİR ]</a>
-      </nav>
-
-      <!-- Right Controls: 4-Color Theme Switcher & Language & Store Button -->
-      <div class="flex items-center gap-4 sm:gap-6">
-        
-        <!-- 4-Theme Palette Switcher -->
-        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 backdrop-blur-md">
-          <button onclick="switchTheme('purple')" title="Mor (Purple)" class="theme-pill bg-[#7F77DD] active" id="btn-theme-purple"></button>
-          <button onclick="switchTheme('gold')" title="Altın (Gold)" class="theme-pill bg-[#C9A84C]" id="btn-theme-gold"></button>
-          <button onclick="switchTheme('rose')" title="Gül Kurusu (Rose)" class="theme-pill bg-[#D4537E]" id="btn-theme-rose"></button>
-          <button onclick="switchTheme('emerald')" title="Zümrüt (Emerald)" class="theme-pill bg-[#22c55e]" id="btn-theme-emerald"></button>
-        </div>
-
-        <!-- Language Switcher -->
-        <div class="hidden sm:flex items-center text-xs font-mono text-white/60 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 gap-2">
-          <button onclick="switchLanguage('tr')" class="hover:text-white transition-colors font-bold text-white" id="lang-tr">TR</button>
-          <span>/</span>
-          <button onclick="switchLanguage('en')" class="hover:text-white transition-colors" id="lang-en">EN</button>
-          <span>/</span>
-          <button onclick="switchLanguage('de')" class="hover:text-white transition-colors" id="lang-de">DE</button>
-        </div>
-
-        <!-- App Store Download Button -->
-        <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2.5 text-xs font-bold text-black bg-white hover:bg-gray-200 px-5 py-2.5 rounded-full transition-all shadow-md">
-          <i class="fa-brands fa-apple text-base"></i>
-          <span id="nav-btn-text">App Store</span>
-        </a>
-      </div>
-
+<!-- ════════ NAV ════════ -->
+<nav id="nav">
+  <div class="nav-logo">DYTHIN</div>
+  <div class="nav-r">
+    <div class="lang-sw">
+      <button class="lang-btn active" id="lang-tr" onclick="switchLang('tr')">TR</button>
+      <span class="lang-sep">|</span>
+      <button class="lang-btn" id="lang-en" onclick="switchLang('en')">EN</button>
+      <span class="lang-sep">|</span>
+      <button class="lang-btn" id="lang-de" onclick="switchLang('de')">DE</button>
     </div>
-  </header>
-
-  <!-- ─── HERO SECTION (BEHANCE DOPPLE 360 COMPOSITION) ─── -->
-  <section class="relative pt-36 pb-28 md:pt-48 md:pb-40 overflow-hidden flex flex-col items-center justify-center min-h-[92vh]">
-    
-    <!-- Ambient Radial Glow -->
-    <div class="hero-watermark-glow"></div>
-
-    <!-- Massive Background Typography (Watermark) -->
-    <div class="hero-watermark" id="hero-watermark-text">
-      DYTHIN
+    <div class="theme-sw">
+      <div class="tdot active" id="td-purple" style="background:#7F77DD" onclick="switchTheme('purple')" title="Purple"></div>
+      <div class="tdot" id="td-gold"    style="background:#C9A84C" onclick="switchTheme('gold')"    title="Gold"></div>
+      <div class="tdot" id="td-rose"    style="background:#D4537E" onclick="switchTheme('rose')"    title="Rose"></div>
+      <div class="tdot" id="td-emerald" style="background:#3B6D11" onclick="switchTheme('emerald')" title="Emerald"></div>
     </div>
+    <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener" class="nav-cta">
+      <i class="fa-brands fa-apple"></i>
+      <span data-i18n="navCta">APP STORE</span>
+    </a>
+  </div>
+</nav>
 
-    <!-- Central Interactive iPhone Mockup -->
-    <div class="relative z-10 flex flex-col items-center">
-      
-      <!-- Top Micro Badge -->
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-white/80 mb-8 backdrop-blur-md">
-        <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: var(--accent);"></span>
-        <span id="hero-meta-tag">[ SOSYAL KARAR & KOMBİN PLATFORMU ]</span>
-      </div>
-
-      <!-- iPhone 16 Pro Frame with Realtime Interactive Voting UI -->
-      <div class="iphone-pro-frame text-left flex flex-col justify-between p-3 select-none">
-        
-        <!-- Dynamic Island -->
-        <div class="dynamic-island">
-          <div class="camera-lens"></div>
-        </div>
-
-        <!-- App Screen Nav -->
-        <div class="pt-8 px-2 flex items-center justify-between">
-          <div class="text-xl font-black text-white tracking-tight">
-            dythin<span style="color: var(--accent);">.</span>
-          </div>
-          <div class="flex items-center gap-1.5 bg-black/60 border border-white/10 px-3 py-1 rounded-full text-[10px] font-mono font-semibold text-white/80">
-            <span id="mock-tab-audience">GENEL</span>
-            <span style="color: var(--accent);" class="font-bold">· 3</span>
-          </div>
-        </div>
-
-        <!-- Live Interactive Swipe Card inside Mockup -->
-        <div class="my-auto py-1">
-          <div class="bg-black/60 backdrop-blur-md rounded-[24px] overflow-hidden border border-white/10 shadow-2xl relative">
-            
-            <!-- Side-by-Side Comparison Photos -->
-            <div class="flex gap-2 p-2.5 h-64 sm:h-72">
-              
-              <!-- Left Option (A) -->
-              <div class="flex-1 h-full rounded-2xl overflow-hidden relative bg-[#0a0a12] border border-white/10 flex items-center justify-center group cursor-pointer" onclick="castMockVote('A')">
-                <img src="/appstore_1.png" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Sol Kombin">
-                <div class="absolute bottom-2 left-2 bg-black/85 backdrop-blur-md px-3 py-1 rounded-xl text-[10px] font-mono font-bold text-white border border-white/15">
-                  SOL (A)
-                </div>
-              </div>
-
-              <!-- Right Option (B) -->
-              <div class="flex-1 h-full rounded-2xl overflow-hidden relative bg-[#0a0a12] border border-white/10 flex items-center justify-center group cursor-pointer" onclick="castMockVote('B')">
-                <img src="/appstore_2.png" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Sağ Kombin">
-                <div class="absolute bottom-2 right-2 bg-black/85 backdrop-blur-md px-3 py-1 rounded-xl text-[10px] font-mono font-bold border border-white/15" style="color: var(--accent);">
-                  SAĞ (B)
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Card Info & Realtime Vote Distribution -->
-            <div class="px-4 pb-3.5 pt-1">
-              <div class="text-xs font-bold text-white truncate" id="mock-card-title">Sizce bu iki kombin arasından hangisi?</div>
-              
-              <!-- Progress Bar -->
-              <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden flex mt-2.5">
-                <div id="mock-bar-a" class="h-full bg-white transition-all duration-500" style="width: 74%;"></div>
-                <div id="mock-bar-b" class="h-full transition-all duration-500" style="width: 26%; background-color: var(--accent);"></div>
-              </div>
-
-              <div class="flex items-center justify-between text-[10px] font-mono text-white/60 mt-2">
-                <span id="mock-pct-a" class="text-white font-bold">%74 Sol</span>
-                <span id="mock-votes-count">24 Oy Toplandı</span>
-                <span id="mock-pct-b" class="font-bold" style="color: var(--accent);">%26 Sağ</span>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Interactive Click-to-Vote Prompt -->
-          <div class="flex items-center justify-center gap-3 mt-3 text-[10px] font-mono text-white/50">
-            <span class="cursor-pointer hover:text-white transition-colors flex items-center gap-1.5" onclick="castMockVote('A')"><i class="fa-solid fa-arrow-left text-[9px]"></i> SOLA TIKLA</span>
-            <span>·</span>
-            <span class="cursor-pointer hover:text-white transition-colors flex items-center gap-1.5" onclick="castMockVote('B')">SAĞA TIKLA <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
-          </div>
-        </div>
-
-        <!-- App Bottom Navigation Bar -->
-        <div class="pt-2 pb-1 border-t border-white/10 flex justify-around items-center bg-black/40 text-[10px]">
-          <div class="flex flex-col items-center" style="color: var(--accent);">
-            <i class="fa-solid fa-layer-group text-sm"></i>
-            <span class="text-[9px] font-bold mt-0.5">Oylama</span>
-          </div>
-          <div class="flex flex-col items-center text-white/50">
-            <i class="fa-solid fa-circle-plus text-sm"></i>
-            <span class="text-[9px] mt-0.5">Paylaş</span>
-          </div>
-          <div class="flex flex-col items-center text-white/50">
-            <i class="fa-solid fa-chart-simple text-sm"></i>
-            <span class="text-[9px] mt-0.5">Sonuçlar</span>
-          </div>
-          <div class="flex flex-col items-center text-white/50">
-            <i class="fa-solid fa-user text-sm"></i>
-            <span class="text-[9px] mt-0.5">Profil</span>
-          </div>
-        </div>
-
-        <!-- iPhone Home Indicator -->
-        <div class="w-28 h-1 bg-white/20 rounded-full mx-auto mt-1 mb-0.5"></div>
-      </div>
-
-      <!-- Action Button Group Below Phone -->
-      <div class="flex flex-col sm:flex-row items-center gap-4 mt-12 z-20">
-        <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 bg-white text-black font-extrabold px-8 py-4 rounded-full hover:bg-gray-200 transition-all text-sm shadow-xl shadow-black/60">
-          <i class="fa-brands fa-apple text-xl"></i>
-          <span>App Store'dan İndir</span>
-        </a>
-
-        <a href="#blueprint" class="flex items-center gap-3 bg-white/5 hover:bg-white/10 text-white font-mono text-xs uppercase tracking-wider px-6 py-4 rounded-full border border-white/15 transition-all">
-          <span>Keşfetmeye Başla</span>
-          <i class="fa-solid fa-arrow-down text-xs"></i>
-        </a>
-      </div>
-
+<!-- ════════ HERO ════════ -->
+<section id="hero">
+  <div class="hero-wm">
+    <div class="wm">DYTHIN</div>
+  </div>
+  <div class="hero-meta">
+    <span class="label la" data-i18n="heroLabel">[ SOSYAL OYLAMA PLATFORMU ]</span>
+    <span class="label">dythin.com.tr</span>
+  </div>
+  <div class="hero-content">
+    <h1 class="hero-h1">
+      <span data-i18n="h1a">KARARSIZ</span><br>
+      <span data-i18n="h1b">KALMAYA</span><br>
+      <span style="color:var(--accent)" data-i18n="h1c">SON.</span>
+    </h1>
+    <div class="hero-bottom">
+      <p class="hero-desc" data-i18n="heroDesc">Fotoğraflarını yükle, topluluğun ve arkadaşlarının oylarıyla anında karar ver. iOS için ücretsiz.</p>
+      <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener" class="text-link" data-i18n="heroLink">APP STORE'DAN İNDİR →</a>
     </div>
-  </section>
+  </div>
+  <div class="hero-scroll"><span class="label">SCROLL ↓</span></div>
+</section>
 
-  <!-- ─── EDITORIAL SECTION (BEHANCE IMAGE 2: SIZING INCONSISTENCY / PAIN POINTS) ─── -->
-  <section id="experience" class="py-28 border-t border-white/10 bg-black relative overflow-hidden">
-    
-    <!-- Watermark Accent -->
-    <div class="absolute right-0 top-1/2 -translate-y-1/2 text-[14rem] font-black uppercase text-white/[0.02] tracking-tighter pointer-events-none select-none">
-      PARALYSIS
+<!-- ════════ FULL-WIDTH BANNER ════════ -->
+<div id="banner">
+  <img src="/appstore_3.png" alt="Dythin App">
+  <div class="banner-hl">
+    <div class="banner-hl-line" data-i18n="bnHl1">OY VER.</div>
+    <div class="banner-hl-line" style="color:var(--accent)" data-i18n="bnHl2">KARAR AL.</div>
+  </div>
+  <div class="banner-bl">
+    <span class="label" data-i18n="bnLabel">[ 01 · UYGULAMA TANITIMI ]</span>
+  </div>
+</div>
+
+<!-- ════════ PROBLEM SPACE ════════ -->
+<section id="problem">
+  <div class="prob-wm wm">KARAR</div>
+  <div class="prob-inner">
+    <div class="section-meta">
+      <span class="label" data-i18n="prob01meta">PROBLEM SPACE · PAIN POINTS</span>
+      <span class="label">01</span>
     </div>
-
-    <div class="max-w-7xl mx-auto px-6">
-      
-      <!-- Metadata Label -->
-      <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-12 text-xs font-mono text-white/50 uppercase tracking-widest">
-        <span>[ PROBLEM SPACE · PAIN POINTS ]</span>
-        <span>01 — 03</span>
-      </div>
-
-      <!-- Main Section Headline -->
-      <div class="max-w-4xl mb-16">
-        <h2 class="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white uppercase leading-[1.05]">
-          Kararsızlığa Son.<br />
-          <span style="color: var(--accent);" class="transition-colors duration-500">Net Tercih, Anında Geri Bildirim.</span>
+    <div class="prob-grid">
+      <div>
+        <h2 class="prob-h2">
+          <span data-i18n="probH2a">KARARSIZLİK</span><br>
+          <span data-i18n="probH2b">HERKESİN</span><br>
+          <span data-i18n="probH2c">PROBLEMİ.</span>
         </h2>
-        <p class="text-base sm:text-lg text-white/60 font-normal leading-relaxed mt-6 max-w-2xl">
-          Aynanın karşısında dakikalarca iki kıyafet arasında kalmak ya da mağazada alışveriş yaparken arkadaşlarından yanıt beklemek tarihe karışıyor.
-        </p>
-      </div>
-
-      <!-- Wide Cinematic Photo Banner -->
-      <div class="rounded-3xl overflow-hidden border border-white/10 relative h-72 sm:h-96 mb-12">
-        <img src="/appstore_3.png" class="w-full h-full object-cover filter brightness-75" alt="Dythin App Screenshot">
-        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-        <div class="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div class="text-xs font-mono text-white/70 uppercase tracking-widest">
-            [ GERÇEK ZAMANLI TOPLULUK DESTEĞİ ]
-          </div>
-          <div class="text-sm font-bold text-white max-w-md">
-            Doğru kıyafeti ve tarzı seçmek, artık tek bir dokunuş mesafesinde.
-          </div>
-        </div>
-      </div>
-
-      <!-- 3 Editorial Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <div class="apple-card rounded-3xl p-8 flex flex-col justify-between">
-          <div>
-            <div class="text-xs font-mono mb-4 text-white/50">[ 01 · ANLIK KONTROL ]</div>
-            <h3 class="text-xl font-bold text-white mb-3">Fotoğraflar Sıkışmaz</h3>
-            <p class="text-sm text-white/60 leading-relaxed">
-              Dikey yüksek çözünürlüklü kadraj sayesinde kombinlerinin tüm detayları net bir şekilde sergilenir; hiçbir ayrıntı kaybolmaz.
-            </p>
-          </div>
-          <div class="mt-8 pt-4 border-t border-white/10 text-xs font-mono" style="color: var(--accent);">
-            %100 HD GÖRSEL KALİTESİ &rarr;
-          </div>
-        </div>
-
-        <div class="apple-card rounded-3xl p-8 flex flex-col justify-between">
-          <div>
-            <div class="text-xs font-mono mb-4 text-white/50">[ 02 · DOĞRU KİTLE ]</div>
-            <h3 class="text-xl font-bold text-white mb-3">Genel veya Arkadaşlar</h3>
-            <p class="text-sm text-white/60 leading-relaxed">
-              Oylamanı dilersen tüm Dythin topluluğuna aç, dilersen sadece onayladığın yakın arkadaşlarının görüşüne sun.
-            </p>
-          </div>
-          <div class="mt-8 pt-4 border-t border-white/10 text-xs font-mono" style="color: var(--accent);">
-            ESNEK HEDEF KİTLE YÖNETİMİ &rarr;
-          </div>
-        </div>
-
-        <div class="apple-card rounded-3xl p-8 flex flex-col justify-between">
-          <div>
-            <div class="text-xs font-mono mb-4 text-white/50">[ 03 · DİNAMİK SAYAÇ ]</div>
-            <h3 class="text-xl font-bold text-white mb-3">24 Saat Canlı Süre</h3>
-            <p class="text-sm text-white/60 leading-relaxed">
-              Her oylama 24 saat boyunca aktiftir. Süre dolduğunda oylama arşive kalkar; sayfan asla eski içeriklerle dolup taşmaz.
-            </p>
-          </div>
-          <div class="mt-8 pt-4 border-t border-white/10 text-xs font-mono" style="color: var(--accent);">
-            OTOMATİK ARŞİV DÖNGÜSÜ &rarr;
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ─── TECHNICAL BLUEPRINT SECTION (BEHANCE IMAGE 3: SCAN TO CHECKOUT / WIRES) ─── -->
-  <section id="blueprint" class="py-28 border-t border-white/10 bg-[#06060c] relative overflow-hidden">
-    
-    <div class="max-w-7xl mx-auto px-6">
-      
-      <!-- Metadata Header -->
-      <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-12 text-xs font-mono text-white/50 uppercase tracking-widest">
-        <span>[ SCAN TO DOWNLOAD · TECHNICAL BLUEPRINT ]</span>
-        <span>02</span>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        
-        <!-- Left: Technical Device Display with Wire Callouts -->
-        <div class="lg:col-span-7 flex justify-center relative py-6">
-          
-          <!-- iPhone Mockup -->
-          <div class="iphone-pro-frame bg-black shadow-2xl relative">
-            <div class="dynamic-island"><div class="camera-lens"></div></div>
-            
-            <!-- Screen Content: Dythin App Preview -->
-            <div class="pt-10 px-4 pb-4 h-full flex flex-col justify-between text-left">
-              <div>
-                <div class="flex items-center justify-between mb-4">
-                  <span class="text-xs font-mono text-white/60">CANLI OYLAMA</span>
-                  <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-full" style="background-color: var(--badge-bg); color: var(--accent);">24h AKTİF</span>
-                </div>
-                <div class="rounded-2xl overflow-hidden border border-white/15 h-80 relative bg-[#11111a]">
-                  <img src="/appstore_4.png" class="w-full h-full object-cover" alt="Dythin Uygulama Ekranı">
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                  <div class="absolute bottom-3 left-3 right-3 flex justify-between items-end text-xs font-bold text-white">
-                    <span>@mehmet</span>
-                    <span class="text-emerald-400 font-mono">148 OY</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Live Voting Action Buttons in Mockup -->
-              <div class="flex gap-2.5 my-3">
-                <button class="flex-1 py-3 rounded-xl bg-white/10 border border-white/20 text-xs font-bold text-white text-center">
-                  ✕ GEÇTİM
-                </button>
-                <button class="flex-1 py-3 rounded-xl text-xs font-bold text-white text-center" style="background-color: var(--accent);">
-                  ✓ BEĞENDİM
-                </button>
-              </div>
-
-              <div class="w-24 h-1 bg-white/20 rounded-full mx-auto mt-2"></div>
+        <p class="prob-desc" data-i18n="probDesc">Aynanın karşısında dakikalarca iki kıyafet arasında kalmak. Mağazada alışveriş yaparken arkadaşlarından yanıt beklemek. Bunlar tarihe karışıyor.</p>
+        <div style="border-top:1px solid rgba(255,255,255,0.08)">
+          <div class="pain-item">
+            <span class="pain-num">01</span>
+            <div>
+              <div class="pain-title" data-i18n="p1t">Anlık Geri Bildirim Yok</div>
+              <div class="pain-desc" data-i18n="p1d">Arkadaşlarından saat bekler, karar gecikir.</div>
             </div>
           </div>
-
-          <!-- Blueprint Wire Annotations (Desktop Floating) -->
-          <div class="hidden md:block absolute left-2 top-24 tech-badge">
-            <div class="font-bold uppercase tracking-wider text-[10px]" style="color: var(--accent);">[ 01 · GÖRSEL KIYASLAMA ]</div>
-            <div>Tek dokunuşla A/B veya Beğeni oylaması</div>
-          </div>
-
-          <div class="hidden md:block absolute right-2 top-1/2 tech-badge">
-            <div class="font-bold uppercase tracking-wider text-[10px]" style="color: var(--accent);">[ 02 · 1-A-1 DM SOHBET ]</div>
-            <div>Arkadaşlarınla anında mesajlaş</div>
-          </div>
-
-          <div class="hidden md:block absolute left-4 bottom-20 tech-badge">
-            <div class="font-bold uppercase tracking-wider text-[10px]" style="color: var(--accent);">[ 03 · GİZLİLİK ]</div>
-            <div>Profilini tek tıkla gizliye al</div>
-          </div>
-
-        </div>
-
-        <!-- Right: Official QR Code & App Store Direct Download -->
-        <div class="lg:col-span-5 flex flex-col justify-center">
-          
-          <h3 class="text-3xl sm:text-5xl font-black uppercase text-white tracking-tight leading-tight mb-6">
-            Kameranı Doğrult.<br />
-            <span style="color: var(--accent);">Anında İndir.</span>
-          </h3>
-
-          <p class="text-sm text-white/60 leading-relaxed mb-8">
-            Telefonunun kamerasını aşağıdaki QR koda doğrultarak doğrudan Apple App Store sayfasına gidebilir veya aşağıdaki butona tıklayabilirsiniz.
-          </p>
-
-          <!-- QR Card Box -->
-          <div class="apple-card rounded-3xl p-6 border border-white/15 flex flex-col sm:flex-row items-center gap-6 mb-8 max-w-md">
-            
-            <!-- Dynamic QR Code Image -->
-            <div class="w-36 h-36 bg-white p-2.5 rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
-              <img src="/Dythin_AppStore_QR.svg" onerror="this.src='/Dythin_AppStore_QR_White.png'" class="w-full h-full object-contain" alt="Dythin App Store QR">
-            </div>
-
-            <!-- QR Details -->
-            <div class="text-left">
-              <div class="text-xs font-mono uppercase tracking-wider text-white/50 mb-1">[ RESMİ APP STORE ]</div>
-              <div class="text-base font-bold text-white mb-2">iOS için %100 Ücretsiz</div>
-              <p class="text-xs text-white/60 leading-relaxed">
-                iPhone ve iPad cihazlarınla tam uyumludur. Reklam içermez.
-              </p>
-            </div>
-
-          </div>
-
-          <!-- Direct App Store Link Button -->
-          <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-3 bg-white text-black font-extrabold px-8 py-4 rounded-full hover:bg-gray-200 transition-all text-sm max-w-xs shadow-xl shadow-white/5">
-            <i class="fa-brands fa-apple text-xl"></i>
-            <span>App Store'da Aç</span>
-          </a>
-
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ─── MULTI-DEVICE SEQUENTIAL FLOW (BEHANCE IMAGE 4: 3-PHONE COMPOSITION) ─── -->
-  <section id="flow" class="py-28 border-t border-white/10 bg-black relative overflow-hidden">
-    
-    <div class="max-w-7xl mx-auto px-6">
-      
-      <!-- Metadata Label -->
-      <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-12 text-xs font-mono text-white/50 uppercase tracking-widest">
-        <span>[ CORE EXPERIENCE FLOW · 3 DİNAMİK AŞAMA ]</span>
-        <span>03</span>
-      </div>
-
-      <div class="text-center max-w-3xl mx-auto mb-20">
-        <h2 class="text-4xl sm:text-6xl font-black uppercase tracking-tight text-white">
-          Kusursuz Akış.<br />
-          <span style="color: var(--accent);" class="transition-colors duration-500">Her Adımda Zarafet.</span>
-        </h2>
-        <p class="text-sm sm:text-base text-white/60 font-normal mt-4">
-          Kararsız kaldığın andan başlayıp kesin sonuca ulaşana kadar geçen 3 adımlı Dythin serüveni.
-        </p>
-      </div>
-
-      <!-- 3 Side-by-Side Phone Frames -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 items-center justify-center">
-        
-        <!-- Screen 1: OYLAMA VE KEŞİF -->
-        <div class="flex flex-col items-center">
-          <div class="iphone-pro-frame scale-90 sm:scale-95 hover:scale-100 transition-transform duration-500">
-            <div class="dynamic-island"><div class="camera-lens"></div></div>
-            <div class="pt-10 px-3 pb-3 h-full flex flex-col justify-between text-left">
-              <div>
-                <div class="text-xs font-mono font-bold text-white/60 mb-2">[ 01 · KAYDIR & OYLA ]</div>
-                <div class="text-sm font-bold text-white mb-3">Akışta Gezin, Oy Kullan</div>
-                <div class="rounded-2xl overflow-hidden h-72 bg-[#11111a] border border-white/15">
-                  <img src="/appstore_5.png" class="w-full h-full object-cover" alt="Dythin Akış Ekranı">
-                </div>
-              </div>
-              <div class="py-2">
-                <div class="text-xs font-bold text-white">Siyah Deri Mont mu, Haki Kaban mı?</div>
-                <div class="text-[10px] font-mono text-white/50 mt-1">@caner · 42 oy</div>
-              </div>
-              <div class="w-24 h-1 bg-white/20 rounded-full mx-auto"></div>
+          <div class="pain-item">
+            <span class="pain-num">02</span>
+            <div>
+              <div class="pain-title" data-i18n="p2t">Geniş Topluluk Erişimi Yok</div>
+              <div class="pain-desc" data-i18n="p2d">Sadece arkadaş çevreni değil, tüm topluluğu dinle.</div>
             </div>
           </div>
-          <div class="mt-4 text-center">
-            <div class="font-mono text-xs font-bold uppercase tracking-wider" style="color: var(--accent);">AŞAMA 01</div>
-            <div class="text-sm font-bold text-white mt-1">Akış & Canlı Oylama</div>
-          </div>
-        </div>
-
-        <!-- Screen 2: A/B PAYLAŞIM -->
-        <div class="flex flex-col items-center">
-          <div class="iphone-pro-frame scale-95 sm:scale-100 shadow-2xl relative" style="box-shadow: 0 30px 100px -20px var(--accent-glow);">
-            <div class="dynamic-island"><div class="camera-lens"></div></div>
-            <div class="pt-10 px-3 pb-3 h-full flex flex-col justify-between text-left">
-              <div>
-                <div class="text-xs font-mono font-bold text-white/60 mb-2">[ 02 · FOTOĞRAF EKLE ]</div>
-                <div class="text-sm font-bold text-white mb-3">A/B Kıyaslama Başlat</div>
-                <div class="grid grid-cols-2 gap-2 h-72">
-                  <div class="rounded-xl overflow-hidden bg-[#11111a] border border-white/15">
-                    <img src="/appstore_6.png" class="w-full h-full object-cover" alt="Fotoğraf 1">
-                  </div>
-                  <div class="rounded-xl overflow-hidden bg-[#11111a] border border-white/15">
-                    <img src="/appstore_1.png" class="w-full h-full object-cover" alt="Fotoğraf 2">
-                  </div>
-                </div>
-              </div>
-              <div class="py-2">
-                <div class="w-full py-2.5 rounded-xl text-center text-xs font-bold text-black bg-white">
-                  Oylamayı Başlat &rarr;
-                </div>
-              </div>
-              <div class="w-24 h-1 bg-white/20 rounded-full mx-auto"></div>
+          <div class="pain-item">
+            <span class="pain-num">03</span>
+            <div>
+              <div class="pain-title" data-i18n="p3t">Sonuç Takibi Yok</div>
+              <div class="pain-desc" data-i18n="p3d">Oylar gerçek zamanlı akar, 24 saat canlı sayaç.</div>
             </div>
           </div>
-          <div class="mt-4 text-center">
-            <div class="font-mono text-xs font-bold uppercase tracking-wider" style="color: var(--accent);">AŞAMA 02</div>
-            <div class="text-sm font-bold text-white mt-1">2 Fotoğraf & Süre Başlat</div>
-          </div>
         </div>
-
-        <!-- Screen 3: CANLI SONUÇLAR & MESAJLAR -->
-        <div class="flex flex-col items-center">
-          <div class="iphone-pro-frame scale-90 sm:scale-95 hover:scale-100 transition-transform duration-500">
-            <div class="dynamic-island"><div class="camera-lens"></div></div>
-            <div class="pt-10 px-3 pb-3 h-full flex flex-col justify-between text-left">
-              <div>
-                <div class="text-xs font-mono font-bold text-white/60 mb-2">[ 03 · KAZANAN ANALİTİĞİ ]</div>
-                <div class="text-sm font-bold text-white mb-3">Canlı Yüzde Dağılımı</div>
-                <div class="rounded-2xl overflow-hidden h-72 bg-[#11111a] border border-white/15 p-4 flex flex-col justify-between">
-                  <div class="text-center pt-4">
-                    <div class="text-4xl font-black font-mono" style="color: var(--accent);">%84</div>
-                    <div class="text-xs font-bold text-white mt-1">Sol Seçenek Kazandı</div>
-                  </div>
-                  <div class="space-y-2 pb-2">
-                    <div class="text-[10px] font-mono text-white/60 flex justify-between">
-                      <span>SOL (112 OY)</span>
-                      <span>SAĞ (21 OY)</span>
-                    </div>
-                    <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden flex">
-                      <div class="h-full bg-white" style="width: 84%;"></div>
-                      <div class="h-full" style="width: 16%; background-color: var(--accent);"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="py-2">
-                <div class="text-xs font-bold text-white">Sonuçlar Anında Cebinde</div>
-                <div class="text-[10px] font-mono text-white/50 mt-1">Gelen yorumları incele ve mesajlaş</div>
-              </div>
-              <div class="w-24 h-1 bg-white/20 rounded-full mx-auto"></div>
-            </div>
-          </div>
-          <div class="mt-4 text-center">
-            <div class="font-mono text-xs font-bold uppercase tracking-wider" style="color: var(--accent);">AŞAMA 03</div>
-            <div class="text-sm font-bold text-white mt-1">Sonuçlar & Anlık Sohbet</div>
-          </div>
-        </div>
-
       </div>
-
-    </div>
-  </section>
-
-  <!-- ─── SIKÇA SORULAN SORULAR (FAQ) ─── -->
-  <section class="py-28 border-t border-white/10 bg-[#06060e] relative">
-    <div class="max-w-4xl mx-auto px-6">
-      
-      <div class="text-center mb-16">
-        <div class="text-xs font-mono text-white/50 uppercase tracking-widest mb-3">[ SIKÇA SORULAN SORULAR ]</div>
-        <h2 class="text-3xl sm:text-5xl font-black uppercase text-white tracking-tight">Merak Edilenler</h2>
-      </div>
-
-      <div class="space-y-4">
-        
-        <div class="apple-card rounded-2xl overflow-hidden">
-          <button onclick="toggleFaq(1)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-sm sm:text-base text-white hover:text-brand-accent transition-colors">
-            <span>1. Dythin tamamen ücretsiz mi?</span>
-            <i id="faqIcon-1" class="fa-solid fa-chevron-down text-white/50 text-xs transition-transform duration-300"></i>
-          </button>
-          <div id="faqAns-1" class="hidden px-6 pb-5 text-xs sm:text-sm text-white/60 leading-relaxed border-t border-white/5 pt-3">
-            Evet, Dythin %100 ücretsizdir. Fotoğraf yüklemek, oylama başlatmak, arkadaş eklemek, DM mesajlaşmak ve canlı sonuçları takip etmek için hiçbir abonelik veya gizli ücret ödemezsiniz.
-          </div>
-        </div>
-
-        <div class="apple-card rounded-2xl overflow-hidden">
-          <button onclick="toggleFaq(2)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-sm sm:text-base text-white hover:text-brand-accent transition-colors">
-            <span>2. Oylamalarımı sadece arkadaşlarıma özel yapabilir miyim?</span>
-            <i id="faqIcon-2" class="fa-solid fa-chevron-down text-white/50 text-xs transition-transform duration-300"></i>
-          </button>
-          <div id="faqAns-2" class="hidden px-6 pb-5 text-xs sm:text-sm text-white/60 leading-relaxed border-t border-white/5 pt-3">
-            Evet. Yeni bir oylama oluştururken hedef kitleyi "Sadece Arkadaşlarım" olarak belirleyebilir ya da Ayarlar sayfasından profilinizi gizliye alarak yalnızca onayladığınız arkadaşlarınızın görmesini sağlayabilirsiniz.
-          </div>
-        </div>
-
-        <div class="apple-card rounded-2xl overflow-hidden">
-          <button onclick="toggleFaq(3)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-sm sm:text-base text-white hover:text-brand-accent transition-colors">
-            <span>3. 24 saat kuralı nasıl çalışır?</span>
-            <i id="faqIcon-3" class="fa-solid fa-chevron-down text-white/50 text-xs transition-transform duration-300"></i>
-          </button>
-          <div id="faqAns-3" class="hidden px-6 pb-5 text-xs sm:text-sm text-white/60 leading-relaxed border-t border-white/5 pt-3">
-            Paylaşılan her oylama tam 24 saat boyunca akışta kalır ve oy toplamaya devam eder. 24 saatin bitiminde otomatik olarak tamamlanır ve Sonuçlar sekmesine taşınır.
-          </div>
-        </div>
-
-        <div class="apple-card rounded-2xl overflow-hidden">
-          <button onclick="toggleFaq(4)" class="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-sm sm:text-base text-white hover:text-brand-accent transition-colors">
-            <span>4. Hesabımı ve tüm verilerimi silebilir miyim?</span>
-            <i id="faqIcon-4" class="fa-solid fa-chevron-down text-white/50 text-xs transition-transform duration-300"></i>
-          </button>
-          <div id="faqAns-4" class="hidden px-6 pb-5 text-xs sm:text-sm text-white/60 leading-relaxed border-t border-white/5 pt-3">
-            Evet. Ayarlar menüsünden "Hesabımı ve Verilerimi Sil" seçeneğini kullanarak veya e-posta göndererek hesabınızı, fotoğraflarınızı ve tüm mesaj geçmişinizi veritabanından kalıcı olarak silebilirsiniz.
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ─── CALL TO ACTION (DOWNLOAD) ─── -->
-  <section id="download" class="py-28 border-t border-white/10 bg-black text-center relative overflow-hidden">
-    <div class="max-w-4xl mx-auto px-6 relative z-10">
-      
-      <div class="text-xs font-mono uppercase tracking-widest text-white/50 mb-4">[ HAZIR MISIN? ]</div>
-      
-      <h2 class="text-4xl sm:text-6xl md:text-7xl font-black uppercase text-white tracking-tight leading-tight mb-6">
-        Kararsızlığa Son Ver.<br />
-        <span style="color: var(--accent);">Dythin ile Tarzını Seç.</span>
-      </h2>
-      
-      <p class="text-sm sm:text-base text-white/60 max-w-lg mx-auto mb-10 leading-relaxed">
-        Uygulamayı hemen indir; kararsız kaldığın her şey için saniyeler içinde tarafsız ve net oy topla.
-      </p>
-
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto flex items-center justify-center gap-3 bg-white text-black font-extrabold px-10 py-4 rounded-full hover:bg-gray-200 transition-all text-sm shadow-2xl">
-          <i class="fa-brands fa-apple text-xl"></i>
-          <span>App Store'dan Ücretsiz İndir</span>
-        </a>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ─── CLEAN ARCHITECTURAL FOOTER ─── -->
-  <footer class="py-12 border-t border-white/10 bg-black text-xs font-mono text-white/50">
-    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-      
-      <div class="flex items-center gap-3">
-        <span class="text-xl font-black text-white font-sans">dythin<span style="color: var(--accent);">.</span></span>
-        <span>&copy; 2026 Dythin Inc. Tüm Hakları Saklıdır.</span>
-      </div>
-
-      <div class="flex items-center gap-6">
-        <a href="https://instagram.com/dythin.app" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center gap-2">
-          <i class="fa-brands fa-instagram"></i>
-          <span>dythin.app</span>
-        </a>
-        <button onclick="openModal('privacy')" class="hover:text-white transition-colors">Gizlilik Politikası</button>
-        <button onclick="openModal('terms')" class="hover:text-white transition-colors">Kullanım Koşulları</button>
-      </div>
-
-    </div>
-  </footer>
-
-  <!-- ─── LEGAL MODAL ─── -->
-  <div id="legalModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center hidden p-4">
-    <div class="bg-[#12121e] border border-white/15 rounded-3xl p-6 max-w-lg w-full relative shadow-2xl max-h-[80vh] flex flex-col">
-      <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
-        <h3 id="legalTitle" class="text-lg font-bold text-white"></h3>
-        <button onclick="closeLegalModal()" class="text-white/60 hover:text-white text-lg">✕</button>
-      </div>
-      <div id="legalBody" class="overflow-y-auto text-xs text-white/70 leading-relaxed space-y-3 flex-1 pr-2">
+      <div class="photo-collage">
+        <img src="/appstore_1.png" alt="Dythin Screenshot 1">
+        <img src="/appstore_2.png" alt="Dythin Screenshot 2" class="pb">
       </div>
     </div>
   </div>
+</section>
 
-  <!-- ─── SCRIPTS ─── -->
-  <script>
-    // 4 Dynamic App Themes
-    const themes = {
-      purple: 'purple',
-      gold: 'gold',
-      rose: 'rose',
-      emerald: 'emerald'
-    };
+<!-- ════════ BLUEPRINT / SCAN TO DOWNLOAD ════════ -->
+<section id="blueprint">
+  <div class="bp-inner">
+    <div class="section-meta">
+      <span class="label" data-i18n="bpMeta">SCAN TO DOWNLOAD · APP STORE</span>
+      <span class="label">02</span>
+    </div>
+    <div class="bp-hl">
+      <span class="bp-word" data-i18n="bpH1">KAMERANI</span>
+      <span class="bp-word" style="color:var(--accent)" data-i18n="bpH2">DOĞRULT.</span>
+    </div>
+    <div class="bp-grid">
+      <!-- Phone + blueprint annotations -->
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <img src="/appstore_4.png" alt="Dythin App Screen">
+        </div>
+        <!-- Left annotation -->
+        <div class="anno" style="left:2%;top:28%;align-items:flex-end;">
+          <div class="anno-lv" style="height:55px;margin-left:auto;"></div>
+          <div class="anno-lh" style="width:52px;"></div>
+          <div class="anno-label" data-i18n="an1l">[ A/B KIYAS ]</div>
+          <div class="anno-sub" data-i18n="an1s">Tek dokunuş</div>
+        </div>
+        <!-- Right annotation -->
+        <div class="anno" style="right:2%;top:54%;align-items:flex-start;">
+          <div class="anno-lv" style="height:55px;"></div>
+          <div class="anno-lh" style="width:52px;"></div>
+          <div class="anno-label" data-i18n="an2l">[ CANLI SONUÇ ]</div>
+          <div class="anno-sub" data-i18n="an2s">24h sayaç</div>
+        </div>
+        <!-- Bottom annotation -->
+        <div class="anno" style="left:50%;bottom:7%;transform:translateX(-50%);align-items:center;">
+          <div class="anno-lv" style="height:38px;"></div>
+          <div class="anno-label" data-i18n="an3l">[ DM SOHBET ]</div>
+        </div>
+      </div>
+      <!-- Right: desc + QR -->
+      <div>
+        <p class="bp-desc" data-i18n="bpDesc">Telefonunun kamerasını aşağıdaki QR koda doğrult ve doğrudan Apple App Store sayfasına ulaş. Ücretsiz. Reklam yok.</p>
+        <div class="qr-box">
+          <div class="qr-img-wrap">
+            <img src="/Dythin_AppStore_QR.svg" onerror="this.src='/Dythin_AppStore_QR_White.png'" alt="QR Code">
+          </div>
+          <div>
+            <div class="label la" style="margin-bottom:0.4rem" data-i18n="qrLabel">[ RESMİ APP STORE ]</div>
+            <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.4rem" data-i18n="qrTitle">iOS için %100 Ücretsiz</div>
+            <div style="font-size:0.78rem;color:rgba(255,255,255,0.42);line-height:1.6" data-i18n="qrSub">iPhone ve iPad ile tam uyumlu.</div>
+          </div>
+        </div>
+        <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener" class="text-link" data-i18n="bpLink">APP STORE'DA AÇ →</a>
+      </div>
+    </div>
+  </div>
+</section>
 
-    function switchTheme(name) {
-      if (!themes[name]) return;
-      document.documentElement.setAttribute('data-theme', name);
-      localStorage.setItem('dythin_theme', name);
+<!-- ════════ 3-PHONE FLOW ════════ -->
+<section id="flow">
+  <div class="flow-inner">
+    <div class="section-meta">
+      <span class="label" data-i18n="flowMeta">CORE EXPERIENCE FLOW · 3 AŞAMA</span>
+      <span class="label">03</span>
+    </div>
+    <div class="flow-h">
+      <span data-i18n="flowH1">KUSURSUZ</span><br>
+      <span data-i18n="flowH2">AKIŞ.</span>
+    </div>
+    <div class="flow-grid">
+      <div class="flow-cell">
+        <div class="label la" data-i18n="s1lbl">AŞAMA 01</div>
+        <div class="flow-step-title" data-i18n="s1t">Akış &amp; Oyla</div>
+        <div class="flow-step-desc" data-i18n="s1d">Sonsuz oylama akışında gezin, beğendiğine oy ver.</div>
+        <div class="flow-img"><img src="/appstore_5.png" alt="Akış"></div>
+      </div>
+      <div class="flow-cell mid">
+        <div class="label la" data-i18n="s2lbl">AŞAMA 02</div>
+        <div class="flow-step-title" data-i18n="s2t">Yükle &amp; Paylaş</div>
+        <div class="flow-step-desc" data-i18n="s2d">İki fotoğraf seç, A/B oylaması başlat.</div>
+        <div class="flow-img"><img src="/appstore_6.png" alt="Paylaş"></div>
+      </div>
+      <div class="flow-cell">
+        <div class="label la" data-i18n="s3lbl">AŞAMA 03</div>
+        <div class="flow-step-title" data-i18n="s3t">Sonuç &amp; Sohbet</div>
+        <div class="flow-step-desc" data-i18n="s3d">Canlı yüzde dağılımını gör, mesajlaş.</div>
+        <div class="flow-img"><img src="/appstore_1.png" alt="Sonuç"></div>
+      </div>
+    </div>
+    <div class="flow-wm-wrap"><div class="wm">FLOW</div></div>
+  </div>
+</section>
 
-      // Update Active Pill Ring
-      document.querySelectorAll('.theme-pill').forEach(btn => btn.classList.remove('active'));
-      const activeBtn = document.getElementById('btn-theme-' + name);
-      if (activeBtn) activeBtn.classList.add('active');
-    }
+<!-- ════════ INTERACTIVE DEMO ════════ -->
+<section id="demo">
+  <div class="demo-inner">
+    <div class="section-meta">
+      <span class="label" data-i18n="demoMeta">INTERACTIVE DEMO · OY KULLAN</span>
+      <span class="label">04</span>
+    </div>
+    <div class="demo-h">
+      <span data-i18n="demoH1">DENEMEDEN</span><br>
+      <span style="color:var(--accent)" data-i18n="demoH2">KARAR VERME.</span>
+    </div>
+  </div>
+  <div class="demo-panel">
+    <div class="demo-opt demo-a" onclick="castVote('A')">
+      <img src="/appstore_1.png" alt="A">
+      <div class="demo-overlay"></div>
+      <div class="demo-top-label" data-i18n="dLblA">[ A · SOL SEÇENEK ]</div>
+      <div class="demo-hint" data-i18n="dHint">TIKLAYARAK OY VER</div>
+      <div class="demo-pct" id="pct-a">%74</div>
+    </div>
+    <div class="demo-opt demo-b" onclick="castVote('B')">
+      <img src="/appstore_2.png" alt="B">
+      <div class="demo-overlay"></div>
+      <div class="demo-top-label" data-i18n="dLblB">[ B · SAĞ SEÇENEK ]</div>
+      <div class="demo-hint" data-i18n="dHint">TIKLAYARAK OY VER</div>
+      <div class="demo-pct" id="pct-b">%26</div>
+    </div>
+  </div>
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="demo-bar-wrap">
+      <div class="demo-bar-a" id="bar-a" style="width:74%"></div>
+      <div class="demo-bar-b" id="bar-b" style="width:26%"></div>
+    </div>
+    <div class="demo-footer-row">
+      <span class="label" id="votes-label" data-i18n="votesLbl">24 OY TOPLANDI · TIKLA OY VER</span>
+      <span class="label">CANLI DEMO</span>
+    </div>
+  </div>
+</section>
 
-    // Restore saved theme
-    const savedTheme = localStorage.getItem('dythin_theme');
-    if (savedTheme && themes[savedTheme]) {
-      switchTheme(savedTheme);
-    }
+<!-- ════════ FAQ ════════ -->
+<section id="faq">
+  <div class="faq-inner">
+    <div class="section-meta">
+      <span class="label" data-i18n="faqMeta">SIKÇA SORULAN SORULAR</span>
+      <span class="label">05</span>
+    </div>
+    <div class="faq-h">
+      <span data-i18n="faqH1">MERAK</span><br>
+      <span data-i18n="faqH2">EDİLENLER.</span>
+    </div>
+    <div id="faq-list"></div>
+  </div>
+</section>
 
-    // Interactive Demo Card Voting
-    let currentPctA = 74;
-    let currentPctB = 26;
-    let currentVotes = 24;
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">DYTHIN</div>
+    <div class="footer-links">
+      <a href="https://instagram.com/dythinapp" target="_blank" class="footer-link">Instagram</a>
+      <button onclick="openModal('m-privacy')" class="footer-link" data-i18n="ftPrivacy">Gizlilik</button>
+      <button onclick="openModal('m-terms')"   class="footer-link" data-i18n="ftTerms">Kullanım</button>
+    </div>
+    <div class="footer-copy">&copy; 2026 DYTHIN</div>
+  </div>
+</footer>
 
-    function castMockVote(choice) {
-      if (choice === 'A') {
-        currentVotes++;
-        currentPctA = Math.min(92, currentPctA + 3);
-        currentPctB = 100 - currentPctA;
-      } else {
-        currentVotes++;
-        currentPctB = Math.min(92, currentPctB + 3);
-        currentPctA = 100 - currentPctB;
-      }
+<!-- ════════ MODALS ════════ -->
+<div class="modal" id="m-privacy">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('m-privacy')">&times;</button>
+    <div class="label la" data-i18n="mpLabel">[ GİZLİLİK POLİTİKASI ]</div>
+    <div class="modal-title" data-i18n="mpTitle">Gizlilik Politikası</div>
+    <div class="modal-body" data-i18n="mpBody">Dythin, kullanıcı gizliliğine önem verir. Uygulama içinde yüklenen fotoğraflar yalnızca oylama amaçlı kullanılır. Kişisel veriler üçüncü taraflarla paylaşılmaz. Hesabınızı dilediğiniz zaman silebilirsiniz.</div>
+  </div>
+</div>
+<div class="modal" id="m-terms">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('m-terms')">&times;</button>
+    <div class="label la" data-i18n="mtLabel">[ KULLANIM KOŞULLARI ]</div>
+    <div class="modal-title" data-i18n="mtTitle">Kullanım Koşulları</div>
+    <div class="modal-body" data-i18n="mtBody">Dythin'i kullanarak bu koşulları kabul etmiş sayılırsınız. Uygunsuz içerik yüklemek yasaktır. İhlal durumunda hesabınız kapatılabilir. Uygulama iOS cihazlar için ücretsiz sunulmaktadır.</div>
+  </div>
+</div>
 
-      document.getElementById('mock-bar-a').style.width = currentPctA + '%';
-      document.getElementById('mock-bar-b').style.width = currentPctB + '%';
-      document.getElementById('mock-pct-a').innerText = '%' + currentPctA + ' Sol';
-      document.getElementById('mock-pct-b').innerText = '%' + currentPctB + ' Sağ';
-      document.getElementById('mock-votes-count').innerText = currentVotes + ' Oy Toplandı';
-    }
+<!-- ════════ SCRIPT ════════ -->
+<script>
+const T = {
+  tr: {
+    navCta:'APP STORE', heroLabel:'[ SOSYAL OYLAMA PLATFORMU ]',
+    h1a:'KARARSIZ', h1b:'KALMAYA', h1c:'SON.',
+    heroDesc:'Fotoğraflarını yükle, topluluğun ve arkadaşlarının oylarıyla anında karar ver. iOS için ücretsiz.',
+    heroLink:"APP STORE'DAN İNDİR →",
+    bnHl1:'OY VER.', bnHl2:'KARAR AL.', bnLabel:'[ 01 · UYGULAMA TANITIMI ]',
+    prob01meta:'PROBLEM SPACE · PAIN POINTS',
+    probH2a:'KARARSIZLİK', probH2b:'HERKESİN', probH2c:'PROBLEMİ.',
+    probDesc:'Aynanın karşısında dakikalarca iki kıyafet arasında kalmak. Mağazada alışveriş yaparken arkadaşlarından yanıt beklemek. Bunlar tarihe karışıyor.',
+    p1t:'Anlık Geri Bildirim Yok', p1d:'Arkadaşlarından saat bekler, karar gecikir.',
+    p2t:'Geniş Topluluk Erişimi Yok', p2d:'Sadece arkadaş çevreni değil, tüm topluluğu dinle.',
+    p3t:'Sonuç Takibi Yok', p3d:'Oylar gerçek zamanlı akar, 24 saat canlı sayaç.',
+    bpMeta:'SCAN TO DOWNLOAD · APP STORE', bpH1:'KAMERANI', bpH2:'DOĞRULT.',
+    bpDesc:'Telefonunun kamerasını aşağıdaki QR koda doğrult ve doğrudan Apple App Store sayfasına ulaş. Ücretsiz. Reklam yok.',
+    an1l:'[ A/B KIYAS ]', an1s:'Tek dokunuş', an2l:'[ CANLI SONUÇ ]', an2s:'24h sayaç', an3l:'[ DM SOHBET ]',
+    qrLabel:'[ RESMİ APP STORE ]', qrTitle:'iOS için %100 Ücretsiz', qrSub:'iPhone ve iPad ile tam uyumlu.',
+    bpLink:"APP STORE'DA AÇ →",
+    flowMeta:'CORE EXPERIENCE FLOW · 3 AŞAMA', flowH1:'KUSURSUZ', flowH2:'AKIŞ.',
+    s1lbl:'AŞAMA 01', s1t:'Akış & Oyla', s1d:'Sonsuz oylama akışında gezin, beğendiğine oy ver.',
+    s2lbl:'AŞAMA 02', s2t:'Yükle & Paylaş', s2d:'İki fotoğraf seç, A/B oylaması başlat.',
+    s3lbl:'AŞAMA 03', s3t:'Sonuç & Sohbet', s3d:'Canlı yüzde dağılımını gör, mesajlaş.',
+    demoMeta:'INTERACTIVE DEMO · OY KULLAN', demoH1:'DENEMEDEN', demoH2:'KARAR VERME.',
+    dLblA:'[ A · SOL SEÇENEK ]', dLblB:'[ B · SAĞ SEÇENEK ]',
+    dHint:'TIKLAYARAK OY VER', votesLbl:'24 OY TOPLANDI · TIKLA OY VER',
+    faqMeta:'SIKÇA SORULAN SORULAR', faqH1:'MERAK', faqH2:'EDİLENLER.',
+    faqs:[
+      ['Dythin tamamen ücretsiz mi?','Evet, Dythin %100 ücretsizdir. Fotoğraf yüklemek, oylama başlatmak, arkadaş eklemek ve canlı sonuçları takip etmek için hiçbir abonelik veya gizli ücret ödemezsiniz.'],
+      ['Oylamalarımı sadece arkadaşlarıma özel yapabilir miyim?','Evet. Yeni oylama oluştururken hedef kitleyi "Sadece Arkadaşlarım" olarak belirleyebilir ya da profilinizi gizliye alabilirsiniz.'],
+      ['Oylamalar ne kadar süre aktif kalıyor?','Her oylama 24 saat boyunca aktiftir. Süre dolduğunda oylama otomatik olarak arşive alınır.'],
+      ['Android için de var mı?','Şu an yalnızca iOS (App Store) için mevcuttur. Android versiyonu yakında yayınlanacak.'],
+    ],
+    ftPrivacy:'Gizlilik', ftTerms:'Kullanım',
+    mpLabel:'[ GİZLİLİK POLİTİKASI ]', mpTitle:'Gizlilik Politikası',
+    mpBody:'Dythin, kullanıcı gizliliğine önem verir. Uygulama içinde yüklenen fotoğraflar yalnızca oylama amaçlı kullanılır. Kişisel veriler üçüncü taraflarla paylaşılmaz. Hesabınızı dilediğiniz zaman silebilirsiniz.',
+    mtLabel:'[ KULLANIM KOŞULLARI ]', mtTitle:'Kullanım Koşulları',
+    mtBody:"Dythin'i kullanarak bu koşulları kabul etmiş sayılırsınız. Uygunsuz içerik yüklemek yasaktır. İhlal durumunda hesabınız kapatılabilir.",
+  },
+  en: {
+    navCta:'APP STORE', heroLabel:'[ SOCIAL VOTING PLATFORM ]',
+    h1a:'STOP', h1b:'BEING', h1c:'INDECISIVE.',
+    heroDesc:'Upload your photos, get instant votes from your community and friends. 100% free for iOS.',
+    heroLink:'DOWNLOAD ON APP STORE →',
+    bnHl1:'VOTE.', bnHl2:'DECIDE.', bnLabel:'[ 01 · APP INTRODUCTION ]',
+    prob01meta:'PROBLEM SPACE · PAIN POINTS',
+    probH2a:'INDECISION', probH2b:"EVERYONE'S", probH2c:'PROBLEM.',
+    probDesc:"Standing in front of the mirror for minutes choosing between outfits. Waiting for friends to respond while shopping. Those days are over.",
+    p1t:'No Instant Feedback', p1d:'You wait hours for friends to respond.',
+    p2t:'No Community Reach', p2d:'Beyond your friends — hear from the whole community.',
+    p3t:'No Result Tracking', p3d:'Votes flow in real-time, live 24h countdown.',
+    bpMeta:'SCAN TO DOWNLOAD · APP STORE', bpH1:'POINT YOUR', bpH2:'CAMERA.',
+    bpDesc:"Point your phone camera at the QR code below and go straight to Apple App Store. Free. No ads.",
+    an1l:'[ A/B COMPARE ]', an1s:'One tap vote', an2l:'[ LIVE RESULTS ]', an2s:'24h countdown', an3l:'[ DM CHAT ]',
+    qrLabel:'[ OFFICIAL APP STORE ]', qrTitle:'100% Free for iOS', qrSub:'Compatible with iPhone and iPad.',
+    bpLink:'OPEN ON APP STORE →',
+    flowMeta:'CORE EXPERIENCE FLOW · 3 STEPS', flowH1:'SEAMLESS', flowH2:'FLOW.',
+    s1lbl:'STEP 01', s1t:'Browse & Vote', s1d:'Scroll the infinite feed, vote on what you love.',
+    s2lbl:'STEP 02', s2t:'Upload & Share', s2d:'Pick two photos, start an A/B poll.',
+    s3lbl:'STEP 03', s3t:'Results & Chat', s3d:'See live percentages, message friends.',
+    demoMeta:'INTERACTIVE DEMO · CAST YOUR VOTE', demoH1:'TRY BEFORE', demoH2:'YOU DECIDE.',
+    dLblA:'[ A · LEFT OPTION ]', dLblB:'[ B · RIGHT OPTION ]',
+    dHint:'CLICK TO VOTE', votesLbl:'24 VOTES CAST · CLICK TO VOTE',
+    faqMeta:'FREQUENTLY ASKED QUESTIONS', faqH1:'COMMON', faqH2:'QUESTIONS.',
+    faqs:[
+      ['Is Dythin completely free?','Yes, Dythin is 100% free. No subscriptions or hidden fees to upload photos, start polls, add friends, or track live results.'],
+      ['Can I make my polls private?','Yes. When creating a poll, set the audience to "Friends Only", or set your profile to private.'],
+      ['How long are polls active?','Each poll is active for 24 hours, then automatically archived.'],
+      ['Is there an Android version?','Currently iOS (App Store) only. Android coming soon.'],
+    ],
+    ftPrivacy:'Privacy', ftTerms:'Terms',
+    mpLabel:'[ PRIVACY POLICY ]', mpTitle:'Privacy Policy',
+    mpBody:'Dythin values user privacy. Photos uploaded within the app are used only for voting. Personal data is never shared with third parties. You can delete your account at any time.',
+    mtLabel:'[ TERMS OF USE ]', mtTitle:'Terms of Use',
+    mtBody:'By using Dythin you agree to these terms. Uploading inappropriate content is prohibited. Violations may result in account suspension.',
+  },
+  de: {
+    navCta:'APP STORE', heroLabel:'[ SOZIALE ABSTIMMUNGSPLATTFORM ]',
+    h1a:'SCHLUSS', h1b:'MIT DER', h1c:'UNENTSCHLOSSENHEIT.',
+    heroDesc:'Lade deine Fotos hoch, erhalte sofortige Votes von der Community und Freunden. Kostenlos für iOS.',
+    heroLink:'IM APP STORE LADEN →',
+    bnHl1:'ABSTIMMEN.', bnHl2:'ENTSCHEIDEN.', bnLabel:'[ 01 · APP VORSTELLUNG ]',
+    prob01meta:'PROBLEMRAUM · SCHMERZPUNKTE',
+    probH2a:'UNENTSCHLOSSENHEIT', probH2b:'IST ÜBERALL', probH2c:'PRÄSENT.',
+    probDesc:'Minutenlang vor dem Spiegel zwischen Outfits wählen. Auf Freunde warten, die beim Shopping nicht antworten. Das ist vorbei.',
+    p1t:'Kein sofortiges Feedback', p1d:'Du wartest stundenlang auf Antworten.',
+    p2t:'Kein Community-Zugang', p2d:'Nicht nur Freunde – hör auf die ganze Community.',
+    p3t:'Kein Ergebnis-Tracking', p3d:'Votes in Echtzeit, 24h Live-Countdown.',
+    bpMeta:'SCAN TO DOWNLOAD · APP STORE', bpH1:'KAMERA', bpH2:'DRAUFHALTEN.',
+    bpDesc:'Richte deine Kamera auf den QR-Code und gelange direkt zum Apple App Store. Kostenlos. Keine Werbung.',
+    an1l:'[ A/B VERGLEICH ]', an1s:'Ein Tipp reicht', an2l:'[ LIVE ERGEBNIS ]', an2s:'24h Countdown', an3l:'[ DM CHAT ]',
+    qrLabel:'[ OFFIZIELLER APP STORE ]', qrTitle:'100% kostenlos für iOS', qrSub:'Kompatibel mit iPhone und iPad.',
+    bpLink:'IM APP STORE ÖFFNEN →',
+    flowMeta:'KERN-ERLEBNIS-FLOW · 3 SCHRITTE', flowH1:'NAHTLOSER', flowH2:'ABLAUF.',
+    s1lbl:'SCHRITT 01', s1t:'Stöbern & Abstimmen', s1d:'Endloser Feed, abstimmen was du liebst.',
+    s2lbl:'SCHRITT 02', s2t:'Hochladen & Teilen', s2d:'Zwei Fotos wählen, A/B-Umfrage starten.',
+    s3lbl:'SCHRITT 03', s3t:'Ergebnisse & Chat', s3d:'Live-Prozente sehen, mit Freunden schreiben.',
+    demoMeta:'INTERAKTIVE DEMO · JETZT ABSTIMMEN', demoH1:'ERST TESTEN,', demoH2:'DANN ENTSCHEIDEN.',
+    dLblA:'[ A · LINKS ]', dLblB:'[ B · RECHTS ]',
+    dHint:'KLICKEN ZUM ABSTIMMEN', votesLbl:'24 STIMMEN · KLICKEN',
+    faqMeta:'HÄUFIG GESTELLTE FRAGEN', faqH1:'HÄUFIGE', faqH2:'FRAGEN.',
+    faqs:[
+      ['Ist Dythin komplett kostenlos?','Ja, Dythin ist 100% kostenlos. Keine Abonnements oder versteckten Gebühren.'],
+      ['Kann ich meine Umfragen privat machen?','Ja. Beim Erstellen kannst du die Zielgruppe auf "Nur Freunde" beschränken.'],
+      ['Wie lange sind Umfragen aktiv?','Jede Umfrage ist 24 Stunden lang aktiv und wird danach automatisch archiviert.'],
+      ['Gibt es eine Android-Version?','Derzeit nur iOS (App Store). Android kommt bald.'],
+    ],
+    ftPrivacy:'Datenschutz', ftTerms:'Nutzungsbedingungen',
+    mpLabel:'[ DATENSCHUTZERKLÄRUNG ]', mpTitle:'Datenschutzerklärung',
+    mpBody:'Dythin legt großen Wert auf den Schutz deiner Daten. Hochgeladene Fotos werden nur für Abstimmungszwecke verwendet. Keine Weitergabe an Dritte.',
+    mtLabel:'[ NUTZUNGSBEDINGUNGEN ]', mtTitle:'Nutzungsbedingungen',
+    mtBody:'Durch die Nutzung von Dythin stimmst du diesen Bedingungen zu. Das Hochladen unangemessener Inhalte ist verboten.',
+  },
+};
 
-    // Multilingual Dictionary (TR / EN / DE)
-    const translations = {
-      tr: {
-        meta: '[ SOSYAL KARAR & KOMBİN PLATFORMU ]',
-        audience: 'GENEL',
-        cardTitle: 'Sizce bu iki kombin arasından hangisi?',
-        navStore: 'App Store',
-      },
-      en: {
-        meta: '[ SOCIAL DECISION & OUTFIT PLATFORM ]',
-        audience: 'PUBLIC',
-        cardTitle: 'Which of these two outfits do you prefer?',
-        navStore: 'App Store',
-      },
-      de: {
-        meta: '[ SOZIALE ENTSCHEIDUNGS- & OUTFIT-PLATTFORM ]',
-        audience: 'ÖFFENTLICH',
-        cardTitle: 'Welches dieser beiden Outfits bevorzugst du?',
-        navStore: 'App Store',
-      }
-    };
+let lang  = localStorage.getItem('dythin-lang')  || 'tr';
+let theme = localStorage.getItem('dythin-theme') || 'purple';
+let vA = 74, vB = 26, totalV = 24;
 
-    function switchLanguage(lang) {
-      const data = translations[lang] || translations.tr;
-      document.getElementById('hero-meta-tag').innerText = data.meta;
-      document.getElementById('mock-tab-audience').innerText = data.audience;
-      document.getElementById('mock-card-title').innerText = data.cardTitle;
-      document.getElementById('nav-btn-text').innerText = data.navStore;
+function switchTheme(t) {
+  theme = t;
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('dythin-theme', t);
+  document.querySelectorAll('.tdot').forEach(d => d.classList.remove('active'));
+  const el = document.getElementById('td-' + t);
+  if (el) el.classList.add('active');
+}
 
-      ['tr', 'en', 'de'].forEach(l => {
-        const el = document.getElementById('lang-' + l);
-        if (el) {
-          if (l === lang) {
-            el.classList.add('font-bold', 'text-white');
-          } else {
-            el.classList.remove('font-bold', 'text-white');
-          }
-        }
-      });
-    }
+function switchLang(l) {
+  lang = l;
+  localStorage.setItem('dythin-lang', l);
+  document.documentElement.setAttribute('lang', l);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('lang-' + l);
+  if (btn) btn.classList.add('active');
+  applyLang();
+}
 
-    // FAQ Accordion
-    function toggleFaq(id) {
-      const ans = document.getElementById('faqAns-' + id);
-      const icon = document.getElementById('faqIcon-' + id);
-      if (ans.classList.contains('hidden')) {
-        ans.classList.remove('hidden');
-        icon.classList.add('rotate-180');
-      } else {
-        ans.classList.add('hidden');
-        icon.classList.remove('rotate-180');
-      }
-    }
+function applyLang() {
+  const t = T[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key] !== undefined && typeof t[key] === 'string') el.textContent = t[key];
+  });
+  buildFaqs();
+}
 
-    // Legal Modals
-    function openModal(type) {
-      const modal = document.getElementById('legalModal');
-      const title = document.getElementById('legalTitle');
-      const body = document.getElementById('legalBody');
+function buildFaqs() {
+  const t = T[lang];
+  const list = document.getElementById('faq-list');
+  if (!list) return;
+  list.innerHTML = '';
+  t.faqs.forEach(([q, a], i) => {
+    const item = document.createElement('div');
+    item.className = 'faq-item';
+    item.innerHTML = `<button class="faq-btn" onclick="toggleFaq(${i})"><span>${q}</span><span class="faq-icon" id="fi-${i}">+</span></button><div class="faq-ans" id="fa-${i}">${a}</div>`;
+    list.appendChild(item);
+  });
+}
 
-      if (type === 'privacy') {
-        title.innerText = 'Gizlilik Politikası (Privacy Policy)';
-        body.innerHTML = `
-          <p><strong>Dythin Gizlilik Politikası</strong> (Son Güncelleme: 1 Ekim 2026)</p>
-          <p>Dythin, kullanıcılarının kişisel verilerinin korunmasına en üst düzeyde önem verir.</p>
-          <p><strong>1. Veri Toplama:</strong> Yalnızca temel hizmet için gerekli profil bilgileri ve oylama içerikleri işlenir.</p>
-          <p><strong>2. Güvenlik:</strong> Verileriniz PostgreSQL RLS ve SSL/TLS şifreleme ile korunmaktadır.</p>
-          <p><strong>3. Veri Silme:</strong> Uygulama içindeki Ayarlar bölümünden hesabınızı ve tüm oylama geçmişinizi dilediğiniz an kalıcı olarak silebilirsiniz.</p>
-        `;
-      } else {
-        title.innerText = 'Kullanım Koşulları (EULA)';
-        body.innerHTML = `
-          <p>Dythin platformunu kullanarak aşağıdaki temel kuralları kabul etmiş sayılırsınız:</p>
-          <p><strong>1. İçerik Sorumluluğu:</strong> Paylaşılan oylamaların telif ve içerik sorumluluğu kullanıcıya aittir.</p>
-          <p><strong>2. Topluluk İlkeleri:</strong> Rahatsız edici, sakıncalı içerikler moderasyon ekibi tarafından 24 saat içinde incelenir ve kuralları ihlal eden hesaplar süresiz olarak askıya alınır.</p>
-        `;
-      }
+function toggleFaq(i) {
+  const ans  = document.getElementById('fa-' + i);
+  const icon = document.getElementById('fi-' + i);
+  const open = ans.classList.contains('open');
+  document.querySelectorAll('.faq-ans').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.faq-icon').forEach(el => { el.textContent = '+'; el.style.color = 'rgba(255,255,255,0.35)'; });
+  if (!open) {
+    ans.classList.add('open');
+    icon.textContent = '−';
+    icon.style.color = 'var(--accent)';
+  }
+}
 
-      modal.classList.remove('hidden');
-    }
+function castVote(side) {
+  totalV++;
+  if (side === 'A') vA += 2; else vB += 2;
+  const total = vA + vB;
+  const pA = Math.round(vA / total * 100);
+  const pB = 100 - pA;
+  document.getElementById('pct-a').textContent = '%' + pA;
+  document.getElementById('pct-b').textContent = '%' + pB;
+  document.getElementById('bar-a').style.width = pA + '%';
+  document.getElementById('bar-b').style.width = pB + '%';
+  const suffix = lang === 'tr' ? ' OY TOPLANDI · TIKLA OY VER' : lang === 'en' ? ' VOTES CAST · CLICK TO VOTE' : ' STIMMEN · KLICKEN';
+  document.getElementById('votes-label').textContent = totalV + suffix;
+}
 
-    function closeLegalModal() {
-      document.getElementById('legalModal').classList.add('hidden');
-    }
-  </script>
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal')) e.target.classList.remove('open');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  switchTheme(theme);
+  switchLang(lang);
+});
+</script>
 </body>
 </html>
