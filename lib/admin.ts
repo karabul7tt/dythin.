@@ -4,6 +4,12 @@ export const SUPER_ADMIN_USERNAMES = [
   'mehmetkarabul7tt',
 ]
 
+export function isSuperAdminUser(username?: string | null): boolean {
+  if (!username) return false
+  const clean = username.toLowerCase().replace('@', '').trim()
+  return SUPER_ADMIN_USERNAMES.includes(clean)
+}
+
 export type AdminKPIs = {
   totalUsers: number
   totalPosts: number

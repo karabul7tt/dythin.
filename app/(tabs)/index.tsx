@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 import { sendPushNotificationToUser } from '../../lib/notifications'
-import { checkIsAdmin, adminDeletePost, adminBanUser } from '../../lib/admin'
+import { checkIsAdmin, adminDeletePost, adminBanUser, isSuperAdminUser, adminPromoteUser, adminRevokeUser } from '../../lib/admin'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -245,41 +245,80 @@ export default function VoteScreen() {
     )
   }
 
-  function handleAdminQuickAction() {
+  async function handleAdminQuickAction() {
     const current = tab === 'public' ? posts[0] : friendPosts[0]
-    if (!current) return
+    if (!current || !session?.user.id) return
     const authorUser = (current as any).profiles?.username || 'kullanici'
+    const currentUsername = session.user.user_metadata?.username
+    const amISuperAdmin = isSuperAdminUser(currentUsername)
+    const isTargetSuper = isSuperAdminUser(authorUser)
+    const isTargetAdmin = await checkIsAdmin(authorUser, null, current.user_id)
+
+    const buttons: any[] = [
+      { text: t('create.cancel'), style: 'cancel' },
+    ]
+
+    // 1. Gönderiyi Sil (Eğer hedef kurucu/super admin değilse veya silen kişi kurucu ise)
+    if (!isTargetSuper || amISuperAdmin) {
+      buttons.push({
+        text: t('feed.deletePost'),
+        style: 'destructive',
+        onPress: async () => {
+          await adminDeletePost(current.id, session.user.id)
+          Alert.alert(t('feed.deleted'), t('feed.postRemoved'))
+          if (tab === 'public') setPosts(prev => prev.slice(1))
+          else setFriendPosts(prev => prev.slice(1))
+        },
+      })
+    }
+
+    // 2. Kullanıcıyı Banla: KURUCU/SUPER ADMIN ASLA BANLANAMAZ!
+    if (!isTargetSuper) {
+      buttons.push({
+        text: t('feed.banUser'),
+        style: 'destructive',
+        onPress: async () => {
+          await adminBanUser(current.user_id, authorUser, session.user.id)
+          await adminDeletePost(current.id, session.user.id)
+          Alert.alert(t('feed.userBannedTitle'), t('feed.userSuspended', { username: authorUser }))
+          setPosts(prev => prev.filter(p => p.user_id !== current.user_id))
+          setFriendPosts(prev => prev.filter(p => p.user_id !== current.user_id))
+        },
+      })
+    }
+
+    // 3. Süper Admin: Başka birini Admin Yap / Adminliğini Kaldır
+    if (amISuperAdmin && !isTargetSuper) {
+      if (isTargetAdmin) {
+        buttons.push({
+          text: 'Yöneticilik Yetkisini Kaldır',
+          style: 'destructive',
+          onPress: async () => {
+            await adminRevokeUser(current.user_id, authorUser, session.user.id)
+            Alert.alert('Yetki Kaldırıldı', `@${authorUser} kullanıcısının yöneticilik yetkisi kaldırıldı.`)
+          },
+        })
+      } else {
+        buttons.push({
+          text: '👑 Yönetici Olarak Ata (Admin Yap)',
+          onPress: async () => {
+            await adminPromoteUser(current.user_id, authorUser, session.user.id)
+            Alert.alert('Yönetici Atandı', `@${authorUser} artık yönetici. Yönetici paneline erişebilir.`)
+          },
+        })
+      }
+    }
+
+    // 4. Yönetici Paneli
+    buttons.push({
+      text: t('feed.adminPanel'),
+      onPress: () => router.push('/admin' as any),
+    })
+
     Alert.alert(
       t('feed.adminActionTitle'),
       `"${current.title}" · @${authorUser}`,
-      [
-        { text: t('create.cancel'), style: 'cancel' },
-        {
-          text: t('feed.deletePost'),
-          style: 'destructive',
-          onPress: async () => {
-            await adminDeletePost(current.id, session!.user.id)
-            Alert.alert(t('feed.deleted'), t('feed.postRemoved'))
-            if (tab === 'public') setPosts(prev => prev.slice(1))
-            else setFriendPosts(prev => prev.slice(1))
-          },
-        },
-        {
-          text: t('feed.banUser'),
-          style: 'destructive',
-          onPress: async () => {
-            await adminBanUser(current.user_id, authorUser, session!.user.id)
-            await adminDeletePost(current.id, session!.user.id)
-            Alert.alert(t('feed.userBannedTitle'), t('feed.userSuspended', { username: authorUser }))
-            setPosts(prev => prev.filter(p => p.user_id !== current.user_id))
-            setFriendPosts(prev => prev.filter(p => p.user_id !== current.user_id))
-          },
-        },
-        {
-          text: t('feed.adminPanel'),
-          onPress: () => router.push('/admin' as any),
-        },
-      ]
+      buttons
     )
   }
 

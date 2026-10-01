@@ -21,6 +21,7 @@ import { supabase } from '../lib/supabase'
 import { sendPushNotificationToUser } from '../lib/notifications'
 import type { Profile, Post, Vote } from '../lib/types'
 import ZoomablePhoto from '../components/ZoomablePhoto'
+import { isSuperAdminUser, checkIsAdmin, adminPromoteUser, adminRevokeUser, adminBanUser } from '../lib/admin'
 
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
 
@@ -222,64 +223,95 @@ export default function UserProfileScreen() {
     }
   }
 
-  function handleProfileModeration() {
-    if (!profile) return
-    Alert.alert(
-      `@${profile.username}`,
-      'Bu kullanıcı ile ilgili işlem seçin:',
-      [
-        {
-          text: 'Kullanıcıyı Bildir',
+  async function handleProfileModeration() {
+    if (!profile || !session?.user.id) return
+    const currentUsername = session.user.user_metadata?.username
+    const amISuperAdmin = isSuperAdminUser(currentUsername)
+    const isTargetSuper = isSuperAdminUser(profile.username)
+    const isTargetAdmin = await checkIsAdmin(profile.username, (profile as any).role, profile.id)
+
+    const buttons: any[] = []
+
+    // 1. Süper Admin Özel Yetkisi: Başka kullanıcıyı admin yapabilir veya adminliğini alabilir
+    if (amISuperAdmin && !isTargetSuper) {
+      if (isTargetAdmin) {
+        buttons.push({
+          text: 'Yöneticilik Yetkisini Kaldır',
           style: 'destructive',
           onPress: async () => {
-            if (posts.length > 0) {
-              await supabase.from('reports').insert({
-                reporter_id: session?.user.id,
-                post_id: posts[0].id,
-                reason: `Profil bildirildi: @${profile.username}`,
-              })
-            }
-            Alert.alert(
-              'Bildirim Alındı',
-              'Şikayetiniz alındı. Sakıncalı kullanıcılar 24 saat içinde incelenir ve kuralları ihlal edenler sistemden kalıcı olarak engellenir.'
-            )
+            await adminRevokeUser(profile.id, profile.username, session.user.id)
+            Alert.alert('Yetki Kaldırıldı', `@${profile.username} kullanıcısının yöneticilik yetkisi kaldırıldı.`)
           },
-        },
-        {
-          text: 'Kullanıcıyı Engelle',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              'Kullanıcıyı Engelle',
-              `@${profile.username} adlı kullanıcıyı engellemek istediğinize emin misiniz?`,
-              [
-                { text: 'İptal', style: 'cancel' },
-                {
-                  text: 'Engelle',
-                  style: 'destructive',
-                  onPress: async () => {
-                    await supabase.from('blocked_users').insert({
-                      blocker_id: session?.user.id,
-                      blocked_id: profile.id,
+        })
+      } else {
+        buttons.push({
+          text: '👑 Yönetici Olarak Ata (Admin Yap)',
+          onPress: async () => {
+            await adminPromoteUser(profile.id, profile.username, session.user.id)
+            Alert.alert('Yönetici Atandı', `@${profile.username} artık yönetici. Yönetici paneline erişebilir ve içerikleri denetleyebilir.`)
+          },
+        })
+      }
+    }
+
+    // 2. Bildir seçeneği
+    buttons.push({
+      text: 'Kullanıcıyı Bildir',
+      style: 'destructive',
+      onPress: async () => {
+        if (posts.length > 0) {
+          await supabase.from('reports').insert({
+            reporter_id: session?.user.id,
+            post_id: posts[0].id,
+            reason: `Profil bildirildi: @${profile.username}`,
+          })
+        }
+        Alert.alert(
+          'Bildirim Alındı',
+          'Şikayetiniz alındı. Sakıncalı kullanıcılar 24 saat içinde incelenir ve kuralları ihlal edenler sistemden kalıcı olarak engellenir.'
+        )
+      },
+    })
+
+    // 3. Engelle seçeneği (Kurucu / Süper admin asla engellenemez)
+    if (!isTargetSuper) {
+      buttons.push({
+        text: 'Kullanıcıyı Engelle',
+        style: 'destructive',
+        onPress: () => {
+          Alert.alert(
+            'Kullanıcıyı Engelle',
+            `@${profile.username} adlı kullanıcıyı engellemek istediğinize emin misiniz?`,
+            [
+              { text: 'İptal', style: 'cancel' },
+              {
+                text: 'Engelle',
+                style: 'destructive',
+                onPress: async () => {
+                  await supabase.from('blocked_users').insert({
+                    blocker_id: session?.user.id,
+                    blocked_id: profile.id,
+                  })
+                  if (posts.length > 0) {
+                    await supabase.from('reports').insert({
+                      reporter_id: session?.user.id,
+                      post_id: posts[0].id,
+                      reason: `Kullanıcı profilden engellendi: @${profile.username}`,
                     })
-                    if (posts.length > 0) {
-                      await supabase.from('reports').insert({
-                        reporter_id: session?.user.id,
-                        post_id: posts[0].id,
-                        reason: `Kullanıcı profilden engellendi: @${profile.username}`,
-                      })
-                    }
-                    Alert.alert('Engellendi', 'Kullanıcı engellendi. Gönderileri artık görünmeyecektir.')
-                    router.back()
-                  },
+                  }
+                  Alert.alert('Engellendi', 'Kullanıcı engellendi. Gönderileri artık görünmeyecektir.')
+                  router.back()
                 },
-              ]
-            )
-          },
+              },
+            ]
+          )
         },
-        { text: 'İptal', style: 'cancel' },
-      ]
-    )
+      })
+    }
+
+    buttons.push({ text: 'İptal', style: 'cancel' })
+
+    Alert.alert(`@${profile.username}`, 'Bu kullanıcı ile ilgili işlem seçin:', buttons)
   }
 
   function getStats(votes: Vote[]) {
