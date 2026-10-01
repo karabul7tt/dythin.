@@ -293,15 +293,21 @@
        BANNER
     ═══════════════════════════════════════════ */
     #banner {
-      width: 100%; height: min(78vh, 900px); min-height: 580px; position: relative;
+      width: 100%; height: min(85vh, 920px); min-height: 640px; position: relative;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       overflow: hidden; background: var(--bg2);
+      transition: background 0.5s, border-color 0.5s;
     }
-    #banner > img {
-      position: absolute; right: clamp(2rem, 9vw, 9rem); bottom: 0;
-      width: auto; height: 100%; max-width: min(48%, 560px); object-fit: contain;
-      object-position: center bottom; filter: drop-shadow(0 24px 70px rgba(0,0,0,0.42));
+    .banner-phone-wrap {
+      position: absolute; right: clamp(2rem, 9vw, 9rem); top: 50%; transform: translateY(-50%);
+      z-index: 2;
+    }
+    .banner-phone-wrap .phone-frame {
+      width: 320px; height: 640px; border-radius: 48px;
+    }
+    .banner-phone-wrap .phone-photo-box {
+      height: 300px;
     }
     .banner-hl { position: absolute; top: 50%; left: clamp(2rem, 8vw, 8rem); transform: translateY(-50%); text-align: left; z-index: 2; }
     .banner-hl-line {
@@ -538,11 +544,13 @@
       #hero { padding: 70px 1.25rem 4rem; }
       .hero-meta { left: 1.25rem; right: 1.25rem; }
       .hero-bottom { gap: 2rem; }
-      #banner { height: min(76svh, 720px); min-height: 520px; }
-      #banner > img { right: 0; height: 74%; max-width: 72%; }
-      .banner-hl { top: 2rem; left: 1.25rem; transform: none; }
+      #banner { height: auto; min-height: auto; padding: 4rem 1.25rem 3.5rem; display: flex; flex-direction: column; align-items: center; gap: 2.5rem; }
+      .banner-hl { position: static; transform: none; text-align: center; width: 100%; }
       .banner-hl-line { font-size: clamp(2rem, 9vw, 4rem); }
-      .banner-bl { left: 1.25rem; bottom: 1.25rem; }
+      .banner-bl { display: none; }
+      .banner-phone-wrap { position: static; transform: none; }
+      .banner-phone-wrap .phone-frame { width: 275px; height: 560px; }
+      .banner-phone-wrap .phone-photo-box { height: 240px; }
       #features { padding: 5rem 1.25rem; }
       .feature-story { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 0; }
       .feature-story.reverse .feature-copy, .feature-story.reverse .feature-shots { order: initial; }
@@ -627,11 +635,59 @@
 
 <!-- ════════ FULL-WIDTH BANNER ════════ -->
 <div id="banner">
-  <img src="live-voting.jpg" alt="Dythin canlı oylama ekranı">
   <div class="banner-hl reveal">
     <div class="banner-hl-line" data-i18n="bnHl1">OY VER.</div>
     <div class="banner-hl-line" style="color:var(--accent)" data-i18n="bnHl2">KARAR AL.</div>
   </div>
+
+  <div class="banner-phone-wrap reveal-right">
+    <div class="phone-frame">
+      <div class="phone-island"></div>
+      
+      <div class="phone-top-bar">
+        <div class="phone-app-logo">dythin<span>.</span></div>
+        <div class="phone-msg-badge"><i class="fa-regular fa-comment-dots"></i> <span data-i18n="appTopMsg">Mesajlar</span></div>
+      </div>
+
+      <div class="phone-pills">
+        <div class="phone-pill active"><i class="fa-solid fa-globe"></i> <span data-i18n="appFeedPublic">Genel</span></div>
+        <div class="phone-pill"><i class="fa-solid fa-user-group"></i> <span data-i18n="appFeedFriends">Arkadaşlar</span></div>
+      </div>
+
+      <div class="phone-card">
+        <div class="phone-photo-box">
+          <img src="photo_2.jpg" alt="Dythin Canlı Oylama Ekranı" id="banner-phone-img">
+          <div class="phone-user-tag">
+            <div class="phone-avatar"></div>
+            <span class="phone-username">@dythin</span>
+          </div>
+        </div>
+
+        <div class="phone-question-box">
+          <div class="phone-q-title" id="banner-phone-q-title" data-i18n="appQuestion">Do you think?</div>
+        </div>
+
+        <div class="phone-actions">
+          <div class="phone-btn phone-btn-pass" onclick="triggerPhoneVote('pass', 'banner')">
+            <span class="phone-btn-main" data-i18n="appBtnPass">✕ Beğenmedim</span>
+            <span class="phone-btn-sub" data-i18n="appBtnPassHint">Geçtim (Sola)</span>
+          </div>
+          <div class="phone-btn phone-btn-like" onclick="triggerPhoneVote('like', 'banner')">
+            <span class="phone-btn-main" data-i18n="appBtnLike">✓ Beğendim</span>
+            <span class="phone-btn-sub" data-i18n="appBtnLikeHint">Harika Seçim (Sağa)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone-tab-bar">
+        <div class="phone-tab-item active"><i class="fa-solid fa-wand-magic-sparkles"></i><span data-i18n="tabVote">Oyla</span></div>
+        <div class="phone-tab-item"><i class="fa-solid fa-circle-plus"></i><span data-i18n="tabCreate">Paylaş</span></div>
+        <div class="phone-tab-item"><i class="fa-solid fa-chart-simple"></i><span data-i18n="tabResults">Sonuçlar</span></div>
+        <div class="phone-tab-item"><i class="fa-solid fa-user"></i><span data-i18n="tabProfile">Profil</span></div>
+      </div>
+    </div>
+  </div>
+
   <div class="banner-bl">
     <span class="label" data-i18n="bnLabel">[ 01 · UYGULAMA TANITIMI ]</span>
   </div>
@@ -1059,22 +1115,25 @@ function applyLang() {
 
 /* ── PHONE DEMO INTERACTION ── */
 let phoneVotes = { pass: 14, like: 86 };
-function triggerPhoneVote(type) {
+function triggerPhoneVote(type, target) {
   if (type === 'like') phoneVotes.like++; else phoneVotes.pass++;
   const total = phoneVotes.like + phoneVotes.pass;
   const pctLike = Math.round((phoneVotes.like / total) * 100);
-  const qTitle = document.getElementById('phone-q-title');
-  if (qTitle) {
-    const thanks = lang === 'tr' ? 'Oyunuz alındı! · %' + pctLike + ' Beğenildi' : lang === 'en' ? 'Vote saved! · ' + pctLike + '% Liked' : 'Abgestimmt! · ' + pctLike + '% Gefällt';
-    qTitle.textContent = thanks;
-    qTitle.style.color = 'var(--accent)';
-    setTimeout(() => {
-      if (T[lang] && T[lang].appQuestion) {
-        qTitle.textContent = T[lang].appQuestion;
-      }
-      qTitle.style.color = 'var(--fg)';
-    }, 2800);
-  }
+  const ids = target === 'banner' ? ['banner-phone-q-title'] : ['phone-q-title', 'banner-phone-q-title'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      const thanks = lang === 'tr' ? 'Oyunuz alındı! · %' + pctLike + ' Beğenildi' : lang === 'en' ? 'Vote saved! · ' + pctLike + '% Liked' : 'Abgestimmt! · ' + pctLike + '% Gefällt';
+      el.textContent = thanks;
+      el.style.color = 'var(--accent)';
+      setTimeout(() => {
+        if (T[lang] && T[lang].appQuestion) {
+          el.textContent = T[lang].appQuestion;
+        }
+        el.style.color = 'var(--fg)';
+      }, 2800);
+    }
+  });
 }
 
 /* ── FAQ ── */
