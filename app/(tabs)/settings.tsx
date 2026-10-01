@@ -318,9 +318,9 @@ export default function SettingsScreen() {
                         router.dismissAll()
                       } catch {}
                       router.replace('/(auth)/login')
-                      Alert.alert('Hesabınız Silindi', 'Hesabınız ve tüm verileriniz kalıcı olarak sistemden kaldırıldı.')
+                      Alert.alert(t('settings.accountDeletedTitle'), t('settings.accountDeletedMsg'))
                     } catch (e: any) {
-                      Alert.alert('Hata', 'Hesap silinirken bir hata oluştu.')
+                      Alert.alert(t('common.error'), t('settings.errorOccurred'))
                     }
                     setLoading(false)
                   },
@@ -334,10 +334,10 @@ export default function SettingsScreen() {
   }
 
   const themeOptions: { key: ThemeName; label: string; color: string }[] = [
-    { key: 'purple', label: 'Mor & Gece', color: '#7F77DD' },
-    { key: 'gold', label: 'Siyah & Altın', color: '#C9A84C' },
-    { key: 'pink', label: 'Pembe & Krem', color: '#D4537E' },
-    { key: 'green', label: 'Yeşil & Bej', color: '#3B6D11' },
+    { key: 'purple', label: t('settings.themePurple'), color: '#7F77DD' },
+    { key: 'gold', label: t('settings.themeGold'), color: '#C9A84C' },
+    { key: 'pink', label: t('settings.themePink'), color: '#D4537E' },
+    { key: 'green', label: t('settings.themeGreen'), color: '#3B6D11' },
   ]
 
   const s = StyleSheet.create({
@@ -448,12 +448,12 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <Text style={s.sectionLabel}>BİLDİRİMLER</Text>
+        <Text style={s.sectionLabel}>{t('settings.notificationsSection')}</Text>
         <View style={s.card}>
           <TouchableOpacity style={s.rowLast} onPress={handleEnableNotifications} disabled={loading}>
             <View>
-              <Text style={s.rowLabel}>Anlık Bildirimler</Text>
-              <Text style={s.rowSub}>Oylama ve yorumlarda bildirim al</Text>
+              <Text style={s.rowLabel}>{t('settings.instantNotifications')}</Text>
+              <Text style={s.rowSub}>{t('settings.notificationsSub')}</Text>
             </View>
             <Ionicons name="notifications-outline" size={18} color={theme.textSub} />
           </TouchableOpacity>
@@ -461,7 +461,7 @@ export default function SettingsScreen() {
 
         {isAdminUser && (
           <>
-            <Text style={s.sectionLabel}>YÖNETİCİ</Text>
+            <Text style={s.sectionLabel}>{t('settings.adminSection')}</Text>
             <View style={s.card}>
               <TouchableOpacity
                 style={s.rowLast}
@@ -469,8 +469,8 @@ export default function SettingsScreen() {
                 activeOpacity={0.8}
               >
                 <View style={{ flex: 1 }}>
-                  <Text style={s.rowLabel}>Yönetici Paneli</Text>
-                  <Text style={s.rowSub}>Şikayetler, Kullanıcı Yönetimi & Metrikler</Text>
+                  <Text style={s.rowLabel}>{t('settings.adminPanel')}</Text>
+                  <Text style={s.rowSub}>{t('settings.adminPanelSub')}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={theme.textSub} />
               </TouchableOpacity>
@@ -478,11 +478,11 @@ export default function SettingsScreen() {
           </>
         )}
 
-        <Text style={s.sectionLabel}>HESAP</Text>
+        <Text style={s.sectionLabel}>{t('settings.emailSection')}</Text>
         <View style={s.card}>
           <View style={s.row}>
             <View style={{ flex: 1 }}>
-              <Text style={s.rowLabel}>E-posta</Text>
+              <Text style={s.rowLabel}>{t('settings.email')}</Text>
               <Text style={s.emailText}>{session?.user.email}</Text>
             </View>
             <TouchableOpacity onPress={handleRefresh} style={{ padding: 6 }} activeOpacity={0.7}>
@@ -490,7 +490,7 @@ export default function SettingsScreen() {
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={s.row} onPress={() => setShowEmailForm(value => !value)}>
-            <Text style={s.rowLabel}>E-posta değiştir</Text>
+            <Text style={s.rowLabel}>{t('settings.changeEmailTitle')}</Text>
             <Text style={s.arrow}>{showEmailForm ? '⌃' : '›'}</Text>
           </TouchableOpacity>
           {showEmailForm && (
@@ -499,7 +499,7 @@ export default function SettingsScreen() {
                 style={s.passwordInput}
                 value={newEmail}
                 onChangeText={setNewEmail}
-                placeholder="Yeni e-posta adresi"
+                placeholder={t('settings.newEmailPlaceholder')}
                 placeholderTextColor={theme.textSub}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -513,19 +513,19 @@ export default function SettingsScreen() {
                 {emailLoading ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                     <ActivityIndicator color={theme.bg} size="small" />
-                    <Text style={s.passwordSaveText}>Gönderiliyor, lütfen bekleyin...</Text>
+                    <Text style={s.passwordSaveText}>{t('settings.sendingWait')}</Text>
                   </View>
                 ) : (
-                  <Text style={s.passwordSaveText}>E-postayı güncelle</Text>
+                  <Text style={s.passwordSaveText}>{t('settings.updateEmailBtn')}</Text>
                 )}
               </TouchableOpacity>
               <Text style={{ fontSize: 11, color: theme.textSub, marginTop: 8, textAlign: 'center' }}>
-                Onay bağlantısı yeni e-posta adresinize gönderilecektir.
+                {t('settings.emailVerificationNotice')}
               </Text>
             </View>
           )}
           <TouchableOpacity style={s.rowLast} onPress={() => setShowPasswordForm(value => !value)}>
-            <Text style={s.rowLabel}>Şifre değiştir</Text>
+            <Text style={s.rowLabel}>{t('settings.changePasswordTitle')}</Text>
             <Text style={s.arrow}>{showPasswordForm ? '⌃' : '›'}</Text>
           </TouchableOpacity>
           {showPasswordForm && (
@@ -534,7 +534,7 @@ export default function SettingsScreen() {
                 style={s.passwordInput}
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
-                placeholder="Eski şifre"
+                placeholder={t('settings.oldPasswordPlaceholder')}
                 placeholderTextColor={theme.textSub}
                 secureTextEntry
                 returnKeyType="next"
@@ -544,7 +544,7 @@ export default function SettingsScreen() {
                 style={s.passwordInput}
                 value={newPassword}
                 onChangeText={setNewPassword}
-                placeholder="Yeni şifre"
+                placeholder={t('settings.newPasswordPlaceholder')}
                 placeholderTextColor={theme.textSub}
                 secureTextEntry
                 returnKeyType="next"
@@ -554,7 +554,7 @@ export default function SettingsScreen() {
                 style={s.passwordInput}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="Yeni şifre (tekrar)"
+                placeholder={t('settings.confirmPasswordPlaceholder')}
                 placeholderTextColor={theme.textSub}
                 secureTextEntry
                 returnKeyType="done"
@@ -563,10 +563,10 @@ export default function SettingsScreen() {
                 editable={!loading}
               />
               <TouchableOpacity style={s.passwordSave} onPress={handleChangePassword} disabled={loading}>
-                {loading ? <ActivityIndicator color={theme.bg} /> : <Text style={s.passwordSaveText}>Şifreyi güncelle</Text>}
+                {loading ? <ActivityIndicator color={theme.bg} /> : <Text style={s.passwordSaveText}>{t('settings.updatePasswordBtn')}</Text>}
               </TouchableOpacity>
               <TouchableOpacity style={s.forgotPassword} onPress={handleForgotPassword} disabled={loading}>
-                <Text style={s.forgotPasswordText}>Şifremi unuttum — e-postama kod gönder</Text>
+                <Text style={s.forgotPasswordText}>{t('settings.forgotPasswordPrompt')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -653,7 +653,7 @@ export default function SettingsScreen() {
               </Text>
             </ScrollView>
             <TouchableOpacity style={s.modalCloseBtn} onPress={() => setShowPrivacyModal(false)}>
-              <Text style={s.modalCloseText}>Kapat</Text>
+              <Text style={s.modalCloseText}>{t('settings.modalClose')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -681,7 +681,7 @@ export default function SettingsScreen() {
               </Text>
             </ScrollView>
             <TouchableOpacity style={s.modalCloseBtn} onPress={() => setShowTermsModal(false)}>
-              <Text style={s.modalCloseText}>Kapat</Text>
+              <Text style={s.modalCloseText}>{t('settings.modalClose')}</Text>
             </TouchableOpacity>
           </View>
         </View>

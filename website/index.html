@@ -12,16 +12,16 @@
   <meta property="og:url" content="https://dythin.com.tr">
   <meta property="og:title" content="Dythin — Canlı Sosyal Oylama & Karar Platformu">
   <meta property="og:description" content="Kombinlerin ve kararsızlıkların için fotoğraflarınla anında canlı oy topla. iOS için ücretsiz!">
-  <meta property="og:image" content="https://dythin.com.tr/photo_2.jpg">
+  <meta property="og:image" content="https://dythin.com.tr/live-voting.jpg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://dythin.com.tr/photo_2.jpg">
+  <meta name="twitter:image" content="https://dythin.com.tr/live-voting.jpg">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@graph":[{"@type":"WebSite","url":"https://dythin.com.tr","name":"Dythin","inLanguage":"tr-TR"},{"@type":"SoftwareApplication","name":"Dythin","operatingSystem":"iOS","applicationCategory":"SocialNetworkingApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"url":"https://apps.apple.com/app/dythin/id6805192895"}]}
   </script>
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="manifest" href="/site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="manifest" href="site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -293,166 +293,54 @@
        BANNER
     ═══════════════════════════════════════════ */
     #banner {
-      width: 100%; height: 65vh; position: relative;
+      width: 100%; height: min(78vh, 900px); min-height: 580px; position: relative;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      overflow: hidden;
+      overflow: hidden; background: var(--bg2);
     }
     #banner > img {
-      width: 100%; height: 100%; object-fit: cover;
-      object-position: center top; filter: brightness(0.65);
-      transition: transform 8s ease-out;
+      position: absolute; right: clamp(2rem, 9vw, 9rem); bottom: 0;
+      width: auto; height: 100%; max-width: min(48%, 560px); object-fit: contain;
+      object-position: center bottom; filter: drop-shadow(0 24px 70px rgba(0,0,0,0.42));
     }
-    #banner:hover > img { transform: scale(1.03); }
-    .banner-hl { position: absolute; top: 2.5rem; right: 3rem; text-align: right; z-index: 2; }
+    .banner-hl { position: absolute; top: 50%; left: clamp(2rem, 8vw, 8rem); transform: translateY(-50%); text-align: left; z-index: 2; }
     .banner-hl-line {
       font-size: clamp(2.5rem, 7vw, 6.5rem);
       font-weight: 900; text-transform: uppercase;
       letter-spacing: -0.03em; line-height: 0.92;
       color: var(--fg); transition: color 0.5s;
     }
-    .banner-bl { position: absolute; bottom: 2.5rem; left: 3rem; z-index: 2; }
+    .banner-bl { position: absolute; bottom: 2.5rem; left: clamp(2rem, 8vw, 8rem); z-index: 2; }
 
     /* ═══════════════════════════════════════════
-       PROBLEM
+       APP FEATURES
     ═══════════════════════════════════════════ */
-    #problem {
-      background: var(--bg); padding: 8rem 2.5rem;
-      position: relative; overflow: hidden;
+    #features {
+      background: var(--bg); padding: 7rem 2.5rem;
       transition: background 0.5s;
     }
-    .prob-wm { position: absolute; bottom: -4rem; left: -1%; z-index: 0; }
-    .prob-inner { max-width: 1400px; margin: 0 auto; position: relative; z-index: 2; }
-    .prob-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
-    .prob-h2 {
-      font-size: clamp(2rem, 4.5vw, 4rem); font-weight: 900;
-      text-transform: uppercase; letter-spacing: -0.025em; line-height: 1;
-      margin-bottom: 2rem; color: var(--fg); transition: color 0.5s;
+    .features-inner { max-width: 1180px; margin: 0 auto; }
+    .features-title {
+      font-size: clamp(2.6rem, 8vw, 7rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: -0.035em; line-height: 0.9;
+      margin-bottom: 3rem; color: var(--fg); transition: color 0.5s;
     }
-    .prob-desc { font-size: 0.88rem; color: var(--fg2); line-height: 1.8; max-width: 420px; margin-bottom: 2.5rem; transition: color 0.5s; }
-    .pain-item { display: flex; gap: 1.75rem; align-items: flex-start; padding: 1.35rem 0; }
-    .pain-item + .pain-item { border-top: 1px solid var(--border2); }
-    .pain-num { font-family: 'Space Grotesk', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: var(--accent); flex-shrink: 0; margin-top: 2px; transition: color 0.5s; }
-    .pain-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--fg); transition: color 0.5s; }
-    .pain-desc2 { font-size: 0.78rem; color: var(--fg2); line-height: 1.65; transition: color 0.5s; }
-    .photo-collage { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .photo-collage img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
-    .photo-collage img:hover { transform: scale(1.03); }
-    .photo-collage .pb { margin-top: 3rem; }
-
-    /* ═══════════════════════════════════════════
-       BLUEPRINT
-    ═══════════════════════════════════════════ */
-    #blueprint {
-      background: var(--bg2); border-top: 1px solid var(--border);
-      padding: 8rem 2.5rem; position: relative; overflow: hidden;
-      transition: background 0.5s, border-color 0.5s;
+    .feature-story {
+      display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: clamp(2rem, 6vw, 6rem); align-items: center;
+      padding: 4rem 0; border-top: 1px solid var(--border);
     }
-    .bp-inner { max-width: 1400px; margin: 0 auto; }
-    .bp-hl { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 6rem; }
-    .bp-word {
-      font-size: clamp(3rem, 9.5vw, 9.5rem); font-weight: 900;
-      text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.9;
-      color: var(--fg); transition: color 0.5s;
-    }
-    .bp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
-    .phone-wrap { position: relative; display: flex; justify-content: center; padding: 4rem 2rem; }
-    .phone-frame {
-      width: 220px; border-radius: 42px;
-      border: 1px solid var(--border); background: var(--bg2);
-      overflow: hidden;
-      box-shadow: 0 0 90px -25px rgba(var(--accent-rgb), 0.45);
-      position: relative; flex-shrink: 0;
-      transition: box-shadow 0.5s, border-color 0.5s, background 0.5s;
-    }
-    .phone-frame img { width: 100%; display: block; }
-    .anno { position: absolute; display: flex; flex-direction: column; }
-    .anno-lh { height: 1px; background: var(--accent); opacity: 0.35; transition: background 0.5s; }
-    .anno-lv { width: 1px; background: var(--accent); opacity: 0.35; transition: background 0.5s; }
-    .anno-label { font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); white-space: nowrap; margin-top: 0.35rem; transition: color 0.5s; }
-    .anno-sub { font-size: 0.68rem; color: var(--fg2); white-space: nowrap; margin-top: 0.2rem; transition: color 0.5s; }
-    .qr-box { display: flex; gap: 2rem; align-items: center; margin-bottom: 3rem; }
-    .qr-img-wrap { width: 115px; height: 115px; background: #fff; padding: 7px; flex-shrink: 0; }
-    .qr-img-wrap img { width: 100%; height: 100%; object-fit: contain; }
-    .bp-desc { font-size: 0.88rem; color: var(--fg2); line-height: 1.8; margin-bottom: 3rem; max-width: 420px; transition: color 0.5s; }
-
-    /* ═══════════════════════════════════════════
-       FLOW
-    ═══════════════════════════════════════════ */
-    #flow {
-      background: var(--bg3); border-top: 1px solid var(--border);
-      padding: 8rem 2.5rem; position: relative; overflow: hidden;
-      transition: background 0.5s, border-color 0.5s;
-    }
-    .flow-inner { max-width: 1400px; margin: 0 auto; }
-    .flow-h {
-      font-size: clamp(3rem, 11vw, 11rem); font-weight: 900;
-      text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87;
-      margin-bottom: 6rem; color: var(--fg); transition: color 0.5s;
-    }
-    .flow-grid {
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      border: 1px solid var(--border);
-      transition: border-color 0.5s;
-    }
-    .flow-cell {
-      padding: 3rem 2.5rem;
-      border-right: 1px solid var(--border);
-      transition: background 0.5s, border-color 0.5s;
-    }
-    .flow-cell:last-child { border-right: none; }
-    .flow-cell.mid { background: rgba(var(--accent-rgb), 0.04); position: relative; }
-    .flow-cell.mid::after {
-      content: ''; position: absolute; bottom: 0; left: 50%;
-      transform: translateX(-50%); width: 55%; height: 1px;
-      background: var(--accent); opacity: 0.5;
-      transition: background 0.5s;
-    }
-    .flow-step-title { font-size: 1.2rem; font-weight: 800; margin: 0.7rem 0 0.6rem; color: var(--fg); transition: color 0.5s; }
-    .flow-step-desc { font-size: 0.78rem; color: var(--fg2); line-height: 1.65; margin-bottom: 2rem; transition: color 0.5s; }
-    .flow-img { overflow: hidden; border: 1px solid var(--border); transition: border-color 0.5s; }
-    .flow-img img { width: 100%; display: block; transition: transform 0.5s; }
-    .flow-img:hover img { transform: scale(1.03); }
-    .flow-wm-wrap { text-align: right; margin-right: -1%; margin-top: -3rem; }
-
-    /* ═══════════════════════════════════════════
-       DEMO
-    ═══════════════════════════════════════════ */
-    #demo {
-      background: var(--bg2); border-top: 1px solid var(--border);
-      padding: 8rem 2.5rem 0;
-      transition: background 0.5s, border-color 0.5s;
-    }
-    .demo-inner { max-width: 1400px; margin: 0 auto; }
-    .demo-h {
-      font-size: clamp(2.5rem, 9vw, 8.5rem); font-weight: 900;
-      text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.87;
-      margin-bottom: 4rem; color: var(--fg); transition: color 0.5s;
-    }
-    .demo-panel {
-      display: grid; grid-template-columns: 1fr 1fr;
-      border: 1px solid var(--border);
-      max-width: 1400px; margin: 0 auto;
-      transition: border-color 0.5s;
-    }
-    .demo-opt { cursor: pointer; position: relative; overflow: hidden; height: 62vh; }
-    .demo-opt + .demo-opt { border-left: 1px solid var(--border); }
-    .demo-opt img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
-    .demo-opt:hover img { transform: scale(1.04); }
-    .demo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.04) 55%, transparent 100%); }
-    .demo-top-label { position: absolute; top: 1.5rem; font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
-    .demo-a .demo-top-label { left: 1.5rem; }
-    .demo-b .demo-top-label { right: 1.5rem; }
-    .demo-hint { position: absolute; font-family: 'Space Grotesk', monospace; font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; }
-    .demo-a .demo-hint { bottom: 5.5rem; left: 2rem; color: rgba(255,255,255,0.5); }
-    .demo-b .demo-hint { bottom: 5.5rem; right: 2rem; color: rgba(var(--accent-rgb), 0.7); }
-    .demo-pct { position: absolute; bottom: 2rem; font-family: 'Space Grotesk', monospace; font-size: 3.25rem; font-weight: 700; line-height: 1; }
-    .demo-a .demo-pct { left: 2rem; color: #fff; }
-    .demo-b .demo-pct { right: 2rem; color: var(--accent); }
-    .demo-bar-wrap { height: 3px; background: var(--border); display: flex; max-width: 1400px; margin: 0 auto; transition: background 0.5s; }
-    .demo-bar-a { height: 100%; background: var(--fg); transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94), background 0.5s; }
-    .demo-bar-b { height: 100%; background: var(--accent); transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94), background 0.5s; }
-    .demo-footer-row { display: flex; justify-content: space-between; padding: 0.85rem 0 6rem; max-width: 1400px; margin: 0 auto; }
+    .feature-story.reverse .feature-copy { order: 2; }
+    .feature-story.reverse .feature-shots { order: 1; }
+    .feature-copy h3 { font-size: clamp(1.7rem, 3.5vw, 3.3rem); line-height: 1.05; letter-spacing: -0.03em; margin: 0.9rem 0 1rem; }
+    .feature-copy p { max-width: 440px; color: var(--fg2); line-height: 1.8; font-size: 0.95rem; }
+    .feature-shots { display: flex; justify-content: center; align-items: center; gap: 1rem; min-width: 0; }
+    .feature-shot { margin: 0; padding: 0.65rem; border: 1px solid var(--border); border-radius: 1.25rem; background: var(--bg2); min-width: 0; }
+    .feature-shot img { display: block; width: auto; max-width: 100%; max-height: min(70vh, 700px); height: auto; border-radius: 0.8rem; }
+    .feature-shot figcaption { padding: 0.8rem 0.25rem 0.25rem; color: var(--fg2); font-size: 0.78rem; line-height: 1.4; }
+    .feature-shots.is-pair { align-items: flex-start; }
+    .feature-shots.is-pair .feature-shot { width: calc(50% - 0.5rem); }
+    .feature-shots.is-pair img { width: 100%; max-height: min(58vh, 560px); object-fit: contain; object-position: top center; }
 
     /* ═══════════════════════════════════════════
        FAQ
@@ -475,6 +363,52 @@
     .faq-icon { font-family: 'Space Grotesk', monospace; font-size: 1.3rem; color: var(--fg3); flex-shrink: 0; line-height: 1; transition: color 0.3s; }
     .faq-ans { display: none; padding-bottom: 1.7rem; font-size: 0.875rem; color: var(--fg2); line-height: 1.82; max-width: 660px; transition: color 0.5s; }
     .faq-ans.open { display: block; }
+
+    /* ═══════════════════════════════════════════
+       BLUEPRINT / SCAN TO DOWNLOAD
+    ═══════════════════════════════════════════ */
+    #blueprint {
+      background: var(--bg2); border-top: 1px solid var(--border);
+      padding: 8rem 2.5rem; position: relative; overflow: hidden;
+      transition: background 0.5s, border-color 0.5s;
+    }
+    .bp-inner { max-width: 1400px; margin: 0 auto; }
+    .bp-hl { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 5rem; }
+    .bp-word {
+      font-size: clamp(2.8rem, 8.5vw, 8.5rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.9;
+      color: var(--fg); transition: color 0.5s;
+    }
+    .bp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    .phone-wrap { position: relative; display: flex; justify-content: center; padding: 3rem 1.5rem; }
+    .phone-frame {
+      width: 250px; border-radius: 44px;
+      border: 2px solid var(--border); background: var(--bg);
+      overflow: hidden;
+      box-shadow: 0 20px 80px -20px rgba(var(--accent-rgb), 0.45);
+      position: relative; flex-shrink: 0;
+      transition: box-shadow 0.5s, border-color 0.5s, background 0.5s;
+    }
+    .phone-frame img { width: 100%; display: block; }
+    .anno { position: absolute; display: flex; flex-direction: column; z-index: 5; }
+    .anno-lh { height: 1px; background: var(--accent); opacity: 0.45; transition: background 0.5s; }
+    .anno-lv { width: 1px; background: var(--accent); opacity: 0.45; transition: background 0.5s; }
+    .anno-label { font-family: 'Space Grotesk', monospace; font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); white-space: nowrap; margin-top: 0.35rem; font-weight: 700; transition: color 0.5s; }
+    .anno-sub { font-size: 0.68rem; color: var(--fg2); white-space: nowrap; margin-top: 0.2rem; transition: color 0.5s; }
+    .qr-card {
+      display: flex; gap: 1.5rem; align-items: center;
+      background: var(--bg3); border: 1px solid var(--border);
+      padding: 1.5rem; border-radius: 20px; margin-bottom: 2.5rem;
+      max-width: 460px; transition: background 0.5s, border-color 0.5s;
+    }
+    .qr-img-wrap {
+      width: 120px; height: 120px; background: #ffffff;
+      padding: 8px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    .qr-img-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .bp-desc { font-size: 0.92rem; color: var(--fg2); line-height: 1.8; margin-bottom: 2.5rem; max-width: 440px; transition: color 0.5s; }
 
     /* ═══════════════════════════════════════════
        FOOTER
@@ -519,32 +453,28 @@
     ═══════════════════════════════════════════ */
     @media (max-width: 960px) {
       #nav { padding: 1rem 1.25rem; }
-      .theme-sw { display: none; }
+      .theme-sw { gap: 0.35rem; }
+      .tdot { width: 12px; height: 12px; }
       #hero { padding: 70px 1.25rem 4rem; }
       .hero-meta { left: 1.25rem; right: 1.25rem; }
       .hero-bottom { gap: 2rem; }
-      #banner { height: 48vh; }
-      .banner-hl { right: 1.5rem; top: 1.5rem; }
-      .banner-bl { left: 1.5rem; bottom: 1.5rem; }
-      #problem { padding: 5rem 1.25rem; }
-      .prob-grid { grid-template-columns: 1fr; gap: 3rem; }
-      .prob-wm { display: none; }
+      #banner { height: min(76svh, 720px); min-height: 520px; }
+      #banner > img { right: 0; height: 74%; max-width: 72%; }
+      .banner-hl { top: 2rem; left: 1.25rem; transform: none; }
+      .banner-hl-line { font-size: clamp(2rem, 9vw, 4rem); }
+      .banner-bl { left: 1.25rem; bottom: 1.25rem; }
+      #features { padding: 5rem 1.25rem; }
+      .feature-story { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 0; }
+      .feature-story.reverse .feature-copy, .feature-story.reverse .feature-shots { order: initial; }
+      .feature-copy p { font-size: 0.9rem; }
+      .feature-shot img { max-height: 68svh; }
+      .feature-shots.is-pair { gap: 0.6rem; }
+      .feature-shots.is-pair .feature-shot { width: calc(50% - 0.3rem); padding: 0.4rem; }
+      .feature-shots.is-pair img { max-height: 52svh; }
       #blueprint { padding: 5rem 1.25rem; }
-      .bp-hl { flex-direction: column; margin-bottom: 3rem; }
+      .bp-hl { margin-bottom: 3rem; }
       .bp-grid { grid-template-columns: 1fr; gap: 3rem; }
       .anno { display: none; }
-      #flow { padding: 5rem 1.25rem; }
-      .flow-grid { grid-template-columns: 1fr; }
-      .flow-cell { border-right: none; border-bottom: 1px solid var(--border); }
-      .flow-cell:last-child { border-bottom: none; }
-      .flow-wm-wrap { display: none; }
-      #demo { padding: 5rem 1.25rem 0; }
-      .demo-panel { grid-template-columns: 1fr; }
-      .demo-opt { height: 48vh; }
-      .demo-opt + .demo-opt { border-left: none; border-top: 1px solid var(--border); }
-      .demo-b .demo-pct { right: auto; left: 2rem; }
-      .demo-b .demo-hint { right: auto; left: 2rem; }
-      .demo-b .demo-top-label { right: auto; left: 1.5rem; }
       #faq { padding: 5rem 1.25rem; }
       footer { padding: 2rem 1.25rem; }
       .section-meta { margin-bottom: 3rem; }
@@ -552,6 +482,14 @@
     }
     @media (max-width: 480px) {
       .nav-cta span { display: none; }
+      #nav { padding: 0.85rem 0.8rem; }
+      .nav-r { gap: 0.55rem; }
+      .lang-sw { gap: 0; }
+      .lang-btn { padding: 0.3rem 0.25rem; font-size: 0.52rem; }
+      .theme-sw { gap: 0.25rem; }
+      .tdot { width: 10px; height: 10px; }
+      .nav-cta { padding: 0.5rem 0.65rem; }
+      .feature-shots.is-pair .feature-shot figcaption { font-size: 0.65rem; }
     }
   </style>
 </head>
@@ -609,7 +547,7 @@
 
 <!-- ════════ FULL-WIDTH BANNER ════════ -->
 <div id="banner">
-  <img src="/photo_2.jpg" alt="Dythin App">
+  <img src="live-voting.jpg" alt="Dythin canlı oylama ekranı">
   <div class="banner-hl reveal">
     <div class="banner-hl-line" data-i18n="bnHl1">OY VER.</div>
     <div class="banner-hl-line" style="color:var(--accent)" data-i18n="bnHl2">KARAR AL.</div>
@@ -619,176 +557,128 @@
   </div>
 </div>
 
-<!-- ════════ PROBLEM SPACE ════════ -->
-<section id="problem">
-  <div class="prob-wm wm">KARAR</div>
-  <div class="prob-inner">
+<!-- ════════ APP FEATURES ════════ -->
+<section id="features">
+  <div class="features-inner">
     <div class="section-meta reveal">
-      <span class="label" data-i18n="prob01meta">PROBLEM SPACE · PAIN POINTS</span>
-      <span class="label">01</span>
+      <span class="label" data-i18n="featuresMeta">DYTHIN ÖZELLİKLERİ</span>
+      <span class="label">02</span>
     </div>
-    <div class="prob-grid">
-      <div class="reveal-left">
-        <h2 class="prob-h2">
-          <span data-i18n="probH2a">KARARSIZLİK</span><br>
-          <span data-i18n="probH2b">HERKESİN</span><br>
-          <span data-i18n="probH2c">PROBLEMİ.</span>
-        </h2>
-        <p class="prob-desc" data-i18n="probDesc">Aynanın karşısında dakikalarca iki kıyafet arasında kalmak. Mağazada alışveriş yaparken arkadaşlarından yanıt beklemek. Bunlar tarihe karışıyor.</p>
-        <div style="border-top:1px solid var(--border2)">
-          <div class="pain-item">
-            <span class="pain-num">01</span>
-            <div>
-              <div class="pain-title" data-i18n="p1t">Anlık Geri Bildirim Yok</div>
-              <div class="pain-desc2" data-i18n="p1d">Arkadaşlarından saat bekler, karar gecikir.</div>
-            </div>
-          </div>
-          <div class="pain-item">
-            <span class="pain-num">02</span>
-            <div>
-              <div class="pain-title" data-i18n="p2t">Geniş Topluluk Erişimi Yok</div>
-              <div class="pain-desc2" data-i18n="p2d">Sadece arkadaş çevreni değil, tüm topluluğu dinle.</div>
-            </div>
-          </div>
-          <div class="pain-item">
-            <span class="pain-num">03</span>
-            <div>
-              <div class="pain-title" data-i18n="p3t">Sonuç Takibi Yok</div>
-              <div class="pain-desc2" data-i18n="p3d">Oylar gerçek zamanlı akar, 24 saat canlı sayaç.</div>
-            </div>
-          </div>
-        </div>
+    <h2 class="features-title reveal"><span data-i18n="featuresH1">KARAR VERMEK</span><br><span style="color:var(--accent)" data-i18n="featuresH2">ARTIK KOLAY.</span></h2>
+
+    <article class="feature-story">
+      <div class="feature-copy reveal-left">
+        <span class="label la" data-i18n="modeLabel">OYLAMA OLUŞTUR</span>
+        <h3 data-i18n="modeTitle">Tekli ya da ikili oylama</h3>
+        <p data-i18n="modeDesc">Tek bir fotoğraf paylaş veya iki seçeneği A/B karşılaştır. Sorunu yaz, kimin oy vereceğini seç ve paylaş.</p>
       </div>
-      <div class="photo-collage reveal-right">
-        <img src="/photo_1.jpg" alt="Dythin Oylama">
-        <img src="/photo_3.png" alt="Dythin Profil" class="pb">
+      <div class="feature-shots is-pair reveal-right">
+        <figure class="feature-shot"><img src="create-single.jpg" alt="Tek fotoğraflı oylama oluşturma ekranı" loading="lazy"><figcaption data-i18n="singleCaption">Tek fotoğraf</figcaption></figure>
+        <figure class="feature-shot"><img src="create-ab.jpg" alt="İki fotoğraflı A/B karşılaştırma ekranı" loading="lazy"><figcaption data-i18n="abCaption">A/B karşılaştırma</figcaption></figure>
       </div>
-    </div>
+    </article>
+
+    <article class="feature-story reverse">
+      <div class="feature-copy reveal-right">
+        <span class="label la" data-i18n="resultsLabel">CANLI SONUÇLAR</span>
+        <h3 data-i18n="resultsTitle">Oyların yönünü anında gör</h3>
+        <p data-i18n="resultsDesc">Beğeni ve geçiş oranlarını tek ekranda takip et. Oylaman tamamlandığında karar vermen kolaylaşsın.</p>
+      </div>
+      <div class="feature-shots reveal-left">
+        <figure class="feature-shot"><img src="voting-results.jpg" alt="Dythin oylama sonuçları" loading="lazy"></figure>
+      </div>
+    </article>
+
+    <article class="feature-story">
+      <div class="feature-copy reveal-left">
+        <span class="label la" data-i18n="profileLabel">PROFİLİN</span>
+        <h3 data-i18n="profileTitle">Paylaşımların ve arkadaşların bir arada</h3>
+        <p data-i18n="profileDesc">Profilini düzenle, paylaşımlarını gör ve arkadaşlarınla bağlantıda kal.</p>
+      </div>
+      <div class="feature-shots reveal-right">
+        <figure class="feature-shot"><img src="profile-screen.jpg" alt="Dythin kullanıcı profili" loading="lazy"></figure>
+      </div>
+    </article>
+
+    <article class="feature-story reverse">
+      <div class="feature-copy reveal-right">
+        <span class="label la" data-i18n="messagesLabel">MESAJLAR</span>
+        <h3 data-i18n="messagesTitle">Anlık mesajlaşma</h3>
+        <p data-i18n="messagesDesc">Arkadaşlarınla birebir yazış, görsel gönder ve kararını sohbet içinde paylaş.</p>
+      </div>
+      <div class="feature-shots reveal-left">
+        <figure class="feature-shot"><img src="messaging-screen.jpg" alt="Dythin anlık mesajlaşma ekranı" loading="lazy"></figure>
+      </div>
+    </article>
+
+    <article class="feature-story">
+      <div class="feature-copy reveal-left">
+        <span class="label la" data-i18n="settingsLabel">TEMA VE DİL</span>
+        <h3 data-i18n="settingsTitle">Herkese uygun görünüm</h3>
+        <p data-i18n="settingsDesc">Mor, altın, pembe ve yeşil temalardan birini seç. Dythin'i Türkçe, İngilizce veya Almanca kullan.</p>
+      </div>
+      <div class="feature-shots reveal-right">
+        <figure class="feature-shot"><img src="theme-language.jpg" alt="Dythin tema ve dil ayarları" loading="lazy"></figure>
+      </div>
+    </article>
   </div>
 </section>
 
-<!-- ════════ BLUEPRINT / SCAN TO DOWNLOAD ════════ -->
+<!-- ════════ BLUEPRINT / SCAN TO DOWNLOAD (KAREKOD) ════════ -->
 <section id="blueprint">
   <div class="bp-inner">
     <div class="section-meta reveal">
       <span class="label" data-i18n="bpMeta">SCAN TO DOWNLOAD · APP STORE</span>
-      <span class="label">02</span>
+      <span class="label">03</span>
     </div>
     <div class="bp-hl reveal">
       <span class="bp-word" data-i18n="bpH1">KAMERANI</span>
       <span class="bp-word" style="color:var(--accent)" data-i18n="bpH2">DOĞRULT.</span>
     </div>
     <div class="bp-grid">
+      <!-- Phone + technical annotations -->
       <div class="phone-wrap reveal-left">
         <div class="phone-frame">
-          <img src="/photo_4.png" alt="Dythin App Screen">
+          <img src="live-voting.jpg" alt="Dythin Canlı Oylama Ekranı">
         </div>
-        <div class="anno" style="left:2%;top:28%;align-items:flex-end;">
+        <!-- Left annotation -->
+        <div class="anno" style="left:-5%;top:28%;align-items:flex-end;">
           <div class="anno-lv" style="height:55px;margin-left:auto;"></div>
-          <div class="anno-lh" style="width:52px;"></div>
-          <div class="anno-label" data-i18n="an1l">[ A/B KIYAS ]</div>
-          <div class="anno-sub" data-i18n="an1s">Tek dokunuş</div>
+          <div class="anno-lh" style="width:60px;"></div>
+          <div class="anno-label" data-i18n="an1l">[ 01 · CANLI OYLAMA ]</div>
+          <div class="anno-sub" data-i18n="an1s">Sağa/sola kaydır veya oyla</div>
         </div>
-        <div class="anno" style="right:2%;top:54%;align-items:flex-start;">
+        <!-- Right annotation -->
+        <div class="anno" style="right:-5%;top:52%;align-items:flex-start;">
           <div class="anno-lv" style="height:55px;"></div>
-          <div class="anno-lh" style="width:52px;"></div>
-          <div class="anno-label" data-i18n="an2l">[ CANLI SONUÇ ]</div>
-          <div class="anno-sub" data-i18n="an2s">24h sayaç</div>
+          <div class="anno-lh" style="width:60px;"></div>
+          <div class="anno-label" data-i18n="an2l">[ 02 · 24H SAYAÇ ]</div>
+          <div class="anno-sub" data-i18n="an2s">24 saat sonra arşivlenir</div>
         </div>
-        <div class="anno" style="left:50%;bottom:7%;transform:translateX(-50%);align-items:center;">
-          <div class="anno-lv" style="height:38px;"></div>
-          <div class="anno-label" data-i18n="an3l">[ DM SOHBET ]</div>
+        <!-- Bottom annotation -->
+        <div class="anno" style="left:50%;bottom:0%;transform:translateX(-50%);align-items:center;">
+          <div class="anno-lv" style="height:35px;"></div>
+          <div class="anno-label" data-i18n="an3l">[ 03 · DM MESAJLAŞMA ]</div>
         </div>
       </div>
+
+      <!-- Right: desc + QR code -->
       <div class="reveal-right">
-        <p class="bp-desc" data-i18n="bpDesc">Telefonunun kamerasını aşağıdaki QR koda doğrult ve doğrudan Apple App Store sayfasına ulaş. Ücretsiz. Reklam yok.</p>
-        <div class="qr-box">
+        <p class="bp-desc" data-i18n="bpDesc">Telefonunun kamerasını aşağıdaki QR koda doğrult ve doğrudan Apple App Store sayfasına ulaş. %100 Ücretsiz. Reklam yok.</p>
+        
+        <div class="qr-card">
           <div class="qr-img-wrap">
-            <img src="/Dythin_AppStore_QR.svg" onerror="this.src='/Dythin_AppStore_QR_White.png'" alt="QR Code">
+            <img src="Dythin_AppStore_QR_Black.svg" alt="Dythin App Store Karekod">
           </div>
           <div>
             <div class="label la" style="margin-bottom:0.4rem" data-i18n="qrLabel">[ RESMİ APP STORE ]</div>
-            <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.4rem;color:var(--fg)" data-i18n="qrTitle">iOS için %100 Ücretsiz</div>
-            <div style="font-size:0.78rem;color:var(--fg2);line-height:1.6" data-i18n="qrSub">iPhone ve iPad ile tam uyumlu.</div>
+            <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.35rem;color:var(--fg)" data-i18n="qrTitle">iOS için %100 Ücretsiz</div>
+            <div style="font-size:0.78rem;color:var(--fg2);line-height:1.6" data-i18n="qrSub">iPhone ve iPad ile tam uyumludur.</div>
           </div>
         </div>
-        <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener" class="text-link" data-i18n="bpLink">APP STORE'DA AÇ →</a>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ════════ 3-PHONE FLOW ════════ -->
-<section id="flow">
-  <div class="flow-inner">
-    <div class="section-meta reveal">
-      <span class="label" data-i18n="flowMeta">CORE EXPERIENCE FLOW · 3 AŞAMA</span>
-      <span class="label">03</span>
-    </div>
-    <div class="flow-h reveal">
-      <span data-i18n="flowH1">KUSURSUZ</span><br>
-      <span data-i18n="flowH2">AKIŞ.</span>
-    </div>
-    <div class="flow-grid">
-      <div class="flow-cell reveal reveal-delay-1">
-        <div class="label la" data-i18n="s1lbl">AŞAMA 01</div>
-        <div class="flow-step-title" data-i18n="s1t">Akış &amp; Oyla</div>
-        <div class="flow-step-desc" data-i18n="s1d">Sonsuz oylama akışında gezin, beğendiğine oy ver.</div>
-        <div class="flow-img"><img src="/photo_5.png" alt="Akış"></div>
+        <a href="https://apps.apple.com/app/dythin/id6805192895" target="_blank" rel="noopener noreferrer" class="text-link" data-i18n="bpLink">APP STORE'DA AÇ →</a>
       </div>
-      <div class="flow-cell mid reveal reveal-delay-2">
-        <div class="label la" data-i18n="s2lbl">AŞAMA 02</div>
-        <div class="flow-step-title" data-i18n="s2t">Yükle &amp; Paylaş</div>
-        <div class="flow-step-desc" data-i18n="s2d">İki fotoğraf seç, A/B oylaması başlat.</div>
-        <div class="flow-img"><img src="/photo_1.jpg" alt="Paylaş"></div>
-      </div>
-      <div class="flow-cell reveal reveal-delay-3">
-        <div class="label la" data-i18n="s3lbl">AŞAMA 03</div>
-        <div class="flow-step-title" data-i18n="s3t">Sonuç &amp; Sohbet</div>
-        <div class="flow-step-desc" data-i18n="s3d">Canlı yüzde dağılımını gör, mesajlaş.</div>
-        <div class="flow-img"><img src="/photo_3.png" alt="Sonuç"></div>
-      </div>
-    </div>
-    <div class="flow-wm-wrap"><div class="wm">FLOW</div></div>
-  </div>
-</section>
-
-<!-- ════════ INTERACTIVE DEMO ════════ -->
-<section id="demo">
-  <div class="demo-inner">
-    <div class="section-meta reveal">
-      <span class="label" data-i18n="demoMeta">INTERACTIVE DEMO · OY KULLAN</span>
-      <span class="label">04</span>
-    </div>
-    <div class="demo-h reveal">
-      <span data-i18n="demoH1">DENEMEDEN</span><br>
-      <span style="color:var(--accent)" data-i18n="demoH2">KARAR VERME.</span>
-    </div>
-  </div>
-  <div class="demo-panel">
-    <div class="demo-opt demo-a" onclick="castVote('A')">
-      <img src="/photo_1.jpg" alt="A">
-      <div class="demo-overlay"></div>
-      <div class="demo-top-label" data-i18n="dLblA">[ A · SOL SEÇENEK ]</div>
-      <div class="demo-hint" data-i18n="dHint">TIKLAYARAK OY VER</div>
-      <div class="demo-pct" id="pct-a">%74</div>
-    </div>
-    <div class="demo-opt demo-b" onclick="castVote('B')">
-      <img src="/photo_2.jpg" alt="B">
-      <div class="demo-overlay"></div>
-      <div class="demo-top-label" data-i18n="dLblB">[ B · SAĞ SEÇENEK ]</div>
-      <div class="demo-hint" data-i18n="dHint">TIKLAYARAK OY VER</div>
-      <div class="demo-pct" id="pct-b">%26</div>
-    </div>
-  </div>
-  <div style="max-width:1400px;margin:0 auto;">
-    <div class="demo-bar-wrap">
-      <div class="demo-bar-a" id="bar-a" style="width:74%"></div>
-      <div class="demo-bar-b" id="bar-b" style="width:26%"></div>
-    </div>
-    <div class="demo-footer-row">
-      <span class="label" id="votes-label" data-i18n="votesLbl">24 OY TOPLANDI · TIKLA OY VER</span>
-      <span class="label">CANLI DEMO</span>
     </div>
   </div>
 </section>
@@ -798,7 +688,7 @@
   <div class="faq-inner">
     <div class="section-meta reveal">
       <span class="label" data-i18n="faqMeta">SIKÇA SORULAN SORULAR</span>
-      <span class="label">05</span>
+      <span class="label">07</span>
     </div>
     <div class="faq-h reveal">
       <span data-i18n="faqH1">MERAK</span><br>
@@ -813,7 +703,7 @@
   <div class="footer-inner">
     <div class="footer-logo">DYTHIN</div>
     <div class="footer-links">
-      <a href="https://instagram.com/dythinapp" target="_blank" class="footer-link">Instagram</a>
+      <a href="https://instagram.com/dythin.app" target="_blank" rel="noopener noreferrer" class="footer-link">Instagram · @dythin.app</a>
       <button onclick="openModal('m-privacy')" class="footer-link" data-i18n="ftPrivacy">Gizlilik Politikası</button>
       <button onclick="openModal('m-terms')"   class="footer-link" data-i18n="ftTerms">Kullanım Koşulları</button>
     </div>
@@ -865,7 +755,19 @@ const T = {
     h1a:'KARARSIZ', h1b:'KALMAYA', h1c:'SON.',
     heroDesc:'Fotoğraflarını yükle, topluluğun ve arkadaşlarının oylarıyla anında karar ver. iOS için ücretsiz.',
     heroLink:"APP STORE'DAN İNDİR →",
-    bnHl1:'OY VER.', bnHl2:'KARAR AL.', bnLabel:'[ 01 · UYGULAMA TANITIMI ]',
+    bnHl1:'CANLI', bnHl2:'OYLAMA', bnLabel:'[ 01 · CANLI OYLAMA ]',
+    featuresMeta:'UYGULAMANIN ÖZELLİKLERİ', featuresH1:'KARAR VERMEK', featuresH2:'ARTIK KOLAY.',
+    modeLabel:'OYLAMA OLUŞTUR', modeTitle:'Tekli ya da ikili oylama',
+    modeDesc:'Tek bir fotoğraf paylaş veya iki seçeneği A/B karşılaştır. Sorunu yaz, kimin oy vereceğini seç ve paylaş.',
+    singleCaption:'Tek fotoğraf', abCaption:'A/B karşılaştırma',
+    resultsLabel:'CANLI SONUÇLAR', resultsTitle:'Oyların yönünü anında gör',
+    resultsDesc:'Beğeni ve geçiş oranlarını tek ekranda takip et. Oylaman tamamlandığında karar vermen kolaylaşsın.',
+    profileLabel:'PROFİLİN', profileTitle:'Paylaşımların ve arkadaşların bir arada',
+    profileDesc:'Profilini düzenle, paylaşımlarını gör ve arkadaşlarınla bağlantıda kal.',
+    messagesLabel:'MESAJLAR', messagesTitle:'Anlık mesajlaşma',
+    messagesDesc:'Arkadaşlarınla birebir yazış, görsel gönder ve kararını sohbet içinde paylaş.',
+    settingsLabel:'TEMA VE DİL', settingsTitle:'Herkese uygun görünüm',
+    settingsDesc:'Mor, altın, pembe ve yeşil temalardan birini seç. Dythin\'i Türkçe, İngilizce veya Almanca kullan.',
     prob01meta:'PROBLEM SPACE · PAIN POINTS',
     probH2a:'KARARSIZLİK', probH2b:'HERKESİN', probH2c:'PROBLEMİ.',
     probDesc:'Aynanın karşısında dakikalarca iki kıyafet arasında kalmak. Mağazada alışveriş yaparken arkadaşlarından yanıt beklemek. Bunlar tarihe karışıyor.',
@@ -879,11 +781,10 @@ const T = {
     bpLink:"APP STORE'DA AÇ →",
     flowMeta:'CORE EXPERIENCE FLOW · 3 AŞAMA', flowH1:'KUSURSUZ', flowH2:'AKIŞ.',
     s1lbl:'AŞAMA 01', s1t:'Akış & Oyla', s1d:'Sonsuz oylama akışında gezin, beğendiğine oy ver.',
-    s2lbl:'AŞAMA 02', s2t:'Yükle & Paylaş', s2d:'İki fotoğraf seç, A/B oylaması başlat.',
-    s3lbl:'AŞAMA 03', s3t:'Sonuç & Sohbet', s3d:'Canlı yüzde dağılımını gör, mesajlaş.',
-    demoMeta:'INTERACTIVE DEMO · OY KULLAN', demoH1:'DENEMEDEN', demoH2:'KARAR VERME.',
-    dLblA:'[ A · SOL SEÇENEK ]', dLblB:'[ B · SAĞ SEÇENEK ]',
-    dHint:'TIKLAYARAK OY VER', votesLbl:'24 OY TOPLANDI · TIKLA OY VER',
+    s2lbl:'AŞAMA 02', s2t:'Sonuçları Gör', s2d:'Oylama sonuçlarını ve oy dağılımını takip et.',
+    s3lbl:'AŞAMA 03', s3t:'Profilini Düzenle', s3d:'Profilini kişiselleştir ve arkadaşlarını keşfet.',
+    demoMeta:'UYGULAMADAN EKRANLAR', demoH1:'UYGULAMADAN', demoH2:'EKRANLAR.',
+    dLblA:'Oylama akışı', dLblB:'Canlı sonuçlar',
     faqMeta:'SIKÇA SORULAN SORULAR', faqH1:'MERAK', faqH2:'EDİLENLER.',
     faqs:[
       ['Dythin tamamen ücretsiz mi?','Evet, Dythin %100 ücretsizdir. Fotoğraf yüklemek, oylama başlatmak, arkadaş eklemek ve canlı sonuçları takip etmek için hiçbir abonelik veya gizli ücret ödemezsiniz.'],
@@ -899,7 +800,19 @@ const T = {
     h1a:'STOP', h1b:'BEING', h1c:'INDECISIVE.',
     heroDesc:'Upload your photos, get instant votes from your community and friends. 100% free for iOS.',
     heroLink:'DOWNLOAD ON APP STORE →',
-    bnHl1:'VOTE.', bnHl2:'DECIDE.', bnLabel:'[ 01 · APP INTRODUCTION ]',
+    bnHl1:'LIVE', bnHl2:'VOTING', bnLabel:'[ 01 · LIVE VOTING ]',
+    featuresMeta:'APP FEATURES', featuresH1:'MAKE YOUR', featuresH2:'CHOICE EASILY.',
+    modeLabel:'CREATE A POLL', modeTitle:'Single photo or A/B poll',
+    modeDesc:'Share one photo or compare two options side by side. Add your question, choose who can vote, and post it.',
+    singleCaption:'Single photo', abCaption:'A/B comparison',
+    resultsLabel:'LIVE RESULTS', resultsTitle:'See how people voted',
+    resultsDesc:'Follow likes and passes on one screen. When your poll ends, make your choice with confidence.',
+    profileLabel:'YOUR PROFILE', profileTitle:'Your posts and friends in one place',
+    profileDesc:'Edit your profile, browse your posts, and stay connected with friends.',
+    messagesLabel:'MESSAGES', messagesTitle:'Instant messaging',
+    messagesDesc:'Chat one to one with friends, send images, and share your decision in the conversation.',
+    settingsLabel:'THEME AND LANGUAGE', settingsTitle:'A look that feels like yours',
+    settingsDesc:'Choose purple, gold, pink, or green. Use Dythin in Turkish, English, or German.',
     prob01meta:'PROBLEM SPACE · PAIN POINTS',
     probH2a:'INDECISION', probH2b:"EVERYONE'S", probH2c:'PROBLEM.',
     probDesc:"Standing in front of the mirror for minutes choosing between outfits. Waiting for friends to respond while shopping. Those days are over.",
@@ -913,11 +826,10 @@ const T = {
     bpLink:'OPEN ON APP STORE →',
     flowMeta:'CORE EXPERIENCE FLOW · 3 STEPS', flowH1:'SEAMLESS', flowH2:'FLOW.',
     s1lbl:'STEP 01', s1t:'Browse & Vote', s1d:'Scroll the infinite feed, vote on what you love.',
-    s2lbl:'STEP 02', s2t:'Upload & Share', s2d:'Pick two photos, start an A/B poll.',
-    s3lbl:'STEP 03', s3t:'Results & Chat', s3d:'See live percentages, message friends.',
-    demoMeta:'INTERACTIVE DEMO · CAST YOUR VOTE', demoH1:'TRY BEFORE', demoH2:'YOU DECIDE.',
-    dLblA:'[ A · LEFT OPTION ]', dLblB:'[ B · RIGHT OPTION ]',
-    dHint:'CLICK TO VOTE', votesLbl:'24 VOTES CAST · CLICK TO VOTE',
+    s2lbl:'STEP 02', s2t:'See Results', s2d:'Track poll results and how the votes are split.',
+    s3lbl:'STEP 03', s3t:'Edit Your Profile', s3d:'Personalize your profile and discover friends.',
+    demoMeta:'APP SCREENSHOTS', demoH1:'INSIDE THE', demoH2:'DYTHIN APP.',
+    dLblA:'Voting feed', dLblB:'Live results',
     faqMeta:'FREQUENTLY ASKED QUESTIONS', faqH1:'COMMON', faqH2:'QUESTIONS.',
     faqs:[
       ['Is Dythin completely free?','Yes, Dythin is 100% free. No subscriptions or hidden fees to upload photos, start polls, add friends, or track live results.'],
@@ -933,7 +845,19 @@ const T = {
     h1a:'SCHLUSS', h1b:'MIT DER', h1c:'UNENTSCHLOSSENHEIT.',
     heroDesc:'Lade deine Fotos hoch, erhalte sofortige Votes von der Community und Freunden. Kostenlos für iOS.',
     heroLink:'IM APP STORE LADEN →',
-    bnHl1:'ABSTIMMEN.', bnHl2:'ENTSCHEIDEN.', bnLabel:'[ 01 · APP VORSTELLUNG ]',
+    bnHl1:'LIVE', bnHl2:'ABSTIMMUNG', bnLabel:'[ 01 · LIVE-ABSTIMMUNG ]',
+    featuresMeta:'APP-FUNKTIONEN', featuresH1:'ENTSCHEIDUNGEN', featuresH2:'LEICHT GEMACHT.',
+    modeLabel:'UMFRAGE ERSTELLEN', modeTitle:'Ein Foto oder A/B-Umfrage',
+    modeDesc:'Teile ein Foto oder vergleiche zwei Optionen direkt. Füge deine Frage hinzu, wähle die Zielgruppe und teile die Umfrage.',
+    singleCaption:'Ein Foto', abCaption:'A/B-Vergleich',
+    resultsLabel:'LIVE-ERGEBNISSE', resultsTitle:'Sieh sofort, wie abgestimmt wurde',
+    resultsDesc:'Verfolge Likes und Überspringen an einem Ort. Nach Ende der Umfrage fällt dir die Entscheidung leichter.',
+    profileLabel:'DEIN PROFIL', profileTitle:'Beiträge und Freunde an einem Ort',
+    profileDesc:'Bearbeite dein Profil, sieh deine Beiträge an und bleib mit Freunden in Kontakt.',
+    messagesLabel:'NACHRICHTEN', messagesTitle:'Sofort Nachrichten senden',
+    messagesDesc:'Schreibe direkt mit Freunden, sende Bilder und teile deine Entscheidung im Chat.',
+    settingsLabel:'DESIGN UND SPRACHE', settingsTitle:'Passend für dich',
+    settingsDesc:'Wähle Lila, Gold, Pink oder Grün. Nutze Dythin auf Türkisch, Englisch oder Deutsch.',
     prob01meta:'PROBLEMRAUM · SCHMERZPUNKTE',
     probH2a:'UNENTSCHLOSSENHEIT', probH2b:'IST ÜBERALL', probH2c:'PRÄSENT.',
     probDesc:'Minutenlang vor dem Spiegel zwischen Outfits wählen. Auf Freunde warten, die beim Shopping nicht antworten. Das ist vorbei.',
@@ -947,11 +871,10 @@ const T = {
     bpLink:'IM APP STORE ÖFFNEN →',
     flowMeta:'KERN-ERLEBNIS-FLOW · 3 SCHRITTE', flowH1:'NAHTLOSER', flowH2:'ABLAUF.',
     s1lbl:'SCHRITT 01', s1t:'Stöbern & Abstimmen', s1d:'Endloser Feed, abstimmen was du liebst.',
-    s2lbl:'SCHRITT 02', s2t:'Hochladen & Teilen', s2d:'Zwei Fotos wählen, A/B-Umfrage starten.',
-    s3lbl:'SCHRITT 03', s3t:'Ergebnisse & Chat', s3d:'Live-Prozente sehen, mit Freunden schreiben.',
-    demoMeta:'INTERAKTIVE DEMO · JETZT ABSTIMMEN', demoH1:'ERST TESTEN,', demoH2:'DANN ENTSCHEIDEN.',
-    dLblA:'[ A · LINKS ]', dLblB:'[ B · RECHTS ]',
-    dHint:'KLICKEN ZUM ABSTIMMEN', votesLbl:'24 STIMMEN · KLICKEN',
+    s2lbl:'SCHRITT 02', s2t:'Ergebnisse ansehen', s2d:'Umfrageergebnisse und Stimmenverteilung verfolgen.',
+    s3lbl:'SCHRITT 03', s3t:'Profil bearbeiten', s3d:'Personalisiere dein Profil und entdecke Freunde.',
+    demoMeta:'EINBLICKE IN DIE APP', demoH1:'EINBLICK IN', demoH2:'DIE DYTHIN APP.',
+    dLblA:'Abstimmungsfeed', dLblB:'Live-Ergebnisse',
     faqMeta:'HÄUFIG GESTELLTE FRAGEN', faqH1:'HÄUFIGE', faqH2:'FRAGEN.',
     faqs:[
       ['Ist Dythin komplett kostenlos?','Ja, Dythin ist 100% kostenlos. Keine Abonnements oder versteckten Gebühren.'],
@@ -966,7 +889,6 @@ const T = {
 
 let lang  = localStorage.getItem('dythin-lang')  || 'tr';
 let theme = localStorage.getItem('dythin-theme') || 'purple';
-let vA = 74, vB = 26, totalV = 24;
 
 /* ── THEME ── */
 function switchTheme(t) {
@@ -1025,21 +947,6 @@ function toggleFaq(i) {
     icon.textContent = '−';
     icon.style.color = 'var(--accent)';
   }
-}
-
-/* ── DEMO VOTE ── */
-function castVote(side) {
-  totalV++;
-  if (side === 'A') vA += 2; else vB += 2;
-  const total = vA + vB;
-  const pA = Math.round(vA / total * 100);
-  const pB = 100 - pA;
-  document.getElementById('pct-a').textContent = '%' + pA;
-  document.getElementById('pct-b').textContent = '%' + pB;
-  document.getElementById('bar-a').style.width = pA + '%';
-  document.getElementById('bar-b').style.width = pB + '%';
-  const suffix = lang === 'tr' ? ' OY TOPLANDI' : lang === 'en' ? ' VOTES CAST' : ' STIMMEN';
-  document.getElementById('votes-label').textContent = totalV + suffix;
 }
 
 /* ── MODALS ── */
