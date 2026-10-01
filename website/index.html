@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dythin — Kombin ve Kararsızlıklar İçin Canlı Sosyal Oylama</title>
-  <meta name="description" content="Kombinlerin, ürün kıyaslamaların ve kararsızlıkların için fotoğraflarını yükle; topluluktan ve arkadaşlarından anında oy topla. iOS için %100 Ücretsiz!">
+  <meta name="description" content="Kombinlerin, ürün kıyaslamaların ve kararsızlıkların için fotoğraflarını yükle; topluluktan ve arkadaşlarından anında oy topla. iOS için Ücretsiz!">
   <meta name="keywords" content="dythin, oylama uygulaması, kombin seçimi, A/B karşılaştırma, sosyal oylama, kararsızlık uygulaması, ios, app store">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://dythin.com.tr" />
@@ -293,21 +293,15 @@
        BANNER
     ═══════════════════════════════════════════ */
     #banner {
-      width: 100%; height: min(85vh, 920px); min-height: 640px; position: relative;
+      width: 100%; height: min(78vh, 900px); min-height: 580px; position: relative;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       overflow: hidden; background: var(--bg2);
-      transition: background 0.5s, border-color 0.5s;
     }
-    .banner-phone-wrap {
-      position: absolute; right: clamp(2rem, 9vw, 9rem); top: 50%; transform: translateY(-50%);
-      z-index: 2;
-    }
-    .banner-phone-wrap .phone-frame {
-      width: 320px; height: 640px; border-radius: 48px;
-    }
-    .banner-phone-wrap .phone-photo-box {
-      height: 300px;
+    #banner > img {
+      position: absolute; right: clamp(2rem, 9vw, 9rem); bottom: 0;
+      width: auto; height: 100%; max-width: min(48%, 560px); object-fit: contain;
+      object-position: center bottom; filter: drop-shadow(0 24px 70px rgba(0,0,0,0.42));
     }
     .banner-hl { position: absolute; top: 50%; left: clamp(2rem, 8vw, 8rem); transform: translateY(-50%); text-align: left; z-index: 2; }
     .banner-hl-line {
@@ -388,94 +382,14 @@
     .bp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
     .phone-wrap { position: relative; display: flex; justify-content: center; padding: 3rem 1.5rem; }
     .phone-frame {
-      width: 280px; height: 570px; border-radius: 46px;
-      border: 3px solid rgba(255,255,255,0.15); background: var(--bg);
+      width: 250px; border-radius: 44px;
+      border: 2px solid var(--border); background: var(--bg);
       overflow: hidden;
-      box-shadow: 0 25px 90px -20px rgba(var(--accent-rgb), 0.5);
+      box-shadow: 0 20px 80px -20px rgba(var(--accent-rgb), 0.45);
       position: relative; flex-shrink: 0;
-      display: flex; flex-direction: column;
       transition: box-shadow 0.5s, border-color 0.5s, background 0.5s;
-      user-select: none;
     }
-    .phone-island {
-      width: 80px; height: 18px; background: #000; border-radius: 20px;
-      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-      z-index: 20;
-    }
-    .phone-top-bar {
-      padding: 34px 14px 6px; display: flex; justify-content: space-between; align-items: center;
-      z-index: 10;
-    }
-    .phone-app-logo { font-size: 14px; font-weight: 800; color: var(--fg); }
-    .phone-app-logo span { color: var(--accent); }
-    .phone-msg-badge {
-      font-size: 9px; color: var(--fg); background: rgba(255,255,255,0.08);
-      padding: 4px 8px; border-radius: 20px; display: flex; align-items: center; gap: 4px;
-      border: 1px solid var(--border);
-    }
-    .phone-pills {
-      display: flex; justify-content: center; gap: 6px; padding: 4px 14px 8px;
-    }
-    .phone-pill {
-      font-size: 9px; font-weight: 600; padding: 3px 10px; border-radius: 12px;
-      background: rgba(255,255,255,0.06); color: var(--fg2);
-    }
-    .phone-pill.active {
-      background: var(--accent); color: #fff;
-    }
-    .phone-card {
-      flex: 1; margin: 0 12px; border-radius: 18px; overflow: hidden;
-      background: var(--bg3); border: 1px solid var(--border);
-      position: relative; display: flex; flex-direction: column;
-      transition: background 0.5s, border-color 0.5s;
-    }
-    .phone-photo-box {
-      width: 100%; height: 245px; position: relative; overflow: hidden;
-    }
-    .phone-photo-box img {
-      width: 100%; height: 100%; object-fit: cover; object-position: center top;
-      display: block;
-    }
-    .phone-user-tag {
-      position: absolute; bottom: 8px; left: 8px; z-index: 2;
-      display: flex; align-items: center; gap: 6px;
-      background: rgba(0,0,0,0.65); backdrop-filter: blur(8px);
-      padding: 3px 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-    }
-    .phone-avatar { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); }
-    .phone-username { font-size: 9px; font-weight: 700; color: #fff; }
-    .phone-question-box {
-      padding: 8px 10px 4px;
-    }
-    .phone-q-title { font-size: 11px; font-weight: 800; color: var(--fg); margin-bottom: 6px; }
-    .phone-actions {
-      display: flex; gap: 6px; padding: 0 8px 8px;
-    }
-    .phone-btn {
-      flex: 1; border-radius: 10px; padding: 6px 3px; text-align: center;
-      cursor: pointer; transition: transform 0.15s, opacity 0.2s, background 0.5s;
-    }
-    .phone-btn:active { transform: scale(0.96); }
-    .phone-btn-pass {
-      background: rgba(255,255,255,0.08); border: 1px solid var(--border);
-      color: var(--fg);
-    }
-    .phone-btn-like {
-      background: var(--accent); color: #fff;
-    }
-    .phone-btn-main { font-size: 9px; font-weight: 700; display: block; }
-    .phone-btn-sub { font-size: 7px; opacity: 0.75; display: block; margin-top: 1px; }
-    .phone-tab-bar {
-      padding: 6px 12px 12px; display: flex; justify-content: space-around;
-      border-top: 1px solid var(--border); background: var(--bg);
-      transition: background 0.5s, border-color 0.5s;
-    }
-    .phone-tab-item {
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      color: var(--fg3); font-size: 8px; font-weight: 600;
-    }
-    .phone-tab-item.active { color: var(--accent); }
-    .phone-tab-item i { font-size: 11px; }
+    .phone-frame img { width: 100%; display: block; }
     .anno { position: absolute; display: flex; flex-direction: column; z-index: 5; }
     .anno-lh { height: 1px; background: var(--accent); opacity: 0.45; transition: background 0.5s; }
     .anno-lv { width: 1px; background: var(--accent); opacity: 0.45; transition: background 0.5s; }
@@ -544,13 +458,11 @@
       #hero { padding: 70px 1.25rem 4rem; }
       .hero-meta { left: 1.25rem; right: 1.25rem; }
       .hero-bottom { gap: 2rem; }
-      #banner { height: auto; min-height: auto; padding: 4rem 1.25rem 3.5rem; display: flex; flex-direction: column; align-items: center; gap: 2.5rem; }
-      .banner-hl { position: static; transform: none; text-align: center; width: 100%; }
+      #banner { height: min(76svh, 720px); min-height: 520px; }
+      #banner > img { right: 0; height: 74%; max-width: 72%; }
+      .banner-hl { top: 2rem; left: 1.25rem; transform: none; }
       .banner-hl-line { font-size: clamp(2rem, 9vw, 4rem); }
-      .banner-bl { display: none; }
-      .banner-phone-wrap { position: static; transform: none; }
-      .banner-phone-wrap .phone-frame { width: 275px; height: 560px; }
-      .banner-phone-wrap .phone-photo-box { height: 240px; }
+      .banner-bl { left: 1.25rem; bottom: 1.25rem; }
       #features { padding: 5rem 1.25rem; }
       .feature-story { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 0; }
       .feature-story.reverse .feature-copy, .feature-story.reverse .feature-shots { order: initial; }
@@ -635,59 +547,11 @@
 
 <!-- ════════ FULL-WIDTH BANNER ════════ -->
 <div id="banner">
+  <img src="live-voting.jpg" alt="Dythin canlı oylama ekranı">
   <div class="banner-hl reveal">
     <div class="banner-hl-line" data-i18n="bnHl1">OY VER.</div>
     <div class="banner-hl-line" style="color:var(--accent)" data-i18n="bnHl2">KARAR AL.</div>
   </div>
-
-  <div class="banner-phone-wrap reveal-right">
-    <div class="phone-frame">
-      <div class="phone-island"></div>
-      
-      <div class="phone-top-bar">
-        <div class="phone-app-logo">dythin<span>.</span></div>
-        <div class="phone-msg-badge"><i class="fa-regular fa-comment-dots"></i> <span data-i18n="appTopMsg">Mesajlar</span></div>
-      </div>
-
-      <div class="phone-pills">
-        <div class="phone-pill active"><i class="fa-solid fa-globe"></i> <span data-i18n="appFeedPublic">Genel</span></div>
-        <div class="phone-pill"><i class="fa-solid fa-user-group"></i> <span data-i18n="appFeedFriends">Arkadaşlar</span></div>
-      </div>
-
-      <div class="phone-card">
-        <div class="phone-photo-box">
-          <img src="photo_2.jpg" alt="Dythin Canlı Oylama Ekranı" id="banner-phone-img">
-          <div class="phone-user-tag">
-            <div class="phone-avatar"></div>
-            <span class="phone-username">@dythin</span>
-          </div>
-        </div>
-
-        <div class="phone-question-box">
-          <div class="phone-q-title" id="banner-phone-q-title" data-i18n="appQuestion">Do you think?</div>
-        </div>
-
-        <div class="phone-actions">
-          <div class="phone-btn phone-btn-pass" onclick="triggerPhoneVote('pass', 'banner')">
-            <span class="phone-btn-main" data-i18n="appBtnPass">✕ Beğenmedim</span>
-            <span class="phone-btn-sub" data-i18n="appBtnPassHint">Geçtim (Sola)</span>
-          </div>
-          <div class="phone-btn phone-btn-like" onclick="triggerPhoneVote('like', 'banner')">
-            <span class="phone-btn-main" data-i18n="appBtnLike">✓ Beğendim</span>
-            <span class="phone-btn-sub" data-i18n="appBtnLikeHint">Harika Seçim (Sağa)</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="phone-tab-bar">
-        <div class="phone-tab-item active"><i class="fa-solid fa-wand-magic-sparkles"></i><span data-i18n="tabVote">Oyla</span></div>
-        <div class="phone-tab-item"><i class="fa-solid fa-circle-plus"></i><span data-i18n="tabCreate">Paylaş</span></div>
-        <div class="phone-tab-item"><i class="fa-solid fa-chart-simple"></i><span data-i18n="tabResults">Sonuçlar</span></div>
-        <div class="phone-tab-item"><i class="fa-solid fa-user"></i><span data-i18n="tabProfile">Profil</span></div>
-      </div>
-    </div>
-  </div>
-
   <div class="banner-bl">
     <span class="label" data-i18n="bnLabel">[ 01 · UYGULAMA TANITIMI ]</span>
   </div>
@@ -775,49 +639,7 @@
       <!-- Phone + technical annotations -->
       <div class="phone-wrap reveal-left">
         <div class="phone-frame">
-          <div class="phone-island"></div>
-          
-          <div class="phone-top-bar">
-            <div class="phone-app-logo">dythin<span>.</span></div>
-            <div class="phone-msg-badge"><i class="fa-regular fa-comment-dots"></i> <span data-i18n="appTopMsg">Mesajlar</span></div>
-          </div>
-
-          <div class="phone-pills">
-            <div class="phone-pill active"><i class="fa-solid fa-globe"></i> <span data-i18n="appFeedPublic">Genel</span></div>
-            <div class="phone-pill"><i class="fa-solid fa-user-group"></i> <span data-i18n="appFeedFriends">Arkadaşlar</span></div>
-          </div>
-
-          <div class="phone-card">
-            <div class="phone-photo-box">
-              <img src="appstore_1.png" alt="Dythin Oylama Kombini" id="phone-demo-img">
-              <div class="phone-user-tag">
-                <div class="phone-avatar"></div>
-                <span class="phone-username">@dythin</span>
-              </div>
-            </div>
-
-            <div class="phone-question-box">
-              <div class="phone-q-title" id="phone-q-title" data-i18n="appQuestion">Do you think?</div>
-            </div>
-
-            <div class="phone-actions">
-              <div class="phone-btn phone-btn-pass" onclick="triggerPhoneVote('pass')">
-                <span class="phone-btn-main" data-i18n="appBtnPass">✕ Beğenmedim</span>
-                <span class="phone-btn-sub" data-i18n="appBtnPassHint">Geçtim (Sola)</span>
-              </div>
-              <div class="phone-btn phone-btn-like" onclick="triggerPhoneVote('like')">
-                <span class="phone-btn-main" data-i18n="appBtnLike">✓ Beğendim</span>
-                <span class="phone-btn-sub" data-i18n="appBtnLikeHint">Harika Seçim (Sağa)</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="phone-tab-bar">
-            <div class="phone-tab-item active"><i class="fa-solid fa-wand-magic-sparkles"></i><span data-i18n="tabVote">Oyla</span></div>
-            <div class="phone-tab-item"><i class="fa-solid fa-circle-plus"></i><span data-i18n="tabCreate">Paylaş</span></div>
-            <div class="phone-tab-item"><i class="fa-solid fa-chart-simple"></i><span data-i18n="tabResults">Sonuçlar</span></div>
-            <div class="phone-tab-item"><i class="fa-solid fa-user"></i><span data-i18n="tabProfile">Profil</span></div>
-          </div>
+          <img src="live-voting.jpg" alt="Dythin Canlı Oylama Ekranı">
         </div>
         <!-- Left annotation -->
         <div class="anno" style="left:-5%;top:28%;align-items:flex-end;">
@@ -842,7 +664,7 @@
 
       <!-- Right: desc + QR code -->
       <div class="reveal-right">
-        <p class="bp-desc" data-i18n="bpDesc">Telefonunun kamerasını aşağıdaki QR koda doğrult ve doğrudan Apple App Store sayfasına ulaş. %100 Ücretsiz. Reklam yok.</p>
+        <p class="bp-desc" data-i18n="bpDesc">Telefonunun kamerasını aşağıdaki QR koda doğrult ve doğrudan Apple App Store sayfasına ulaş. Ücretsiz. Reklam yok.</p>
         
         <div class="qr-card">
           <div class="qr-img-wrap">
@@ -850,7 +672,7 @@
           </div>
           <div>
             <div class="label la" style="margin-bottom:0.4rem" data-i18n="qrLabel">[ RESMİ APP STORE ]</div>
-            <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.35rem;color:var(--fg)" data-i18n="qrTitle">iOS için %100 Ücretsiz</div>
+            <div style="font-size:1.1rem;font-weight:800;margin-bottom:0.35rem;color:var(--fg)" data-i18n="qrTitle">iOS için Ücretsiz</div>
             <div style="font-size:0.78rem;color:var(--fg2);line-height:1.6" data-i18n="qrSub">iPhone ve iPad ile tam uyumludur.</div>
           </div>
         </div>
@@ -955,7 +777,7 @@ const T = {
     bpMeta:'SCAN TO DOWNLOAD · APP STORE', bpH1:'KAMERANI', bpH2:'DOĞRULT.',
     bpDesc:'Telefonunun kamerasını aşağıdaki QR koda doğrult ve doğrudan Apple App Store sayfasına ulaş. Ücretsiz. Reklam yok.',
     an1l:'[ A/B KIYAS ]', an1s:'Tek dokunuş', an2l:'[ CANLI SONUÇ ]', an2s:'24h sayaç', an3l:'[ DM SOHBET ]',
-    qrLabel:'[ RESMİ APP STORE ]', qrTitle:'iOS için %100 Ücretsiz', qrSub:'iPhone ve iPad ile tam uyumlu.',
+    qrLabel:'[ RESMİ APP STORE ]', qrTitle:'iOS için Ücretsiz', qrSub:'iPhone ve iPad ile tam uyumlu.',
     bpLink:"APP STORE'DA AÇ →",
     flowMeta:'CORE EXPERIENCE FLOW · 3 AŞAMA', flowH1:'KUSURSUZ', flowH2:'AKIŞ.',
     s1lbl:'AŞAMA 01', s1t:'Akış & Oyla', s1d:'Sonsuz oylama akışında gezin, beğendiğine oy ver.',
@@ -965,23 +787,18 @@ const T = {
     dLblA:'Oylama akışı', dLblB:'Canlı sonuçlar',
     faqMeta:'SIKÇA SORULAN SORULAR', faqH1:'MERAK', faqH2:'EDİLENLER.',
     faqs:[
-      ['Dythin tamamen ücretsiz mi?','Evet, Dythin %100 ücretsizdir. Fotoğraf yüklemek, oylama başlatmak, arkadaş eklemek ve canlı sonuçları takip etmek için hiçbir abonelik veya gizli ücret ödemezsiniz.'],
+      ['Dythin tamamen ücretsiz mi?','Evet, Dythin tamamen ücretsizdir. Fotoğraf yüklemek, oylama başlatmak, arkadaş eklemek ve canlı sonuçları takip etmek için hiçbir abonelik veya gizli ücret ödemezsiniz.'],
       ['Oylamalarımı sadece arkadaşlarıma özel yapabilir miyim?','Evet. Yeni oylama oluştururken hedef kitleyi "Sadece Arkadaşlarım" olarak belirleyebilir ya da profilinizi gizliye alabilirsiniz.'],
       ['Oylamalar ne kadar süre aktif kalıyor?','Her oylama 24 saat boyunca aktiftir. Süre dolduğunda oylama otomatik olarak arşive alınır ve profilinde görüntülenebilir.'],
       ['Yüklediğim fotoğraflar güvende mi?','Evet. Tüm veriler SSL/TLS ile şifrelenir ve PostgreSQL RLS ile korunur. Fotoğraflarınız yalnızca oylama amaçlı kullanılır.'],
       ['Android için de var mı?','Şu an yalnızca iOS (App Store) için mevcuttur. Android versiyonu yakında yayınlanacak.'],
     ],
     ftPrivacy:'Gizlilik Politikası', ftTerms:'Kullanım Koşulları',
-    appTopMsg:'Mesajlar', appFeedPublic:'Genel', appFeedFriends:'Arkadaşlar',
-    appQuestion:'Sizce bu kombin nasıl?',
-    appBtnPass:'✕ Beğenmedim', appBtnPassHint:'Geçtim (Sola)',
-    appBtnLike:'✓ Beğendim', appBtnLikeHint:'Harika Seçim (Sağa)',
-    tabVote:'Oyla', tabCreate:'Paylaş', tabResults:'Sonuçlar', tabProfile:'Profil',
   },
   en: {
     navCta:'APP STORE', heroLabel:'[ SOCIAL VOTING PLATFORM ]',
     h1a:'STOP', h1b:'BEING', h1c:'INDECISIVE.',
-    heroDesc:'Upload your photos, get instant votes from your community and friends. 100% free for iOS.',
+    heroDesc:'Upload your photos, get instant votes from your community and friends. Free for iOS.',
     heroLink:'DOWNLOAD ON APP STORE →',
     bnHl1:'LIVE', bnHl2:'VOTING', bnLabel:'[ 01 · LIVE VOTING ]',
     featuresMeta:'APP FEATURES', featuresH1:'MAKE YOUR', featuresH2:'CHOICE EASILY.',
@@ -1005,7 +822,7 @@ const T = {
     bpMeta:'SCAN TO DOWNLOAD · APP STORE', bpH1:'POINT YOUR', bpH2:'CAMERA.',
     bpDesc:"Point your phone camera at the QR code below and go straight to Apple App Store. Free. No ads.",
     an1l:'[ A/B COMPARE ]', an1s:'One tap vote', an2l:'[ LIVE RESULTS ]', an2s:'24h countdown', an3l:'[ DM CHAT ]',
-    qrLabel:'[ OFFICIAL APP STORE ]', qrTitle:'100% Free for iOS', qrSub:'Compatible with iPhone and iPad.',
+    qrLabel:'[ OFFICIAL APP STORE ]', qrTitle:'Free for iOS', qrSub:'Compatible with iPhone and iPad.',
     bpLink:'OPEN ON APP STORE →',
     flowMeta:'CORE EXPERIENCE FLOW · 3 STEPS', flowH1:'SEAMLESS', flowH2:'FLOW.',
     s1lbl:'STEP 01', s1t:'Browse & Vote', s1d:'Scroll the infinite feed, vote on what you love.',
@@ -1015,18 +832,13 @@ const T = {
     dLblA:'Voting feed', dLblB:'Live results',
     faqMeta:'FREQUENTLY ASKED QUESTIONS', faqH1:'COMMON', faqH2:'QUESTIONS.',
     faqs:[
-      ['Is Dythin completely free?','Yes, Dythin is 100% free. No subscriptions or hidden fees to upload photos, start polls, add friends, or track live results.'],
+      ['Is Dythin completely free?','Yes, Dythin is completely free. No subscriptions or hidden fees to upload photos, start polls, add friends, or track live results.'],
       ['Can I make my polls private?','Yes. When creating a poll, set the audience to "Friends Only", or set your profile to private.'],
       ['How long are polls active?','Each poll is active for 24 hours, then automatically archived and visible on your profile.'],
       ['Are my photos safe?','Yes. All data is SSL/TLS encrypted and protected by PostgreSQL RLS. Your photos are used only for voting.'],
       ['Is there an Android version?','Currently iOS (App Store) only. Android version coming soon.'],
     ],
     ftPrivacy:'Privacy Policy', ftTerms:'Terms of Use',
-    appTopMsg:'Messages', appFeedPublic:'Public', appFeedFriends:'Friends',
-    appQuestion:'How does this outfit look?',
-    appBtnPass:'✕ Dislike', appBtnPassHint:'Pass (Swipe Left)',
-    appBtnLike:'✓ Like', appBtnLikeHint:'Great Choice (Swipe Right)',
-    tabVote:'Vote', tabCreate:'Create', tabResults:'Results', tabProfile:'Profile',
   },
   de: {
     navCta:'APP STORE', heroLabel:'[ SOZIALE ABSTIMMUNGSPLATTFORM ]',
@@ -1055,7 +867,7 @@ const T = {
     bpMeta:'SCAN TO DOWNLOAD · APP STORE', bpH1:'KAMERA', bpH2:'DRAUFHALTEN.',
     bpDesc:'Richte deine Kamera auf den QR-Code und gelange direkt zum Apple App Store. Kostenlos. Keine Werbung.',
     an1l:'[ A/B VERGLEICH ]', an1s:'Ein Tipp reicht', an2l:'[ LIVE ERGEBNIS ]', an2s:'24h Countdown', an3l:'[ DM CHAT ]',
-    qrLabel:'[ OFFIZIELLER APP STORE ]', qrTitle:'100% kostenlos für iOS', qrSub:'Kompatibel mit iPhone und iPad.',
+    qrLabel:'[ OFFIZIELLER APP STORE ]', qrTitle:'Kostenlos für iOS', qrSub:'Kompatibel mit iPhone und iPad.',
     bpLink:'IM APP STORE ÖFFNEN →',
     flowMeta:'KERN-ERLEBNIS-FLOW · 3 SCHRITTE', flowH1:'NAHTLOSER', flowH2:'ABLAUF.',
     s1lbl:'SCHRITT 01', s1t:'Stöbern & Abstimmen', s1d:'Endloser Feed, abstimmen was du liebst.',
@@ -1065,18 +877,13 @@ const T = {
     dLblA:'Abstimmungsfeed', dLblB:'Live-Ergebnisse',
     faqMeta:'HÄUFIG GESTELLTE FRAGEN', faqH1:'HÄUFIGE', faqH2:'FRAGEN.',
     faqs:[
-      ['Ist Dythin komplett kostenlos?','Ja, Dythin ist 100% kostenlos. Keine Abonnements oder versteckten Gebühren.'],
+      ['Ist Dythin komplett kostenlos?','Ja, Dythin ist komplett kostenlos. Keine Abonnements oder versteckten Gebühren.'],
       ['Kann ich meine Umfragen privat machen?','Ja. Beim Erstellen einer Umfrage kannst du "Nur Freunde" auswählen oder dein Profil auf privat stellen.'],
       ['Wie lange sind Umfragen aktiv?','Jede Umfrage ist 24 Stunden lang aktiv und wird dann automatisch archiviert.'],
       ['Sind meine Fotos sicher?','Ja. Alle Daten werden mit SSL/TLS verschlüsselt und durch PostgreSQL RLS geschützt.'],
       ['Gibt es eine Android-Version?','Derzeit nur iOS (App Store). Android kommt bald.'],
     ],
     ftPrivacy:'Datenschutz', ftTerms:'Nutzungsbedingungen',
-    appTopMsg:'Nachrichten', appFeedPublic:'Öffentlich', appFeedFriends:'Freunde',
-    appQuestion:'Wie gefällt dir das Outfit?',
-    appBtnPass:'✕ Nicht meins', appBtnPassHint:'Weiter (Links)',
-    appBtnLike:'✓ Gefällt mir', appBtnLikeHint:'Top Wahl (Rechts)',
-    tabVote:'Abstimmen', tabCreate:'Teilen', tabResults:'Ergebnisse', tabProfile:'Profil',
   },
 };
 
@@ -1111,29 +918,6 @@ function applyLang() {
     if (t[key] !== undefined && typeof t[key] === 'string') el.textContent = t[key];
   });
   buildFaqs();
-}
-
-/* ── PHONE DEMO INTERACTION ── */
-let phoneVotes = { pass: 14, like: 86 };
-function triggerPhoneVote(type, target) {
-  if (type === 'like') phoneVotes.like++; else phoneVotes.pass++;
-  const total = phoneVotes.like + phoneVotes.pass;
-  const pctLike = Math.round((phoneVotes.like / total) * 100);
-  const ids = target === 'banner' ? ['banner-phone-q-title'] : ['phone-q-title', 'banner-phone-q-title'];
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      const thanks = lang === 'tr' ? 'Oyunuz alındı! · %' + pctLike + ' Beğenildi' : lang === 'en' ? 'Vote saved! · ' + pctLike + '% Liked' : 'Abgestimmt! · ' + pctLike + '% Gefällt';
-      el.textContent = thanks;
-      el.style.color = 'var(--accent)';
-      setTimeout(() => {
-        if (T[lang] && T[lang].appQuestion) {
-          el.textContent = T[lang].appQuestion;
-        }
-        el.style.color = 'var(--fg)';
-      }, 2800);
-    }
-  });
 }
 
 /* ── FAQ ── */
