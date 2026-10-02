@@ -1,10 +1,29 @@
 create extension if not exists pgcrypto with schema extensions;
 
+-- Posts tablosundaki eski image_url not-null kisitlamasini esnet
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'posts' and column_name = 'image_url'
+  ) then
+    alter table public.posts alter column image_url drop not null;
+  end if;
+end $$;
+
 create table if not exists public.bot_seed_tracker (
   id int primary key default 1,
   last_index int default 0,
   updated_at timestamptz default now()
 );
+
+alter table public.bot_seed_tracker enable row level security;
+
+drop policy if exists "bot_seed_tracker_read" on public.bot_seed_tracker;
+create policy "bot_seed_tracker_read" on public.bot_seed_tracker for select using (true);
+
+drop policy if exists "bot_seed_tracker_write" on public.bot_seed_tracker;
+create policy "bot_seed_tracker_write" on public.bot_seed_tracker for all using (true) with check (true);
 
 insert into public.bot_seed_tracker (id, last_index)
 values (1, 0)
@@ -373,12 +392,13 @@ begin
       v_creator_id uuid := v_bot_ids[((v_post_idx - 1) % array_length(v_bot_ids, 1)) + 1];
     begin
       insert into public.posts (
-        user_id, title, description, image_a_url, image_b_url, is_active, category, created_at
+        user_id, title, description, image_url, image_a_url, image_b_url, is_active, category, created_at
       )
       values (
         v_creator_id,
         v_post_record.title,
         v_post_record.description,
+        v_post_record.image_a,
         v_post_record.image_a,
         v_post_record.image_b,
         true,
