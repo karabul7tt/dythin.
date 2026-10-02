@@ -1,17 +1,48 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { supabase } from './supabase'
 
 export const SUPER_ADMIN_USERNAMES = [
   'mehmetkarabul7tt',
-  'karabul1',
-  'karabul7tt',
-  'dythin',
-  'dythin.app',
 ]
 
-export function isSuperAdminUser(username?: string | null): boolean {
-  if (!username) return false
-  const clean = username.toLowerCase().replace('@', '').trim()
-  return SUPER_ADMIN_USERNAMES.includes(clean)
+export const SUPER_ADMIN_EMAILS = [
+  'mehmetkarabul7tt@gmail.com',
+]
+
+const PROMOTED_ADMINS_STORAGE_KEY = '@dythin_promoted_admins_v2'
+
+export async function getLocallyPromotedAdmins(): Promise<Set<string>> {
+  try {
+    const raw = await AsyncStorage.getItem(PROMOTED_ADMINS_STORAGE_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return new Set(parsed)
+    return new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+export async function addLocallyPromotedAdmin(userId: string): Promise<void> {
+  try {
+    const set = await getLocallyPromotedAdmins()
+    set.add(userId)
+    await AsyncStorage.setItem(PROMOTED_ADMINS_STORAGE_KEY, JSON.stringify(Array.from(set)))
+  } catch {}
+}
+
+export async function removeLocallyPromotedAdmin(userId: string): Promise<void> {
+  try {
+    const set = await getLocallyPromotedAdmins()
+    set.delete(userId)
+    await AsyncStorage.setItem(PROMOTED_ADMINS_STORAGE_KEY, JSON.stringify(Array.from(set)))
+  } catch {}
+}
+
+export function isSuperAdminUser(identifier?: string | null): boolean {
+  if (!identifier) return false
+  const clean = identifier.toLowerCase().replace('@', '').trim()
+  return SUPER_ADMIN_USERNAMES.includes(clean) || SUPER_ADMIN_EMAILS.includes(clean)
 }
 
 export type AdminKPIs = {
@@ -57,36 +88,50 @@ export type AdminUserItem = {
 export async function checkIsAdmin(
   username?: string | null,
   role?: string | null,
-  userId?: string | null
+  userId?: string | null,
+  email?: string | null
 ): Promise<boolean> {
-  if (!username && !userId) return false
+  // 1. Kurucu (Super Admin) kontrolü - Yalnızca @mehmetkarabul7tt / mehmetkarabul7tt@gmail.com
+  if (isSuperAdminUser(username) || isSuperAdminUser(email)) return true
 
   let cleanUser = (username || '').toLowerCase().replace('@', '').trim()
 
-  // 1. Ana yönetici (Super Admin) kontrolü - Yalnızca @mehmetkarabul7tt
-  if (cleanUser && SUPER_ADMIN_USERNAMES.includes(cleanUser)) return true
-
-  // 2. Veritabanından profil ve role kontrolü
+  // 2. Auth session ve veritabanı profil / rol kontrolü
   if (userId) {
+    try {
+      const { data: authData } = await supabase.auth.getSession()
+      const sUser = authData?.session?.user
+      if (sUser && sUser.id === userId) {
+        if (isSuperAdminUser(sUser.email) || isSuperAdminUser(sUser.user_metadata?.username)) {
+          return true
+        }
+      }
+    } catch {}
+
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role, username')
+        .select('role, username, email')
         .eq('id', userId)
         .maybeSingle()
 
       if (profile) {
-        const dbUser = (profile.username || '').toLowerCase().replace('@', '').trim()
-        if (dbUser && SUPER_ADMIN_USERNAMES.includes(dbUser)) return true
+        if (isSuperAdminUser(profile.username) || isSuperAdminUser(profile.email)) return true
         if (profile.role === 'admin') return true
-        if (dbUser) cleanUser = dbUser
+        if (profile.username) cleanUser = profile.username.toLowerCase().replace('@', '').trim()
       }
+    } catch {}
+
+    // Yerel önbellekte kayıtlı admin mi?
+    try {
+      const localAdmins = await getLocallyPromotedAdmins()
+      if (localAdmins.has(userId)) return true
     } catch {}
   }
 
   if (role === 'admin') return true
 
-  // 3. Mehmet'in admin panelinden yetkilendirdiği kullanıcılar
+  // 3. Veritabanındaki admin rapor ve yetkilendirme aksiyonları
   try {
     const { data } = await supabase
       .from('reports')
@@ -201,11 +246,33 @@ export async function getReportedPosts(): Promise<ReportedPostItem[]> {
   }
 }
 
+async function logAdminAction(adminUserId: string, reason: string): Promise<void> {
+  try {
+    const { error } = await supabase.from('reports').insert({
+      reporter_id: adminUserId,
+      reason,
+    })
+    if (!error) return
+
+    const { data: anyPost } = await supabase.from('posts').select('id').limit(1).maybeSingle()
+    if (anyPost?.id) {
+      await supabase.from('reports').insert({
+        reporter_id: adminUserId,
+        post_id: anyPost.id,
+        reason,
+      })
+    }
+  } catch (err) {
+    console.warn('logAdminAction error:', err)
+  }
+}
+
 export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
   try {
-    const [profilesRes, reportsRes] = await Promise.all([
+    const [profilesRes, reportsRes, localAdmins] = await Promise.all([
       supabase.from('profiles').select('*').order('created_at', { ascending: false }),
       supabase.from('reports').select('reason, created_at').like('reason', 'ADMIN_ACTION:%').order('created_at', { ascending: false }),
+      getLocallyPromotedAdmins(),
     ])
 
     const profiles = profilesRes.data || []
@@ -213,7 +280,7 @@ export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
 
     const bannedUsers = new Set<string>()
     const unbannedUsers = new Set<string>()
-    const promotedAdmins = new Set<string>()
+    const promotedAdmins = new Set<string>(localAdmins)
     const revokedAdmins = new Set<string>()
 
     for (const ev of adminEvents) {
@@ -236,10 +303,11 @@ export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
     }
 
     return profiles.map(p => {
-      const cleanUser = (p.username || '').toLowerCase()
-      const isSuper = SUPER_ADMIN_USERNAMES.includes(cleanUser)
-      const isDynamicAdmin = promotedAdmins.has(p.id) || (p.role === 'admin')
-      const isBanned = bannedUsers.has(p.id) || (p.role === 'banned')
+      const cleanUser = (p.username || '').toLowerCase().replace('@', '').trim()
+      const cleanEmail = (p.email || '').toLowerCase().trim()
+      const isSuper = isSuperAdminUser(cleanUser) || isSuperAdminUser(cleanEmail)
+      const isDynamicAdmin = !isSuper && (promotedAdmins.has(p.id) || p.role === 'admin') && !revokedAdmins.has(p.id)
+      const isBanned = !isSuper && (bannedUsers.has(p.id) || p.role === 'banned')
 
       return {
         id: p.id,
@@ -266,11 +334,7 @@ export async function adminDeletePost(postId: string, adminUserId: string): Prom
       await supabase.from('posts').delete().eq('id', postId)
     } catch {}
 
-    await supabase.from('reports').insert({
-      reporter_id: adminUserId,
-      post_id: postId,
-      reason: `ADMIN_ACTION:DELETE_POST:${postId}`,
-    })
+    await logAdminAction(adminUserId, `ADMIN_ACTION:DELETE_POST:${postId}`)
 
     return true
   } catch (err) {
@@ -286,10 +350,12 @@ export async function adminBanUser(
 ): Promise<boolean> {
   try {
     const cleanUser = targetUsername.toLowerCase().replace('@', '').trim()
-    if (SUPER_ADMIN_USERNAMES.includes(cleanUser)) {
-      console.warn('Ana yönetici banlanamaz.')
+    if (isSuperAdminUser(cleanUser)) {
+      console.warn('Ana kurucu yönetici banlanamaz.')
       return false
     }
+
+    await removeLocallyPromotedAdmin(targetUserId)
 
     try {
       await supabase.rpc('admin_set_user_role', {
@@ -304,10 +370,7 @@ export async function adminBanUser(
 
     await supabase.from('posts').update({ is_active: false }).eq('user_id', targetUserId)
 
-    await supabase.from('reports').insert({
-      reporter_id: adminUserId,
-      reason: `ADMIN_ACTION:BAN_USER:${targetUserId}:@${cleanUser}`,
-    })
+    await logAdminAction(adminUserId, `ADMIN_ACTION:BAN_USER:${targetUserId}:@${cleanUser}`)
 
     try {
       await supabase.from('blocked_users').insert({
@@ -342,10 +405,7 @@ export async function adminUnbanUser(
       await supabase.from('profiles').update({ role: 'user' }).eq('id', targetUserId)
     } catch {}
 
-    await supabase.from('reports').insert({
-      reporter_id: adminUserId,
-      reason: `ADMIN_ACTION:UNBAN_USER:${targetUserId}:@${cleanUser}`,
-    })
+    await logAdminAction(adminUserId, `ADMIN_ACTION:UNBAN_USER:${targetUserId}:@${cleanUser}`)
 
     try {
       await supabase.from('blocked_users').delete().eq('blocker_id', adminUserId).eq('blocked_id', targetUserId)
@@ -366,21 +426,29 @@ export async function adminPromoteUser(
   try {
     const cleanUser = targetUsername.toLowerCase().replace('@', '').trim()
 
+    // 1. Yerel AsyncStorage önbelleğine derhal ekle (UI derhal güncellensin)
+    await addLocallyPromotedAdmin(targetUserId)
+
+    // 2. Supabase RPC ile veritabanında role = 'admin' yap
     try {
       await supabase.rpc('admin_set_user_role', {
         target_user_id: targetUserId,
         new_role: 'admin',
       })
-    } catch {}
+    } catch (e) {
+      console.warn('admin_set_user_role rpc error:', e)
+    }
 
+    // 3. Profiles tablosunda role = 'admin' yapmayı dene
     try {
       await supabase.from('profiles').update({ role: 'admin' }).eq('id', targetUserId)
-    } catch {}
+    } catch (e) {
+      console.warn('profiles update role admin error:', e)
+    }
 
-    await supabase.from('reports').insert({
-      reporter_id: adminUserId,
-      reason: `ADMIN_ACTION:PROMOTE_ADMIN:${targetUserId}:@${cleanUser}`,
-    })
+    // 4. Denetim loguna kaydet
+    await logAdminAction(adminUserId, `ADMIN_ACTION:PROMOTE_ADMIN:${targetUserId}:@${cleanUser}`)
+
     return true
   } catch (err) {
     console.warn('adminPromoteUser error:', err)
@@ -395,26 +463,34 @@ export async function adminRevokeUser(
 ): Promise<boolean> {
   try {
     const cleanUser = targetUsername.toLowerCase().replace('@', '').trim()
-    if (SUPER_ADMIN_USERNAMES.includes(cleanUser)) {
-      console.warn('Ana yöneticinin yetkisi kaldırılamaz.')
+    if (isSuperAdminUser(cleanUser)) {
+      console.warn('Ana kurucu yöneticinin yetkisi kaldırılamaz.')
       return false
     }
 
+    // 1. Yerel önbellekten çıkar
+    await removeLocallyPromotedAdmin(targetUserId)
+
+    // 2. RPC ile role = 'user' yap
     try {
       await supabase.rpc('admin_set_user_role', {
         target_user_id: targetUserId,
         new_role: 'user',
       })
-    } catch {}
+    } catch (e) {
+      console.warn('admin_set_user_role rpc error:', e)
+    }
 
+    // 3. Profiles tablosunda role = 'user' yapmayı dene
     try {
       await supabase.from('profiles').update({ role: 'user' }).eq('id', targetUserId)
-    } catch {}
+    } catch (e) {
+      console.warn('profiles update role user error:', e)
+    }
 
-    await supabase.from('reports').insert({
-      reporter_id: adminUserId,
-      reason: `ADMIN_ACTION:REVOKE_ADMIN:${targetUserId}:@${cleanUser}`,
-    })
+    // 4. Denetim loguna yetki kaldırma kaydı ekle
+    await logAdminAction(adminUserId, `ADMIN_ACTION:REVOKE_ADMIN:${targetUserId}:@${cleanUser}`)
+
     return true
   } catch (err) {
     console.warn('adminRevokeUser error:', err)

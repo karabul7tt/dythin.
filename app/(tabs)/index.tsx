@@ -35,7 +35,7 @@ export default function VoteScreen() {
     useCallback(() => {
       if (userId) {
         fetchPosts()
-        checkIsAdmin(session?.user?.user_metadata?.username, null, userId).then(setIsAdminUser)
+        checkIsAdmin(session?.user?.user_metadata?.username, null, userId, session?.user?.email).then(setIsAdminUser)
       }
     }, [userId])
   )
@@ -249,10 +249,12 @@ export default function VoteScreen() {
     const current = tab === 'public' ? posts[0] : friendPosts[0]
     if (!current || !session?.user.id) return
     const authorUser = (current as any).profiles?.username || 'kullanici'
+    const authorEmail = (current as any).profiles?.email
     const currentUsername = session.user.user_metadata?.username
-    const amISuperAdmin = isSuperAdminUser(currentUsername)
-    const isTargetSuper = isSuperAdminUser(authorUser)
-    const isTargetAdmin = await checkIsAdmin(authorUser, null, current.user_id)
+    const currentEmail = session.user.email
+    const amISuperAdmin = isSuperAdminUser(currentUsername) || isSuperAdminUser(currentEmail)
+    const isTargetSuper = isSuperAdminUser(authorUser) || isSuperAdminUser(authorEmail)
+    const isTargetAdmin = await checkIsAdmin(authorUser, null, current.user_id, authorEmail)
 
     const buttons: any[] = [
       { text: t('create.cancel'), style: 'cancel' },
@@ -300,7 +302,7 @@ export default function VoteScreen() {
         })
       } else {
         buttons.push({
-          text: '👑 Yönetici Olarak Ata (Admin Yap)',
+          text: 'Yönetici Olarak Ata',
           onPress: async () => {
             await adminPromoteUser(current.user_id, authorUser, session.user.id)
             Alert.alert('Yönetici Atandı', `@${authorUser} artık yönetici. Yönetici paneline erişebilir.`)

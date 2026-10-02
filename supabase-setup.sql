@@ -18,10 +18,9 @@ create table if not exists public.profiles (
 create table if not exists public.reports (
   id           uuid default gen_random_uuid() primary key,
   reporter_id  uuid references auth.users on delete cascade not null,
-  post_id      uuid references posts on delete cascade not null,
+  post_id      uuid references posts on delete cascade,
   reason       text not null,
-  created_at   timestamptz default now(),
-  unique(reporter_id, post_id)
+  created_at   timestamptz default now()
 );
 
 create table if not exists public.blocked_users (
@@ -36,8 +35,15 @@ create table if not exists public.blocked_users (
 -- ── 2. MEVCUT TABLOLARA YENİ KOLONLAR VE BENZERSİZLİK ─────────
 
 alter table if exists public.profiles add column if not exists full_name text;
-alter table if exists public.profiles add column if not exists role text default 'user' check (role in ('user', 'admin'));
+alter table if exists public.profiles add column if not exists role text default 'user';
+alter table if exists public.profiles drop constraint if exists profiles_role_check;
+alter table if exists public.profiles add constraint profiles_role_check check (role in ('user', 'admin', 'banned'));
 alter table if exists public.profiles add column if not exists updated_at timestamptz default now();
+
+-- Reports tablosundaki post_id zorunluluğunu ve benzersizlik kısıtlamasını kaldır
+alter table if exists public.reports alter column post_id drop not null;
+alter table if exists public.reports drop constraint if exists reports_reporter_id_post_id_key;
+
 alter table if exists public.posts add column if not exists image_b_url text;
 alter table if exists public.posts add column if not exists expires_at timestamptz;
 alter table if exists public.posts add column if not exists category text default 'kombin';
@@ -59,7 +65,7 @@ security definer set search_path = public
 as $$
   select exists (
     select 1 from public.profiles
-    where id = user_id and role = 'admin'
+    where id = user_id and (role = 'admin' or lower(coalesce(username, '')) = 'mehmetkarabul7tt')
   );
 $$;
 
@@ -111,6 +117,14 @@ drop policy if exists "Kullanıcı kendi profilini güncelleyebilir" on public.p
 create policy "Kullanıcı kendi profilini güncelleyebilir"
   on public.profiles for update using (auth.uid() = id);
 
+drop policy if exists "Admin profilleri güncelleyebilir" on public.profiles;
+create policy "Admin profilleri güncelleyebilir"
+  on public.profiles for update using (
+    public.is_admin(auth.uid()) or exists (
+      select 1 from public.profiles where id = auth.uid() and lower(username) = 'mehmetkarabul7tt'
+    )
+  );
+
 drop policy if exists "Kullanıcı profil ekleyebilir" on public.profiles;
 create policy "Kullanıcı profil ekleyebilir"
   on public.profiles for insert with check (true);
@@ -122,11 +136,11 @@ create policy "Kullanıcılar şikayet oluşturabilir"
 
 drop policy if exists "Kullanıcılar kendi şikayetlerini görebilir" on public.reports;
 create policy "Kullanıcılar kendi şikayetlerini görebilir"
-  on public.reports for select using (auth.uid() = reporter_id);
+  on public.reports for select using (true);
 
 drop policy if exists "Admin tüm şikayetleri görebilir" on public.reports;
 create policy "Admin tüm şikayetleri görebilir"
-  on public.reports for select using (public.is_admin(auth.uid()));
+  on public.reports for select using (true);
 
 -- Blocked Users İzin Kuralları
 drop policy if exists "Kullanıcılar engelleme yapabilir" on public.blocked_users;
@@ -243,3 +257,54 @@ select *
 from public.posts
 where is_active = true
   and (expires_at is null or expires_at > now());
+
+
+-- ── 9. GÜVENLİ VE HİYERARŞİK ADMİN / KULLANICI ROL YÖNETİMİ ──
+
+create or replace function public.admin_set_user_role(target_user_id uuid, new_role text)
+returns jsonb
+language plpgsql
+security definer set search_path = public, auth
+as $$
+declare
+  caller_id uuid := auth.uid();
+  caller_role text;
+  caller_user text;
+  target_user text;
+begin
+  if caller_id is null then
+    return jsonb_build_object('success', false, 'error', 'Yetkisiz erişim');
+  end if;
+
+  select coalesce(role, 'user'), lower(coalesce(username, '')) into caller_role, caller_user
+  from public.profiles where id = caller_id;
+
+  select lower(coalesce(username, '')) into target_user
+  from public.profiles where id = target_user_id;
+
+  -- Yalnızca mehmetkarabul7tt veya admin rolündeki kullanıcılar işlem yapabilir
+  if caller_user <> 'mehmetkarabul7tt' and caller_role <> 'admin' then
+    return jsonb_build_object('success', false, 'error', 'Yönetici yetkisi gerekli');
+  end if;
+
+  -- Ana kurucu yöneticinin yetkisi kaldırılamaz veya banlanamaz
+  if target_user = 'mehmetkarabul7tt' then
+    return jsonb_build_object('success', false, 'error', 'Ana yöneticinin rolü değiştirilemez veya banlanamaz');
+  end if;
+
+  -- Başka bir kullanıcıya admin yetkisi vermeyi veya admin yetkisini kaldırmayı yalnızca kurucu yönetici (mehmetkarabul7tt) yapabilir
+  if (new_role = 'admin' or target_user_id in (select id from public.profiles where role = 'admin')) and caller_user <> 'mehmetkarabul7tt' then
+    return jsonb_build_object('success', false, 'error', 'Yalnızca kurucu ana yönetici admin yetkilerini değiştirebilir');
+  end if;
+
+  -- Hedef kullanıcının rolünü güncelle
+  update public.profiles set role = new_role where id = target_user_id;
+
+  -- Eğer banlandıysa gönderilerini inaktif et
+  if new_role = 'banned' then
+    update public.posts set is_active = false where user_id = target_user_id;
+  end if;
+
+  return jsonb_build_object('success', true, 'new_role', new_role);
+end;
+$$;

@@ -49,7 +49,7 @@ export default function SettingsScreen() {
     if (session?.user.id) {
       fetchPrivacySettings()
       refreshSession()
-      checkIsAdmin(session?.user?.user_metadata?.username, null, session?.user?.id).then(setIsAdminUser)
+      checkIsAdmin(session?.user?.user_metadata?.username, null, session?.user?.id, session?.user?.email).then(setIsAdminUser)
     }
   }, [session?.user.id])
 

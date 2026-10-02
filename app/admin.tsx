@@ -30,6 +30,7 @@ import {
   adminDismissReport,
   adminSeedBots,
   adminClearBots,
+  isSuperAdminUser,
   SUPER_ADMIN_USERNAMES,
   AdminKPIs,
   ReportedPostItem,
@@ -64,7 +65,8 @@ export default function AdminScreen() {
   const [isClearing, setIsClearing] = useState(false)
 
   const currentUsername = (session?.user?.user_metadata?.username || '').toLowerCase().replace('@', '').trim()
-  const isCurrentUserSuperAdmin = SUPER_ADMIN_USERNAMES.includes(currentUsername)
+  const currentEmail = (session?.user?.email || '').toLowerCase().trim()
+  const isCurrentUserSuperAdmin = isSuperAdminUser(currentUsername) || isSuperAdminUser(currentEmail)
 
   useEffect(() => {
     verifyAndLoad()
@@ -73,7 +75,8 @@ export default function AdminScreen() {
   async function verifyAndLoad() {
     setLoading(true)
     const username = session?.user?.user_metadata?.username
-    const isAuthorized = await checkIsAdmin(username, null, session?.user?.id)
+    const email = session?.user?.email
+    const isAuthorized = await checkIsAdmin(username, null, session?.user?.id, email)
 
     if (!isAuthorized) {
       setIsAdminAuthorized(false)
@@ -140,7 +143,7 @@ export default function AdminScreen() {
   function handleBanReportedUser(item: ReportedPostItem) {
     if (!item.post) return
     const authorUser = item.post.authorUsername.toLowerCase().replace('@', '').trim()
-    if (SUPER_ADMIN_USERNAMES.includes(authorUser)) {
+    if (isSuperAdminUser(authorUser)) {
       Alert.alert(t('admin.unauthorizedActionTitle'), t('admin.cannotBanSuperAdmin'))
       return
     }
@@ -209,7 +212,7 @@ export default function AdminScreen() {
     // Yönetici Rolü Atama / Kaldırma (Her zaman erişilebilir)
     if (targetUser.isAdmin) {
       options.push({
-        text: '👑 ' + t('admin.revokeAdmin'),
+        text: t('admin.revokeAdmin'),
         style: 'destructive',
         onPress: async () => {
           const ok = await adminRevokeUser(targetUser.id, targetUser.username, session!.user.id)
@@ -223,7 +226,7 @@ export default function AdminScreen() {
       })
     } else {
       options.push({
-        text: '👑 ' + t('admin.makeAdmin'),
+        text: t('admin.makeAdmin'),
         onPress: async () => {
           const ok = await adminPromoteUser(targetUser.id, targetUser.username, session!.user.id)
           if (ok) {

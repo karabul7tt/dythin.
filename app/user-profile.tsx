@@ -226,9 +226,10 @@ export default function UserProfileScreen() {
   async function handleProfileModeration() {
     if (!profile || !session?.user.id) return
     const currentUsername = session.user.user_metadata?.username
-    const amISuperAdmin = isSuperAdminUser(currentUsername)
-    const isTargetSuper = isSuperAdminUser(profile.username)
-    const isTargetAdmin = await checkIsAdmin(profile.username, (profile as any).role, profile.id)
+    const currentEmail = session.user.email
+    const amISuperAdmin = isSuperAdminUser(currentUsername) || isSuperAdminUser(currentEmail)
+    const isTargetSuper = isSuperAdminUser(profile.username) || isSuperAdminUser((profile as any).email)
+    const isTargetAdmin = await checkIsAdmin(profile.username, (profile as any).role, profile.id, (profile as any).email)
 
     const buttons: any[] = []
 
@@ -245,10 +246,10 @@ export default function UserProfileScreen() {
         })
       } else {
         buttons.push({
-          text: '👑 Yönetici Olarak Ata (Admin Yap)',
+          text: 'Yönetici Olarak Ata',
           onPress: async () => {
             await adminPromoteUser(profile.id, profile.username, session.user.id)
-            Alert.alert('Yönetici Atandı', `@${profile.username} artık yönetici. Yönetici paneline erişebilir ve içerikleri denetleyebilir.`)
+            Alert.alert('Yönetici Atandı', `@${profile.username} artık yönetici. Yönetici paneline erişebilir.`)
           },
         })
       }

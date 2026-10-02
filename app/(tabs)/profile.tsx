@@ -160,7 +160,7 @@ export default function ProfileScreen() {
     if (data) {
       const prof = data as Profile
       const uName = prof.username || ''
-      checkIsAdmin(uName, prof.role, session.user.id).then(setIsAdminUser)
+      checkIsAdmin(uName, prof.role, session.user.id, session.user.email).then(setIsAdminUser)
       let fName = prof.full_name || ''
       let avUrl = prof.avatar_url || null
 
