@@ -524,7 +524,7 @@ end;
 $$;
 
 -- Yardımcı fonksiyon: is_admin kontrolü
-create or replace function public.is_admin(p_user_id uuid)
+create or replace function public.is_admin(user_id uuid)
 returns boolean
 language sql
 security definer
@@ -532,7 +532,7 @@ stable
 as $$
   select exists (
     select 1 from public.profiles
-    where id = p_user_id
+    where id = user_id
       and (role = 'admin' or lower(coalesce(username, '')) = 'mehmetkarabul7tt')
   );
 $$;
