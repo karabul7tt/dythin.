@@ -1,9 +1,5 @@
--- ============================================================
--- DYTHIN. — 240 Gerçekçi Bot Havuzu & Sıralı 12'şer Seeding Sistemi (V3)
--- Supabase Dashboard > SQL Editor alanına yapıştırıp "RUN" yapın.
--- ============================================================
+create extension if not exists pgcrypto with schema extensions;
 
--- ── 1. BOT SAYAÇ TABLOSU (SIRAYLA 12'ŞER GÖNDERİMİ TAKİP EDER) ──
 create table if not exists public.bot_seed_tracker (
   id int primary key default 1,
   last_index int default 0,
@@ -14,7 +10,7 @@ insert into public.bot_seed_tracker (id, last_index)
 values (1, 0)
 on conflict (id) do nothing;
 
--- ── 2. SIRADAKİ 12 BOTU YÜKLEYEN FONKSİYON (seed_next_bot_batch) ──
+-- 2. SIRADAKI 12 BOTU YUKLEYEN FONKSIYON (seed_next_bot_batch)
 create or replace function public.seed_next_bot_batch(p_batch_size int default 12)
 returns text
 language plpgsql
@@ -435,7 +431,7 @@ as $$
   select public.seed_next_bot_batch(12);
 $$;
 
--- ── 3. TÜM BOTLARI VE VERİLERİNİ SIFIRLAYIP YER AÇAN FONKSİYON ──
+-- 3. TUM BOTLARI VE VERILERINI SIFIRLAYIP YER ACAN FONKSIYON
 create or replace function public.clear_all_bots()
 returns text
 language plpgsql
@@ -478,7 +474,7 @@ begin
 end;
 $$;
 
--- ── 4. GÜVENLİ VE HİYERARŞİK ADMİN / KULLANICI ROL YÖNETİMİ ──
+-- 4. GUVENLI VE HIYERARSIK ADMIN / KULLANICI ROL YONETIMI
 create or replace function public.admin_set_user_role(target_user_id uuid, new_role text)
 returns jsonb
 language plpgsql
@@ -525,6 +521,20 @@ begin
 
   return jsonb_build_object('success', true, 'new_role', new_role);
 end;
+$$;
+
+-- Yardımcı fonksiyon: is_admin kontrolü
+create or replace function public.is_admin(p_user_id uuid)
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = p_user_id
+      and (role = 'admin' or lower(coalesce(username, '')) = 'mehmetkarabul7tt')
+  );
 $$;
 
 -- RLS: Adminlerin diğer profilleri güncellemesine izin ver
