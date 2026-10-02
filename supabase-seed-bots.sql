@@ -525,39 +525,61 @@ declare
   caller_id uuid := auth.uid();
   caller_role text;
   caller_user text;
+  caller_email text;
   target_user text;
+  target_email text;
+  is_caller_super boolean := false;
+  is_caller_admin boolean := false;
 begin
   if caller_id is null then
     return jsonb_build_object('success', false, 'error', 'Yetkisiz erişim');
   end if;
 
-  select coalesce(role, 'user'), lower(coalesce(username, '')) into caller_role, caller_user
+  select coalesce(role, 'user'), lower(coalesce(username, '')), lower(coalesce(email, ''))
+  into caller_role, caller_user, caller_email
   from public.profiles where id = caller_id;
 
-  select lower(coalesce(username, '')) into target_user
+  select lower(coalesce(username, '')), lower(coalesce(email, ''))
+  into target_user, target_email
   from public.profiles where id = target_user_id;
 
-  -- Yalnızca mehmetkarabul7tt veya admin rolündeki kullanıcılar işlem yapabilir
-  if caller_user <> 'mehmetkarabul7tt' and caller_role <> 'admin' then
+  -- Kurucu (Super Admin) kontrolü (kullanıcı adı veya email mehmetkarabul7tt)
+  if caller_user = 'mehmetkarabul7tt' or caller_email = 'mehmetkarabul7tt@gmail.com' then
+    is_caller_super := true;
+    is_caller_admin := true;
+  end if;
+
+  -- Admin kontrolü (veritabanı rolü veya reports logundaki en son promote)
+  if caller_role = 'admin' or exists (
+    select 1 from public.reports 
+    where reason like 'ADMIN_ACTION:PROMOTE_ADMIN:' || caller_id || ':%'
+  ) then
+    is_caller_admin := true;
+  end if;
+
+  -- Yalnızca kurucu veya admin yetkisine sahip kullanıcılar işlem yapabilir
+  if not is_caller_admin then
     return jsonb_build_object('success', false, 'error', 'Yönetici yetkisi gerekli');
   end if;
 
   -- Ana kurucu yöneticinin yetkisi kaldırılamaz veya banlanamaz
-  if target_user = 'mehmetkarabul7tt' then
+  if target_user = 'mehmetkarabul7tt' or target_email = 'mehmetkarabul7tt@gmail.com' then
     return jsonb_build_object('success', false, 'error', 'Ana yöneticinin rolü değiştirilemez veya banlanamaz');
   end if;
 
   -- Başka bir kullanıcıya admin yetkisi vermeyi veya admin yetkisini kaldırmayı yalnızca kurucu yönetici (mehmetkarabul7tt) yapabilir
-  if (new_role = 'admin' or target_user_id in (select id from public.profiles where role = 'admin')) and caller_user <> 'mehmetkarabul7tt' then
+  if (new_role = 'admin' or target_user_id in (select id from public.profiles where role = 'admin')) and not is_caller_super then
     return jsonb_build_object('success', false, 'error', 'Yalnızca kurucu ana yönetici admin yetkilerini değiştirebilir');
   end if;
 
   -- Hedef kullanıcının rolünü güncelle
   update public.profiles set role = new_role where id = target_user_id;
 
-  -- Eğer banlandıysa gönderilerini inaktif et
+  -- Eğer banlandıysa gönderilerini inaktif et, unban edildiyse aktif et
   if new_role = 'banned' then
     update public.posts set is_active = false where user_id = target_user_id;
+  elsif new_role = 'user' then
+    update public.posts set is_active = true where user_id = target_user_id;
   end if;
 
   return jsonb_build_object('success', true, 'new_role', new_role);

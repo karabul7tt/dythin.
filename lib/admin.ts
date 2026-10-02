@@ -12,6 +12,7 @@ export const SUPER_ADMIN_EMAILS = [
 const PROMOTED_ADMINS_STORAGE_KEY = '@dythin_promoted_admins_v2'
 const REVOKED_ADMINS_STORAGE_KEY = '@dythin_revoked_admins_v2'
 const BANNED_USERS_STORAGE_KEY = '@dythin_banned_users_v2'
+const UNBANNED_USERS_STORAGE_KEY = '@dythin_unbanned_users_v2'
 
 export async function getLocallyBannedUsers(): Promise<Set<string>> {
   try {
@@ -38,6 +39,34 @@ export async function removeLocallyBannedUser(userId: string): Promise<void> {
     const set = await getLocallyBannedUsers()
     set.delete(userId)
     await AsyncStorage.setItem(BANNED_USERS_STORAGE_KEY, JSON.stringify(Array.from(set)))
+  } catch {}
+}
+
+export async function getLocallyUnbannedUsers(): Promise<Set<string>> {
+  try {
+    const raw = await AsyncStorage.getItem(UNBANNED_USERS_STORAGE_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return new Set(parsed)
+    return new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+export async function addLocallyUnbannedUser(userId: string): Promise<void> {
+  try {
+    const set = await getLocallyUnbannedUsers()
+    set.add(userId)
+    await AsyncStorage.setItem(UNBANNED_USERS_STORAGE_KEY, JSON.stringify(Array.from(set)))
+  } catch {}
+}
+
+export async function removeLocallyUnbannedUser(userId: string): Promise<void> {
+  try {
+    const set = await getLocallyUnbannedUsers()
+    set.delete(userId)
+    await AsyncStorage.setItem(UNBANNED_USERS_STORAGE_KEY, JSON.stringify(Array.from(set)))
   } catch {}
 }
 
@@ -115,11 +144,11 @@ export async function checkIsUserBanned(
     if (isSuper) return false
   }
 
-  // 2. Yerel cihaz önbelleğinde banlı mı?
+  // 2. Açıkça banı kaldırılmış (unbanned) kullanıcılar ASLA kilitlenemez
   if (userId) {
     try {
-      const localBanned = await getLocallyBannedUsers()
-      if (localBanned.has(userId)) return true
+      const localUnbanned = await getLocallyUnbannedUsers()
+      if (localUnbanned.has(userId)) return false
     } catch {}
   }
 
@@ -130,29 +159,42 @@ export async function checkIsUserBanned(
     const { data } = await supabase
       .from('reports')
       .select('reason, created_at')
-      .or(`reason.like.ADMIN_ACTION:BAN_USER:%,reason.like.ADMIN_ACTION:UNBAN_USER:%`)
+      .like('reason', 'ADMIN_ACTION:%')
       .order('created_at', { ascending: false })
+      .limit(50)
 
     if (data && data.length > 0) {
       for (const row of data) {
+        const r = row.reason || ''
         const isUserMatch =
-          (cleanUser && row.reason.toLowerCase().includes(`:@${cleanUser}`)) ||
-          (userId && row.reason.includes(`:${userId}:`))
+          (cleanUser && r.toLowerCase().includes(`:@${cleanUser}`)) ||
+          (userId && r.includes(`:${userId}:`))
         if (isUserMatch) {
-          if (row.reason.startsWith('ADMIN_ACTION:UNBAN_USER:')) {
-            if (userId) removeLocallyBannedUser(userId).catch(() => {})
+          if (r.startsWith('ADMIN_ACTION:UNBAN_USER:')) {
+            if (userId) {
+              await removeLocallyBannedUser(userId)
+              await addLocallyUnbannedUser(userId)
+            }
             return false
           }
-          if (row.reason.startsWith('ADMIN_ACTION:BAN_USER:')) {
-            if (userId) addLocallyBannedUser(userId).catch(() => {})
+          if (r.startsWith('ADMIN_ACTION:BAN_USER:')) {
+            // Eğer daha önceden açıkça unban edilmişse ban kaydını geç
+            if (userId) {
+              const localUnbanned = await getLocallyUnbannedUsers()
+              if (localUnbanned.has(userId)) return false
+              await addLocallyBannedUser(userId)
+              await removeLocallyUnbannedUser(userId)
+            }
             return true
           }
         }
       }
     }
-  } catch {}
+  } catch (err) {
+    console.warn('checkIsUserBanned reports error:', err)
+  }
 
-  // 4. Veritabanı profiller tablosundaki rol kontrolü (role === 'banned')
+  // 4. Veritabanı profiller tablosundaki rol kontrolü
   if (userId) {
     try {
       const { data: profile } = await supabase
@@ -163,11 +205,34 @@ export async function checkIsUserBanned(
 
       if (profile) {
         if (isSuperAdminUser(profile.username) || isSuperAdminUser(profile.email)) return false
-        if (profile.role === 'banned') {
-          addLocallyBannedUser(userId).catch(() => {})
-          return true
+        
+        // Eğer veritabanında role 'banned' değilse kesinlikle banlı değildir
+        if (profile.role !== 'banned') {
+          await removeLocallyBannedUser(userId)
+          return false
         }
+
+        // Eğer veritabanında role 'banned' kalmış ama yerelde unban edilmişse (RLS güncelleme kısıtlaması nedeniyle)
+        const localUnbanned = await getLocallyUnbannedUsers()
+        if (localUnbanned.has(userId)) {
+          // Kendisi giriş yapıyorsa profilini de user olarak güncelle
+          Promise.resolve(supabase.from('profiles').update({ role: 'user' }).eq('id', userId)).catch(() => {})
+          return false
+        }
+
+        await addLocallyBannedUser(userId)
+        return true
       }
+    } catch {}
+  }
+
+  // 5. Yerel önbellekte banlı mı? (Yalnızca açıkça unban edilmemişse)
+  if (userId) {
+    try {
+      const localUnbanned = await getLocallyUnbannedUsers()
+      if (localUnbanned.has(userId)) return false
+      const localBanned = await getLocallyBannedUsers()
+      if (localBanned.has(userId)) return true
     } catch {}
   }
 
@@ -261,24 +326,36 @@ export async function checkIsAdmin(
     const { data } = await supabase
       .from('reports')
       .select('reason, created_at')
-      .or(`reason.like.ADMIN_ACTION:PROMOTE_ADMIN:%,reason.like.ADMIN_ACTION:REVOKE_ADMIN:%`)
+      .like('reason', 'ADMIN_ACTION:%')
       .order('created_at', { ascending: false })
+      .limit(50)
 
     if (data && data.length > 0) {
       for (const row of data) {
-        const isUserMatch = (cleanUser && row.reason.toLowerCase().includes(`:@${cleanUser}`)) ||
-                            (userId && row.reason.includes(`:${userId}:`))
+        const r = row.reason || ''
+        const isUserMatch = (cleanUser && r.toLowerCase().includes(`:@${cleanUser}`)) ||
+                            (userId && r.includes(`:${userId}:`))
         if (isUserMatch) {
-          if (row.reason.startsWith('ADMIN_ACTION:REVOKE_ADMIN:')) {
+          if (r.startsWith('ADMIN_ACTION:REVOKE_ADMIN:')) {
+            if (userId) {
+              await removeLocallyPromotedAdmin(userId)
+              await addLocallyRevokedAdmin(userId)
+            }
             return false
           }
-          if (row.reason.startsWith('ADMIN_ACTION:PROMOTE_ADMIN:')) {
+          if (r.startsWith('ADMIN_ACTION:PROMOTE_ADMIN:')) {
+            if (userId) {
+              await addLocallyPromotedAdmin(userId)
+              await removeLocallyRevokedAdmin(userId)
+            }
             return true
           }
         }
       }
     }
-  } catch {}
+  } catch (err) {
+    console.warn('checkIsAdmin reports error:', err)
+  }
 
   // 4. Yerel önbellekte kayıtlı admin mi?
   if (userId) {
@@ -317,26 +394,29 @@ export async function getAdminKPIs(): Promise<AdminKPIs> {
   let bannedCount = 0
 
   try {
-    const [uRes, pRes, vRes, rRes, localBanned] = await Promise.all([
+    const [uRes, pRes, vRes, rRes, localBanned, localUnbanned] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('posts').select('id', { count: 'exact', head: true }).eq('is_active', true),
       supabase.from('votes').select('id', { count: 'exact', head: true }),
       supabase.from('reports').select('id, reason'),
       getLocallyBannedUsers(),
+      getLocallyUnbannedUsers(),
     ])
 
     totalUsers = uRes.count || 0
     totalPosts = pRes.count || 0
     totalVotes = vRes.count || 0
 
-    const bannedSet = new Set<string>(localBanned)
+    const bannedSet = new Set<string>()
+    for (const b of localBanned) bannedSet.add(b)
+    for (const u of localUnbanned) bannedSet.delete(u)
 
     if (rRes.data) {
       pendingReports = rRes.data.filter(r => !r.reason?.startsWith('ADMIN_ACTION:')).length
       for (const r of rRes.data) {
         if (r.reason?.startsWith('ADMIN_ACTION:BAN_USER:')) {
           const uid = r.reason.split(':')[2]
-          if (uid) bannedSet.add(uid)
+          if (uid && !localUnbanned.has(uid)) bannedSet.add(uid)
         } else if (r.reason?.startsWith('ADMIN_ACTION:UNBAN_USER:')) {
           const uid = r.reason.split(':')[2]
           if (uid) bannedSet.delete(uid)
@@ -490,18 +570,20 @@ async function logAdminAction(adminUserId: string, reason: string): Promise<void
 
 export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
   try {
-    const [profilesRes, reportsRes, localAdmins, localRevoked, localBanned] = await Promise.all([
+    const [profilesRes, reportsRes, localAdmins, localRevoked, localBanned, localUnbanned] = await Promise.all([
       supabase.from('profiles').select('*').order('created_at', { ascending: false }),
       supabase.from('reports').select('reason, created_at').like('reason', 'ADMIN_ACTION:%').order('created_at', { ascending: true }),
       getLocallyPromotedAdmins(),
       getLocallyRevokedAdmins(),
       getLocallyBannedUsers(),
+      getLocallyUnbannedUsers(),
     ])
 
     const profiles = profilesRes.data || []
     const adminEvents = reportsRes.data || []
 
-    const bannedUsers = new Set<string>(localBanned)
+    const bannedUsers = new Set<string>()
+    const unbannedUsers = new Set<string>(localUnbanned)
     const promotedAdmins = new Set<string>(localAdmins)
     const revokedAdmins = new Set<string>(localRevoked)
 
@@ -509,10 +591,16 @@ export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
       const r = ev.reason
       if (r.startsWith('ADMIN_ACTION:BAN_USER:')) {
         const uid = r.split(':')[2]
-        if (uid) bannedUsers.add(uid)
+        if (uid) {
+          bannedUsers.add(uid)
+          unbannedUsers.delete(uid)
+        }
       } else if (r.startsWith('ADMIN_ACTION:UNBAN_USER:')) {
         const uid = r.split(':')[2]
-        if (uid) bannedUsers.delete(uid)
+        if (uid) {
+          unbannedUsers.add(uid)
+          bannedUsers.delete(uid)
+        }
       } else if (r.startsWith('ADMIN_ACTION:PROMOTE_ADMIN:')) {
         const uid = r.split(':')[2]
         if (uid) {
@@ -538,8 +626,14 @@ export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
         promotedAdmins.add(admId)
       }
     }
+    for (const uId of localUnbanned) {
+      unbannedUsers.add(uId)
+      bannedUsers.delete(uId)
+    }
     for (const bId of localBanned) {
-      bannedUsers.add(bId)
+      if (!unbannedUsers.has(bId)) {
+        bannedUsers.add(bId)
+      }
     }
 
     return profiles.map(p => {
@@ -549,7 +643,10 @@ export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
       
       const isRevoked = revokedAdmins.has(p.id) || localRevoked.has(p.id)
       const isDynamicAdmin = !isSuper && !isRevoked && (promotedAdmins.has(p.id) || p.role === 'admin')
-      const isBanned = !isSuper && (bannedUsers.has(p.id) || localBanned.has(p.id) || p.role === 'banned')
+      
+      // Kullanıcı açıkça unban edilmişse asla banlı değildir
+      const isExplicitlyUnbanned = unbannedUsers.has(p.id) || localUnbanned.has(p.id)
+      const isBanned = !isSuper && !isExplicitlyUnbanned && (bannedUsers.has(p.id) || (p.role === 'banned' && !isExplicitlyUnbanned))
 
       return {
         id: p.id,
@@ -597,12 +694,23 @@ export async function adminBanUser(
       return false
     }
 
-    // 1. Yerel önbellek: Ban listesine ekle, adminlikten çıkar
+    // 1. Yerel önbellek: Ban listesine ekle, unbanned ve adminlikten çıkar
     await addLocallyBannedUser(targetUserId)
+    await removeLocallyUnbannedUser(targetUserId)
     await removeLocallyPromotedAdmin(targetUserId)
     await addLocallyRevokedAdmin(targetUserId)
 
-    // 2. RPC ile veritabanı rolünü güncelle
+    // 2. Eski UNBAN rapor kayıtlarını veritabanından tamamen sil
+    try {
+      await supabase.from('reports').delete().like('reason', `ADMIN_ACTION:UNBAN_USER:${targetUserId}%`)
+    } catch (e) {
+      console.warn('reports delete old unban error:', e)
+    }
+
+    // 3. Denetim loguna ban kaydı ekle (Tüm adminlerin ve sistemin görmesi için)
+    await logAdminAction(adminUserId, `ADMIN_ACTION:BAN_USER:${targetUserId}:@${cleanUser}`)
+
+    // 4. RPC ile veritabanı rolünü güncelle
     try {
       await supabase.rpc('admin_set_user_role', {
         target_user_id: targetUserId,
@@ -610,20 +718,17 @@ export async function adminBanUser(
       })
     } catch {}
 
-    // 3. Profiles tablosunda role = 'banned' yap
+    // 5. Profiles tablosunda role = 'banned' yap
     try {
       await supabase.from('profiles').update({ role: 'banned' }).eq('id', targetUserId)
     } catch {}
 
-    // 4. Gönderilerini inaktif yap
+    // 6. Gönderilerini inaktif yap
     try {
       await supabase.from('posts').update({ is_active: false }).eq('user_id', targetUserId)
     } catch {}
 
-    // 5. Denetim loguna ban kaydı ekle
-    await logAdminAction(adminUserId, `ADMIN_ACTION:BAN_USER:${targetUserId}:@${cleanUser}`)
-
-    // 6. Blocked users tablosuna da ekle
+    // 7. Blocked users tablosuna da ekle
     try {
       await supabase.from('blocked_users').insert({
         blocker_id: adminUserId,
@@ -646,10 +751,21 @@ export async function adminUnbanUser(
   try {
     const cleanUser = targetUsername.toLowerCase().replace('@', '').trim()
 
-    // 1. Yerel önbellekten ban kaydını sil
+    // 1. Yerel önbellekten ban kaydını sil ve explicit unbanned'e ekle
     await removeLocallyBannedUser(targetUserId)
+    await addLocallyUnbannedUser(targetUserId)
 
-    // 2. RPC ile rolü 'user' yap
+    // 2. Veritabanındaki eski BAN rapor kayıtlarını tamamen sil
+    try {
+      await supabase.from('reports').delete().like('reason', `ADMIN_ACTION:BAN_USER:${targetUserId}%`)
+    } catch (e) {
+      console.warn('reports delete old ban error:', e)
+    }
+
+    // 3. Denetim loguna unban kaydı ekle (Tüm adminler ve cihazların hemen görmesi için)
+    await logAdminAction(adminUserId, `ADMIN_ACTION:UNBAN_USER:${targetUserId}:@${cleanUser}`)
+
+    // 4. RPC ile rolü 'user' yap
     try {
       await supabase.rpc('admin_set_user_role', {
         target_user_id: targetUserId,
@@ -657,15 +773,17 @@ export async function adminUnbanUser(
       })
     } catch {}
 
-    // 3. Profiles tablosunda role = 'user' yap
+    // 5. Profiles tablosunda role = 'user' yap
     try {
       await supabase.from('profiles').update({ role: 'user' }).eq('id', targetUserId)
     } catch {}
 
-    // 4. Denetim loguna unban kaydı ekle
-    await logAdminAction(adminUserId, `ADMIN_ACTION:UNBAN_USER:${targetUserId}:@${cleanUser}`)
+    // 6. Gönderilerini tekrar aktif yap
+    try {
+      await supabase.from('posts').update({ is_active: true }).eq('user_id', targetUserId)
+    } catch {}
 
-    // 5. Blocked users tablosundan çıkar
+    // 7. Blocked users tablosundan çıkar
     try {
       await supabase.from('blocked_users').delete().eq('blocker_id', adminUserId).eq('blocked_id', targetUserId)
     } catch {}

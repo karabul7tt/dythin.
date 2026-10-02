@@ -237,34 +237,36 @@ export default function AdminScreen() {
       { text: t('common.cancel'), style: 'cancel' },
     ]
 
-    // Yönetici Rolü Atama / Kaldırma (Her zaman erişilebilir)
-    if (targetUser.isAdmin) {
-      options.push({
-        text: t('admin.revokeAdmin'),
-        style: 'destructive',
-        onPress: async () => {
-          const ok = await adminRevokeUser(targetUser.id, targetUser.username, session!.user.id)
-          if (ok) {
-            Alert.alert(t('common.success'), t('admin.revokeAdminSuccess', { username: targetUser.username }))
-            await loadData()
-          } else {
-            Alert.alert(t('common.error'), t('admin.revokeAdminError'))
-          }
-        },
-      })
-    } else {
-      options.push({
-        text: t('admin.makeAdmin'),
-        onPress: async () => {
-          const ok = await adminPromoteUser(targetUser.id, targetUser.username, session!.user.id)
-          if (ok) {
-            Alert.alert(t('common.success'), t('admin.makeAdminSuccess', { username: targetUser.username }))
-            await loadData()
-          } else {
-            Alert.alert(t('common.error'), t('admin.makeAdminError'))
-          }
-        },
-      })
+    // Yönetici Rolü Atama / Kaldırma (Yalnızca Süper Admin / Kurucu yapabilir)
+    if (isCurrentUserSuperAdmin) {
+      if (targetUser.isAdmin) {
+        options.push({
+          text: t('admin.revokeAdmin'),
+          style: 'destructive',
+          onPress: async () => {
+            const ok = await adminRevokeUser(targetUser.id, targetUser.username, session!.user.id)
+            if (ok) {
+              Alert.alert(t('common.success'), t('admin.revokeAdminSuccess', { username: targetUser.username }))
+              await loadData()
+            } else {
+              Alert.alert(t('common.error'), t('admin.revokeAdminError'))
+            }
+          },
+        })
+      } else {
+        options.push({
+          text: t('admin.makeAdmin'),
+          onPress: async () => {
+            const ok = await adminPromoteUser(targetUser.id, targetUser.username, session!.user.id)
+            if (ok) {
+              Alert.alert(t('common.success'), t('admin.makeAdminSuccess', { username: targetUser.username }))
+              await loadData()
+            } else {
+              Alert.alert(t('common.error'), t('admin.makeAdminError'))
+            }
+          },
+        })
+      }
     }
 
     if (targetUser.isBanned) {

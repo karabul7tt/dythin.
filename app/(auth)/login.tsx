@@ -395,17 +395,22 @@ export default function Login() {
         let targetEmail = inputIdentifier
 
         if (!inputIdentifier.includes('@')) {
-          const { data: foundProfile } = await supabase
-            .from('profiles')
-            .select('id, username, email')
-            .ilike('username', inputIdentifier.replace(/^@/, ''))
-            .single()
-
-          if (foundProfile?.email) {
-            targetEmail = foundProfile.email
+          const cleanUser = inputIdentifier.replace(/^@/, '').toLowerCase().trim()
+          if (cleanUser === 'mehmetkarabul7tt') {
+            targetEmail = 'mehmetkarabul7tt@gmail.com'
           } else {
-            setLoading(false)
-            return Alert.alert('Kullanıcı Bulunamadı', 'Bu kullanıcı adıyla kayıtlı bir hesap bulunamadı. Lütfen e-posta adresinizle giriş yapın.')
+            const { data: foundProfile } = await supabase
+              .from('profiles')
+              .select('id, username, email')
+              .ilike('username', cleanUser)
+              .maybeSingle()
+
+            if (foundProfile?.email) {
+              targetEmail = foundProfile.email
+            } else {
+              setLoading(false)
+              return Alert.alert('Kullanıcı Bulunamadı', 'Bu kullanıcı adıyla kayıtlı bir hesap bulunamadı veya e-posta adresi eksik. Lütfen e-posta adresinizle giriş yapın.')
+            }
           }
         }
 
@@ -441,6 +446,11 @@ export default function Login() {
               )
               return
             }
+            // Banlı değilse, rolü DB'de 'banned' kalmışsa kendini 'user' olarak onar (self-heal)
+            Promise.resolve(supabase.from('profiles').update({ role: 'user' }).eq('id', signInData.user.id)).catch(() => {})
+            setLoading(false)
+            router.replace('/(tabs)')
+            return
           }
         }
       }

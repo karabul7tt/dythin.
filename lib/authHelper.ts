@@ -81,7 +81,7 @@ export async function syncUserProfileWithDatabase(user: any) {
 
     const { data: existingProfile } = await supabase
       .from('profiles')
-      .select('id, full_name, avatar_url, username')
+      .select('id, full_name, avatar_url, username, email')
       .eq('id', user.id)
       .maybeSingle()
 
@@ -105,6 +105,12 @@ export async function syncUserProfileWithDatabase(user: any) {
       }
       if ((!existingProfile.avatar_url || existingProfile.avatar_url.trim() === '') && avatar) {
         updates.avatar_url = avatar
+      }
+      if (email && !(existingProfile as any).email) {
+        updates.email = email
+      }
+      if (existingProfile.username?.toLowerCase() === 'mehmetkarabul7tt' && !(existingProfile as any).email) {
+        updates.email = 'mehmetkarabul7tt@gmail.com'
       }
       if (Object.keys(updates).length > 0) {
         await supabase.from('profiles').update(updates).eq('id', user.id)
