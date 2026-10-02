@@ -1,6 +1,6 @@
 create extension if not exists pgcrypto with schema extensions;
 
--- Posts tablosundaki eski image_url not-null kisitlamasini esnet
+-- Tablo kisitlamalarini ve kolonlari guvene al
 do $$
 begin
   if exists (
@@ -8,6 +8,27 @@ begin
     where table_schema = 'public' and table_name = 'posts' and column_name = 'image_url'
   ) then
     alter table public.posts alter column image_url drop not null;
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'votes' and column_name = 'value'
+  ) then
+    alter table public.votes add column value boolean default false;
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'votes' and column_name = 'selected_option'
+  ) then
+    alter table public.votes add column selected_option text;
+  end if;
+
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'votes' and column_name = 'comment'
+  ) then
+    alter table public.votes add column comment text;
   end if;
 end $$;
 
@@ -425,8 +446,8 @@ begin
             else 'B kombini çok daha enerjik duruyor.'
           end;
 
-          insert into public.votes (voter_id, post_id, option, selected_option, comment, created_at)
-          values (v_voter_id, v_post_id, v_option, v_option, v_comment, now() - ((i * 4) || ' minutes')::interval)
+          insert into public.votes (voter_id, post_id, value, selected_option, comment, created_at)
+          values (v_voter_id, v_post_id, (v_option = 'B'), v_option, v_comment, now() - ((i * 4) || ' minutes')::interval)
           on conflict (voter_id, post_id) do nothing;
         end if;
       end loop;
