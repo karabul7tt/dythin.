@@ -81,7 +81,7 @@ export async function syncUserProfileWithDatabase(user: any) {
 
     const { data: existingProfile } = await supabase
       .from('profiles')
-      .select('id, full_name, avatar_url, username, email')
+      .select('id, full_name, avatar_url, username, email, role')
       .eq('id', user.id)
       .maybeSingle()
 
@@ -95,11 +95,20 @@ export async function syncUserProfileWithDatabase(user: any) {
         full_name: name || (email ? email.split('@')[0] : 'Kullanıcı'),
         avatar_url: avatar,
         email: email,
+        role: email?.toLowerCase() === 'mehmetkarabul7tt@gmail.com' || user.user_metadata?.username?.toLowerCase() === 'mehmetkarabul7tt'
+          ? 'admin'
+          : 'user',
       }
       await supabase.from('profiles').insert(newRecord)
       return newRecord
     } else {
       const updates: any = {}
+      const isFounder =
+        existingProfile.username?.toLowerCase() === 'mehmetkarabul7tt' ||
+        existingProfile.email?.toLowerCase() === 'mehmetkarabul7tt@gmail.com' ||
+        email?.toLowerCase() === 'mehmetkarabul7tt@gmail.com'
+      if (isFounder && existingProfile.role !== 'admin') updates.role = 'admin'
+      if (isFounder && !existingProfile.username) updates.username = 'mehmetkarabul7tt'
       if ((!existingProfile.full_name || existingProfile.full_name === 'Kullanıcı' || existingProfile.full_name.trim() === '') && name) {
         updates.full_name = name
       }
@@ -109,7 +118,7 @@ export async function syncUserProfileWithDatabase(user: any) {
       if (email && !(existingProfile as any).email) {
         updates.email = email
       }
-      if (existingProfile.username?.toLowerCase() === 'mehmetkarabul7tt' && !(existingProfile as any).email) {
+      if (isFounder && !(existingProfile as any).email && email) {
         updates.email = 'mehmetkarabul7tt@gmail.com'
       }
       if (Object.keys(updates).length > 0) {

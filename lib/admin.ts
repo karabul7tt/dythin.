@@ -146,7 +146,14 @@ export async function checkIsUserBanned(
 
   if (!userId && !username && !email) return false
 
-  let cleanUser = (username || '').toLowerCase().replace('@', '').trim()
+  const cleanUser = (username || '').toLowerCase().replace('@', '').trim()
+
+  // The current device can retain an older local ban after an unban. Explicit
+  // unban state always wins over that cached entry.
+  if (userId) {
+    const localUnbanned = await getLocallyUnbannedUsers()
+    if (localUnbanned.has(userId)) return false
+  }
 
   // 2. Veritabanındaki denetim loglarını kontrol et (en güncel aksiyon kazanır)
   try {
@@ -160,14 +167,20 @@ export async function checkIsUserBanned(
     if (data && data.length > 0) {
       for (const row of data) {
         const r = row.reason || ''
+        const lowerReason = r.toLowerCase()
         const isUserMatch =
-          (cleanUser && r.toLowerCase().includes(`:@${cleanUser}`)) ||
-          (userId && r.includes(`:${userId}:`))
+          (userId && r.includes(`:${userId}:`)) ||
+          (cleanUser && lowerReason.endsWith(`:@${cleanUser}`))
         if (isUserMatch) {
           if (r.startsWith('ADMIN_ACTION:UNBAN_USER:')) {
+            if (userId) {
+              await removeLocallyBannedUser(userId)
+              await addLocallyUnbannedUser(userId)
+            }
             return false
           }
           if (r.startsWith('ADMIN_ACTION:BAN_USER:')) {
+            if (userId) await addLocallyBannedUser(userId)
             return true
           }
         }
@@ -175,6 +188,11 @@ export async function checkIsUserBanned(
     }
   } catch (err) {
     console.warn('checkIsUserBanned reports error:', err)
+  }
+
+  if (userId) {
+    const localBanned = await getLocallyBannedUsers()
+    if (localBanned.has(userId)) return true
   }
 
   // 3. Veritabanı profiller tablosundaki role kontrolü
@@ -887,5 +905,3 @@ export async function adminClearBots(): Promise<{ success: boolean; message: str
     return { success: false, message: err?.message || 'Silme işlemi başarısız.' }
   }
 }
-
-

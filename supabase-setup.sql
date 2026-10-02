@@ -35,6 +35,7 @@ create table if not exists public.blocked_users (
 -- ── 2. MEVCUT TABLOLARA YENİ KOLONLAR VE BENZERSİZLİK ─────────
 
 alter table if exists public.profiles add column if not exists full_name text;
+alter table if exists public.profiles add column if not exists email text;
 alter table if exists public.profiles add column if not exists role text default 'user';
 alter table if exists public.profiles drop constraint if exists profiles_role_check;
 alter table if exists public.profiles add constraint profiles_role_check check (role in ('user', 'admin', 'banned'));
@@ -65,7 +66,11 @@ security definer set search_path = public
 as $$
   select exists (
     select 1 from public.profiles
-    where id = user_id and (role = 'admin' or lower(coalesce(username, '')) = 'mehmetkarabul7tt')
+    where id = user_id and (
+      role = 'admin'
+      or lower(coalesce(username, '')) = 'mehmetkarabul7tt'
+      or lower(coalesce(email, '')) = 'mehmetkarabul7tt@gmail.com'
+    )
   );
 $$;
 

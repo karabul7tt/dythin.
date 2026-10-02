@@ -183,29 +183,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (initialUrl) handleOAuthUrl(initialUrl)
     }).catch(() => null)
 
-    const authListener = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      if (newSession?.user) {
-        const isBanned = await checkIsUserBanned(
-          newSession.user.id,
-          newSession.user.user_metadata?.username,
-          newSession.user.email
-        )
-        if (isBanned) {
-          await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
-          setSession(null)
-          setIsAuthLoading(false)
-          return
-        }
-        setSession(newSession)
-        syncUserProfileWithDatabase(newSession.user).catch(() => null)
-
-        setTimeout(() => {
-          registerForPushNotificationsAsync(newSession.user.id).catch(() => null)
-        }, 3000)
-      } else {
-        setSession(null)
-      }
+    // Keep the Supabase auth callback synchronous. Awaiting database requests
+    // here can deadlock auth-js while it is still processing the sign-in event.
+    const authListener = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession)
       setIsAuthLoading(false)
+      if (!newSession?.user) return
+
+      const user = newSession.user
+      setTimeout(() => {
+        void (async () => {
+          const isBanned = await checkIsUserBanned(user.id, user.user_metadata?.username, user.email)
+          if (isBanned) {
+            await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+            setSession(null)
+            return
+          }
+          await syncUserProfileWithDatabase(user).catch(() => null)
+          registerForPushNotificationsAsync(user.id).catch(() => null)
+        })()
+      }, 0)
     })
 
     const safetyTimer = setTimeout(() => {
