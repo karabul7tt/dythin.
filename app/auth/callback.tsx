@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import * as Linking from 'expo-linking'
 import { supabase } from '../../lib/supabase'
 import { authenticateFromUrl } from '../../lib/authHelper'
+import { checkIsUserBanned } from '../../lib/admin'
 
 export default function AuthCallback() {
   const router = useRouter()
@@ -19,6 +20,16 @@ export default function AuthCallback() {
         if (urlToTry) {
           const success = await authenticateFromUrl(urlToTry)
           if (success) {
+            const { data } = await supabase.auth.getSession()
+            if (data?.session?.user) {
+              const isBanned = await checkIsUserBanned(data.session.user.id, data.session.user.user_metadata?.username, data.session.user.email)
+              if (isBanned) {
+                await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+                hasHandled.current = true
+                router.replace('/(auth)/login')
+                return
+              }
+            }
             hasHandled.current = true
             router.replace('/(tabs)')
             return
@@ -27,7 +38,14 @@ export default function AuthCallback() {
 
         if (params.code) {
           const { data, error } = await supabase.auth.exchangeCodeForSession(params.code)
-          if (!error && data?.session) {
+          if (!error && data?.session?.user) {
+            const isBanned = await checkIsUserBanned(data.session.user.id, data.session.user.user_metadata?.username, data.session.user.email)
+            if (isBanned) {
+              await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+              hasHandled.current = true
+              router.replace('/(auth)/login')
+              return
+            }
             hasHandled.current = true
             router.replace('/(tabs)')
             return
@@ -35,7 +53,14 @@ export default function AuthCallback() {
         }
 
         const { data: cur } = await supabase.auth.getSession()
-        if (cur?.session) {
+        if (cur?.session?.user) {
+          const isBanned = await checkIsUserBanned(cur.session.user.id, cur.session.user.user_metadata?.username, cur.session.user.email)
+          if (isBanned) {
+            await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+            hasHandled.current = true
+            router.replace('/(auth)/login')
+            return
+          }
           hasHandled.current = true
           router.replace('/(tabs)')
           return
@@ -58,7 +83,13 @@ export default function AuthCallback() {
     timer = setTimeout(async () => {
       if (hasHandled.current) return
       const { data } = await supabase.auth.getSession()
-      if (data?.session) {
+      if (data?.session?.user) {
+        const isBanned = await checkIsUserBanned(data.session.user.id, data.session.user.user_metadata?.username, data.session.user.email)
+        if (isBanned) {
+          await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+          router.replace('/(auth)/login')
+          return
+        }
         router.replace('/(tabs)')
       } else {
         router.replace('/(auth)/login')

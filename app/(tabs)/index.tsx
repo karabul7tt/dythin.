@@ -187,10 +187,11 @@ export default function VoteScreen() {
           text: t('feed.report'),
           style: 'destructive',
           onPress: async () => {
+            const targetUserTag = current.profiles?.username ? `@${current.profiles.username} ` : ''
             const { error } = await supabase.from('reports').insert({
               reporter_id: session?.user.id,
               post_id: current.id,
-              reason: 'Uygunsuz/Sakıncalı içerik',
+              reason: `Uygunsuz/Sakıncalı içerik: ${targetUserTag}[ID:${current.user_id}]`,
             })
             if (error && error.code !== '23505') {
               Alert.alert(t('common.error'), 'Bildirim gönderilemedi.')
@@ -224,10 +225,11 @@ export default function VoteScreen() {
               blocker_id: session?.user.id,
               blocked_id: current.user_id,
             })
+            const targetUserTag = current.profiles?.username ? `@${current.profiles.username} ` : ''
             await supabase.from('reports').insert({
               reporter_id: session?.user.id,
               post_id: current.id,
-              reason: 'Kullanıcı engellendi (Uygunsuz içerik / Otomatik moderasyon bildirimi)',
+              reason: `Kullanıcı akıştan engellendi: ${targetUserTag}[ID:${current.user_id}]`,
             })
             if (error && error.code !== '23505') {
               Alert.alert(t('common.error'), 'Engelleme yapılamadı.')

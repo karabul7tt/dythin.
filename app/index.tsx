@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react'
 import * as Linking from 'expo-linking'
 import { supabase } from '../lib/supabase'
 import { authenticateFromUrl } from '../lib/authHelper'
+import { checkIsUserBanned } from '../lib/admin'
 
 export default function Index() {
   const { session, isAuthLoading } = useApp()
@@ -21,7 +22,14 @@ export default function Index() {
         setExchanging(true)
         try {
           const { data, error } = await supabase.auth.exchangeCodeForSession(params.code)
-          if (!error && data?.session) {
+          if (!error && data?.session?.user) {
+            const isBanned = await checkIsUserBanned(data.session.user.id, data.session.user.user_metadata?.username, data.session.user.email)
+            if (isBanned) {
+              await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+              isHandled.current = true
+              router.replace('/(auth)/login')
+              return
+            }
             isHandled.current = true
             router.replace('/(tabs)')
             return
@@ -36,6 +44,16 @@ export default function Index() {
           setExchanging(true)
           const success = await authenticateFromUrl(initialUrl)
           if (success) {
+            const { data } = await supabase.auth.getSession()
+            if (data?.session?.user) {
+              const isBanned = await checkIsUserBanned(data.session.user.id, data.session.user.user_metadata?.username, data.session.user.email)
+              if (isBanned) {
+                await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+                isHandled.current = true
+                router.replace('/(auth)/login')
+                return
+              }
+            }
             isHandled.current = true
             router.replace('/(tabs)')
             return

@@ -21,7 +21,16 @@ import { supabase } from '../lib/supabase'
 import { sendPushNotificationToUser } from '../lib/notifications'
 import type { Profile, Post, Vote } from '../lib/types'
 import ZoomablePhoto from '../components/ZoomablePhoto'
-import { isSuperAdminUser, checkIsSuperAdmin, checkIsAdmin, adminPromoteUser, adminRevokeUser, adminBanUser } from '../lib/admin'
+import {
+  isSuperAdminUser,
+  checkIsSuperAdmin,
+  checkIsAdmin,
+  checkIsUserBanned,
+  adminPromoteUser,
+  adminRevokeUser,
+  adminBanUser,
+  adminUnbanUser,
+} from '../lib/admin'
 
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
 
@@ -228,44 +237,108 @@ export default function UserProfileScreen() {
     const currentUsername = session.user.user_metadata?.username
     const currentEmail = session.user.email
     const amISuperAdmin = await checkIsSuperAdmin(session.user.id, currentUsername, currentEmail)
+    const amIAdmin = await checkIsAdmin(currentUsername, null, session.user.id, currentEmail)
     const isTargetSuper = isSuperAdminUser(profile.username) || isSuperAdminUser((profile as any).email)
     const isTargetAdmin = await checkIsAdmin(profile.username, (profile as any).role, profile.id, (profile as any).email)
+    const isTargetBanned = await checkIsUserBanned(profile.id, profile.username, (profile as any).email)
 
     const buttons: any[] = []
 
-    // 1. Süper Admin Özel Yetkisi: Başka kullanıcıyı admin yapabilir veya adminliğini alabilir
+    // 1. Kurucu (Süper Admin) Özel Yetkisi: Başka kullanıcıyı admin yapabilir veya adminliğini alabilir
     if (amISuperAdmin && !isTargetSuper) {
       if (isTargetAdmin) {
         buttons.push({
           text: 'Yöneticilik Yetkisini Kaldır',
           style: 'destructive',
           onPress: async () => {
-            await adminRevokeUser(profile.id, profile.username, session.user.id)
-            Alert.alert('Yetki Kaldırıldı', `@${profile.username} kullanıcısının yöneticilik yetkisi kaldırıldı.`)
+            const ok = await adminRevokeUser(profile.id, profile.username, session.user.id)
+            if (ok) {
+              Alert.alert('Yetki Kaldırıldı', `@${profile.username} kullanıcısının yöneticilik yetkisi kaldırıldı.`)
+            } else {
+              Alert.alert('Hata', 'Yetki kaldırma işlemi başarısız oldu.')
+            }
           },
         })
       } else {
         buttons.push({
           text: 'Yönetici Olarak Ata',
           onPress: async () => {
-            await adminPromoteUser(profile.id, profile.username, session.user.id)
-            Alert.alert('Yönetici Atandı', `@${profile.username} artık yönetici. Yönetici paneline erişebilir.`)
+            const ok = await adminPromoteUser(profile.id, profile.username, session.user.id)
+            if (ok) {
+              Alert.alert('Yönetici Atandı', `@${profile.username} artık yönetici. Yönetici paneline erişebilir.`)
+            } else {
+              Alert.alert('Hata', 'Yönetici atama işlemi başarısız oldu.')
+            }
           },
         })
       }
     }
 
-    // 2. Bildir seçeneği
+    // 2. Admin & Süper Admin Banlama / Ban Kaldırma Yetkisi (Doğrudan hesabı askıya alır / açar)
+    if ((amISuperAdmin || amIAdmin) && !isTargetSuper) {
+      if (isTargetBanned) {
+        buttons.push({
+          text: 'Kullanıcının Banını Kaldır',
+          onPress: async () => {
+            const ok = await adminUnbanUser(profile.id, profile.username, session.user.id)
+            if (ok) {
+              Alert.alert('Ban Kaldırıldı', `@${profile.username} adlı kullanıcının askıya alınma durumu kaldırıldı. Artık giriş yapabilir.`)
+            } else {
+              Alert.alert('Hata', 'Ban kaldırma işlemi başarısız oldu.')
+            }
+          },
+        })
+      } else {
+        buttons.push({
+          text: 'Kullanıcıyı Banla (Askıya Al)',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Kullanıcıyı Banla',
+              `@${profile.username} adlı kullanıcıyı kalıcı olarak askıya almak ve uygulamaya girişini engellemek istediğinize emin misiniz?`,
+              [
+                { text: 'İptal', style: 'cancel' },
+                {
+                  text: 'Banla (Askıya Al)',
+                  style: 'destructive',
+                  onPress: async () => {
+                    const ok = await adminBanUser(profile.id, profile.username, session.user.id)
+                    if (ok) {
+                      Alert.alert('Kullanıcı Askıya Alındı', `@${profile.username} başarıyla banlandı. Artık uygulamaya giremeyecek ve 'Banlılar' listesinde yer alacak.`)
+                      router.back()
+                    } else {
+                      Alert.alert('Hata', 'Kullanıcı banlanamadı.')
+                    }
+                  },
+                },
+              ]
+            )
+          },
+        })
+      }
+    }
+
+    // 3. Kullanıcıyı Bildir (Şikayet paneline eksiksiz düşer)
     buttons.push({
       text: 'Kullanıcıyı Bildir',
       style: 'destructive',
       onPress: async () => {
-        if (posts.length > 0) {
-          await supabase.from('reports').insert({
-            reporter_id: session?.user.id,
-            post_id: posts[0].id,
-            reason: `Profil bildirildi: @${profile.username}`,
-          })
+        let targetPostId = posts.length > 0 ? posts[0].id : null
+        const repReason = `Profil bildirildi: @${profile.username} [ID:${profile.id}]`
+        const { error } = await supabase.from('reports').insert({
+          reporter_id: session.user.id,
+          post_id: targetPostId,
+          reason: repReason,
+        })
+        if (error && !targetPostId) {
+          const { data: anyPost } = await supabase.from('posts').select('id').limit(1).maybeSingle()
+          if (anyPost?.id) {
+            await supabase.from('reports').insert({
+              reporter_id: session.user.id,
+              post_id: anyPost.id,
+              reason: repReason,
+            })
+          }
         }
         Alert.alert(
           'Bildirim Alındı',
@@ -274,15 +347,15 @@ export default function UserProfileScreen() {
       },
     })
 
-    // 3. Engelle seçeneği (Kurucu / Süper admin asla engellenemez)
+    // 4. Kişisel Engelleme seçeneği (Kurucu / Süper admin asla engellenemez)
     if (!isTargetSuper) {
       buttons.push({
-        text: 'Kullanıcıyı Engelle',
+        text: 'Kullanıcıyı Engelle (Beni Rahatsız Etmesin)',
         style: 'destructive',
         onPress: () => {
           Alert.alert(
             'Kullanıcıyı Engelle',
-            `@${profile.username} adlı kullanıcıyı engellemek istediğinize emin misiniz?`,
+            `@${profile.username} adlı kullanıcıyı engellemek istediğinize emin misiniz? Gönderileri artık akışınızda görünmeyecektir.`,
             [
               { text: 'İptal', style: 'cancel' },
               {
@@ -290,15 +363,25 @@ export default function UserProfileScreen() {
                 style: 'destructive',
                 onPress: async () => {
                   await supabase.from('blocked_users').insert({
-                    blocker_id: session?.user.id,
+                    blocker_id: session.user.id,
                     blocked_id: profile.id,
                   })
-                  if (posts.length > 0) {
-                    await supabase.from('reports').insert({
-                      reporter_id: session?.user.id,
-                      post_id: posts[0].id,
-                      reason: `Kullanıcı profilden engellendi: @${profile.username}`,
-                    })
+                  let targetPostId = posts.length > 0 ? posts[0].id : null
+                  const repReason = `Kullanıcı profilden engellendi: @${profile.username} [ID:${profile.id}]`
+                  const { error } = await supabase.from('reports').insert({
+                    reporter_id: session.user.id,
+                    post_id: targetPostId,
+                    reason: repReason,
+                  })
+                  if (error && !targetPostId) {
+                    const { data: anyPost } = await supabase.from('posts').select('id').limit(1).maybeSingle()
+                    if (anyPost?.id) {
+                      await supabase.from('reports').insert({
+                        reporter_id: session.user.id,
+                        post_id: anyPost.id,
+                        reason: repReason,
+                      })
+                    }
                   }
                   Alert.alert('Engellendi', 'Kullanıcı engellendi. Gönderileri artık görünmeyecektir.')
                   router.back()

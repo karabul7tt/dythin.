@@ -20,6 +20,7 @@ import * as AppleAuthentication from 'expo-apple-authentication'
 import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '../../lib/supabase'
 import { authenticateFromUrl } from '../../lib/authHelper'
+import { checkIsUserBanned } from '../../lib/admin'
 
 WebBrowser.maybeCompleteAuthSession()
 import { getCleanErrorMessage } from '../../lib/errors'
@@ -29,14 +30,23 @@ import { supportedLanguages } from '../../lib/i18n'
 
 export default function Login() {
   const router = useRouter()
-  const { session, isAuthLoading, language, setLanguage, t } = useApp()
+  const { session, isAuthLoading, signOut, language, setLanguage, t } = useApp()
   const params = useLocalSearchParams<{ code?: string }>()
 
   useEffect(() => {
     if (params.code) {
       setLoading(true)
-      supabase.auth.exchangeCodeForSession(params.code).then(({ data, error }) => {
-        if (!error && data?.session) {
+      supabase.auth.exchangeCodeForSession(params.code).then(async ({ data, error }) => {
+        if (!error && data?.session?.user) {
+          const isBanned = await checkIsUserBanned(data.session.user.id, data.session.user.user_metadata?.username, data.session.user.email)
+          if (isBanned) {
+            await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+            Alert.alert(
+              'Hesabınız Askıya Alındı',
+              'Topluluk kurallarını ihlal ettiğiniz için hesabınız yönetici tarafından askıya alınmıştır. Yönetici banınızı kaldırana kadar giriş yapamazsınız.'
+            )
+            return
+          }
           router.replace('/(tabs)')
         }
       }).catch(() => null).finally(() => setLoading(false))
@@ -45,16 +55,40 @@ export default function Login() {
     Linking.getInitialURL().then((url) => {
       if (url && (url.includes('code=') || url.includes('access_token'))) {
         setLoading(true)
-        authenticateFromUrl(url).then((ok) => {
-          if (ok) router.replace('/(tabs)')
+        authenticateFromUrl(url).then(async (ok) => {
+          if (ok) {
+            const { data } = await supabase.auth.getSession()
+            if (data?.session?.user) {
+              const isBanned = await checkIsUserBanned(data.session.user.id, data.session.user.user_metadata?.username, data.session.user.email)
+              if (isBanned) {
+                await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+                Alert.alert(
+                  'Hesabınız Askıya Alındı',
+                  'Topluluk kurallarını ihlal ettiğiniz için hesabınız yönetici tarafından askıya alınmıştır. Yönetici banınızı kaldırana kadar giriş yapamazsınız.'
+                )
+                return
+              }
+              router.replace('/(tabs)')
+            }
+          }
         }).catch(() => null).finally(() => setLoading(false))
       }
     }).catch(() => null)
   }, [params.code])
 
   useEffect(() => {
-    if (!isAuthLoading && session) {
-      router.replace('/(tabs)')
+    if (!isAuthLoading && session?.user) {
+      checkIsUserBanned(session.user.id, session.user.user_metadata?.username, session.user.email).then(async (isBanned) => {
+        if (isBanned) {
+          await signOut()
+          Alert.alert(
+            'Hesabınız Askıya Alındı',
+            'Topluluk kurallarını ihlal ettiğiniz için hesabınız yönetici tarafından askıya alınmıştır. Yönetici banınızı kaldırana kadar giriş yapamazsınız.'
+          )
+        } else {
+          router.replace('/(tabs)')
+        }
+      })
     }
   }, [isAuthLoading, session])
 
@@ -101,6 +135,18 @@ export default function Login() {
       if (res.type === 'success' && res.url) {
         const success = await authenticateFromUrl(res.url)
         if (success) {
+          const { data: cur } = await supabase.auth.getSession()
+          if (cur?.session?.user) {
+            const isBanned = await checkIsUserBanned(cur.session.user.id, cur.session.user.user_metadata?.username, cur.session.user.email)
+            if (isBanned) {
+              await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+              Alert.alert(
+                'Hesabınız Askıya Alındı',
+                'Topluluk kurallarını ihlal ettiğiniz için hesabınız yönetici tarafından askıya alınmıştır. Yönetici banınızı kaldırana kadar giriş yapamazsınız.'
+              )
+              return
+            }
+          }
           router.replace('/(tabs)')
           return
         }
@@ -109,7 +155,16 @@ export default function Login() {
       for (let i = 0; i < 10; i++) {
         await new Promise(r => setTimeout(r, 500))
         const { data: poll } = await supabase.auth.getSession()
-        if (poll?.session) {
+        if (poll?.session?.user) {
+          const isBanned = await checkIsUserBanned(poll.session.user.id, poll.session.user.user_metadata?.username, poll.session.user.email)
+          if (isBanned) {
+            await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+            Alert.alert(
+              'Hesabınız Askıya Alındı',
+              'Topluluk kurallarını ihlal ettiğiniz için hesabınız yönetici tarafından askıya alınmıştır. Yönetici banınızı kaldırana kadar giriş yapamazsınız.'
+            )
+            return
+          }
           router.replace('/(tabs)')
           return
         }
@@ -122,7 +177,16 @@ export default function Login() {
       Alert.alert('Giriş Yapılamadı', `${provider === 'apple' ? 'Apple' : 'Google'} hesabıyla giriş tamamlanamadı. Lütfen tekrar deneyin.`)
     } catch (e: any) {
       const { data: check } = await supabase.auth.getSession()
-      if (check?.session) {
+      if (check?.session?.user) {
+        const isBanned = await checkIsUserBanned(check.session.user.id, check.session.user.user_metadata?.username, check.session.user.email)
+        if (isBanned) {
+          await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+          Alert.alert(
+            'Hesabınız Askıya Alındı',
+            'Topluluk kurallarını ihlal ettiğiniz için hesabınız yönetici tarafından askıya alınmıştır. Yönetici banınızı kaldırana kadar giriş yapamazsınız.'
+          )
+          return
+        }
         router.replace('/(tabs)')
         return
       }
@@ -161,6 +225,16 @@ export default function Login() {
           if (error) throw error
 
           if (data.user) {
+            const isBanned = await checkIsUserBanned(data.user.id, data.user.user_metadata?.username, data.user.email)
+            if (isBanned) {
+              await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+              setLoading(false)
+              Alert.alert(
+                'Hesabınız Askıya Alındı',
+                'Topluluk kurallarını ihlal ettiğiniz için hesabınız yönetici tarafından askıya alınmıştır. Yönetici banınızı kaldırana kadar giriş yapamazsınız.'
+              )
+              return
+            }
             const appleName = credential.fullName
               ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
               : null
@@ -335,7 +409,7 @@ export default function Login() {
           }
         }
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: signInData, error } = await supabase.auth.signInWithPassword({
           email: targetEmail,
           password,
         })
@@ -352,6 +426,22 @@ export default function Login() {
           }
         } else {
           setAttemptCount(0)
+          if (signInData?.user) {
+            const isBanned = await checkIsUserBanned(
+              signInData.user.id,
+              signInData.user.user_metadata?.username,
+              signInData.user.email
+            )
+            if (isBanned) {
+              await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+              setLoading(false)
+              Alert.alert(
+                'Hesabınız Askıya Alındı',
+                'Topluluk kurallarını ihlal ettiğiniz için hesabınız yönetici tarafından askıya alınmıştır. Yönetici banınızı kaldırana kadar giriş yapamazsınız.'
+              )
+              return
+            }
+          }
         }
       }
     } catch (e: unknown) {
@@ -399,10 +489,26 @@ export default function Login() {
         }
 
         if (password) {
-          await supabase.auth.signInWithPassword({
+          const { data: vSign } = await supabase.auth.signInWithPassword({
             email: email.trim(),
             password,
           })
+          if (vSign?.user) {
+            const isBanned = await checkIsUserBanned(
+              vSign.user.id,
+              vSign.user.user_metadata?.username,
+              vSign.user.email
+            )
+            if (isBanned) {
+              await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+              setLoading(false)
+              Alert.alert(
+                'Hesabınız Askıya Alındı',
+                'Topluluk kurallarını ihlal ettiğiniz için hesabınız yönetici tarafından askıya alınmıştır. Yönetici banınızı kaldırana kadar giriş yapamazsınız.'
+              )
+              return
+            }
+          }
         }
 
         Alert.alert('Hesap Oluşturuldu', 'E-posta adresiniz doğrulandı ve giriş yapıldı.')

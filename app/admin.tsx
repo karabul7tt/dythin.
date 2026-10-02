@@ -17,6 +17,7 @@ import {
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useApp } from '../context/AppContext'
+import { supabase } from '../lib/supabase'
 import {
   checkIsAdmin,
   checkIsSuperAdmin,
@@ -149,31 +150,50 @@ export default function AdminScreen() {
   }
 
   function handleBanReportedUser(item: ReportedPostItem) {
-    if (!item.post) return
-    const authorUser = item.post.authorUsername.toLowerCase().replace('@', '').trim()
-    if (isSuperAdminUser(authorUser)) {
+    const targetId = item.post?.authorId || item.targetUserId
+    const targetUsername = item.post?.authorUsername || item.targetUsername
+    if (!targetUsername) {
+      Alert.alert(t('common.error'), 'Raporlanan kullanıcının bilgisi tespit edilemedi.')
+      return
+    }
+
+    const cleanUser = targetUsername.toLowerCase().replace('@', '').trim()
+    if (isSuperAdminUser(cleanUser)) {
       Alert.alert(t('admin.unauthorizedActionTitle'), t('admin.cannotBanSuperAdmin'))
       return
     }
 
     Alert.alert(
       t('admin.banUserConfirmTitle'),
-      t('admin.banUserConfirmMsg', { username: item.post.authorUsername }),
+      t('admin.banUserConfirmMsg', { username: targetUsername }),
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('admin.banUserBtn'),
           style: 'destructive',
           onPress: async () => {
+            let finalTargetId = targetId
+            if (!finalTargetId) {
+              const { data: p } = await supabase.from('profiles').select('id').ilike('username', cleanUser).maybeSingle()
+              finalTargetId = p?.id
+            }
+
+            if (!finalTargetId) {
+              Alert.alert(t('common.error'), 'Kullanıcı ID tespit edilemedi.')
+              return
+            }
+
             const ok = await adminBanUser(
-              item.post!.authorId,
-              item.post!.authorUsername,
+              finalTargetId,
+              targetUsername,
               session!.user.id
             )
             if (ok) {
-              await adminDeletePost(item.post!.id, session!.user.id)
+              if (item.post?.id) {
+                await adminDeletePost(item.post.id, session!.user.id)
+              }
               await adminDismissReport(item.reportId)
-              Alert.alert(t('common.success'), t('admin.banSuccessMsg', { username: item.post!.authorUsername }))
+              Alert.alert(t('common.success'), t('admin.banSuccessMsg', { username: targetUsername }))
               await loadData()
             } else {
               Alert.alert(t('common.error'), t('admin.banErrorMsg'))
@@ -544,7 +564,7 @@ export default function AdminScreen() {
                     {t('admin.reporterLabel')} <Text style={{ color: theme.accent }}>@{item.reporterUsername}</Text>
                   </Text>
 
-                  {/* Gönderi Önizlemesi */}
+                  {/* Gönderi veya Profil Önizlemesi */}
                   {item.post ? (
                     <View style={s.reportedPostBox}>
                       <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 8 }}>
@@ -585,6 +605,28 @@ export default function AdminScreen() {
                         )}
                       </View>
                     </View>
+                  ) : item.targetUsername ? (
+                    <View style={s.reportedPostBox}>
+                      <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                        {item.targetUserAvatar ? (
+                          <Image source={{ uri: item.targetUserAvatar }} style={s.authorAvatar} />
+                        ) : (
+                          <View style={s.authorAvatarPlaceholder}>
+                            <Text style={{ color: '#ffffff', fontWeight: '700' }}>
+                              {(item.targetUsername || 'D')[0].toUpperCase()}
+                            </Text>
+                          </View>
+                        )}
+                        <View>
+                          <Text style={{ color: theme.text, fontWeight: '600', fontSize: 13 }}>
+                            @{item.targetUsername}
+                          </Text>
+                          <Text style={{ color: theme.textSub, fontSize: 11 }}>
+                            Bildirilen Kullanıcı Profili
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
                   ) : (
                     <View style={s.reportedPostDeleted}>
                       <Text style={{ color: theme.textSub, fontSize: 12, fontStyle: 'italic' }}>
@@ -596,25 +638,25 @@ export default function AdminScreen() {
                   {/* Admin Butonları */}
                   <View style={s.actionRow}>
                     {item.post && (
-                      <>
-                        <TouchableOpacity
-                          style={[s.actionBtn, s.deleteBtn]}
-                          onPress={() => handleDeleteReportedPost(item)}
-                          activeOpacity={0.8}
-                        >
-                          <Ionicons name="trash-outline" size={14} color="#ffffff" />
-                          <Text style={s.actionBtnText}>{t('admin.deletePostBtn')}</Text>
-                        </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[s.actionBtn, s.deleteBtn]}
+                        onPress={() => handleDeleteReportedPost(item)}
+                        activeOpacity={0.8}
+                      >
+                        <Ionicons name="trash-outline" size={14} color="#ffffff" />
+                        <Text style={s.actionBtnText}>{t('admin.deletePostBtn')}</Text>
+                      </TouchableOpacity>
+                    )}
 
-                        <TouchableOpacity
-                          style={[s.actionBtn, s.banBtn]}
-                          onPress={() => handleBanReportedUser(item)}
-                          activeOpacity={0.8}
-                        >
-                          <Ionicons name="ban-outline" size={14} color="#ffffff" />
-                          <Text style={s.actionBtnText}>{t('admin.banUserBtn')}</Text>
-                        </TouchableOpacity>
-                      </>
+                    {(item.post || item.targetUserId || item.targetUsername) && (
+                      <TouchableOpacity
+                        style={[s.actionBtn, s.banBtn]}
+                        onPress={() => handleBanReportedUser(item)}
+                        activeOpacity={0.8}
+                      >
+                        <Ionicons name="ban-outline" size={14} color="#ffffff" />
+                        <Text style={s.actionBtnText}>{t('admin.banUserBtn')}</Text>
+                      </TouchableOpacity>
                     )}
 
                     <TouchableOpacity

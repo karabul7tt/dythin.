@@ -2,11 +2,12 @@ import React, { useEffect } from 'react'
 import { Tabs, useRouter } from 'expo-router'
 import { useApp } from '../../context/AppContext'
 import { Ionicons } from '@expo/vector-icons'
-import { Platform } from 'react-native'
+import { Platform, Alert } from 'react-native'
 import { useFonts } from 'expo-font'
+import { checkIsUserBanned } from '../../lib/admin'
 
 export default function TabLayout() {
-  const { theme, session, isAuthLoading, t } = useApp()
+  const { theme, session, isAuthLoading, signOut, t } = useApp()
   const router = useRouter()
 
   const [fontsLoaded] = useFonts({
@@ -14,8 +15,21 @@ export default function TabLayout() {
   })
 
   useEffect(() => {
-    if (!isAuthLoading && !session) {
-      router.replace('/(auth)/login')
+    if (!isAuthLoading) {
+      if (!session) {
+        router.replace('/(auth)/login')
+      } else if (session?.user) {
+        checkIsUserBanned(session.user.id, session.user.user_metadata?.username, session.user.email).then((isBanned) => {
+          if (isBanned) {
+            signOut()
+            Alert.alert(
+              'Hesabınız Askıya Alındı',
+              'Hesabınız yönetici tarafından askıya alınmıştır. Yönetici banınızı kaldırana kadar uygulamaya erişemezsiniz.'
+            )
+            router.replace('/(auth)/login')
+          }
+        })
+      }
     }
   }, [isAuthLoading, session])
 

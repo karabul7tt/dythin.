@@ -8,6 +8,7 @@ import { registerForPushNotificationsAsync } from '../lib/notifications'
 import { authenticateFromUrl, extractUserProfile, syncUserProfileWithDatabase } from '../lib/authHelper'
 
 import { Language, translate } from '../lib/i18n'
+import { checkIsUserBanned } from '../lib/admin'
 
 type AppContextType = {
   session: Session | null
@@ -66,14 +67,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   async function refreshSession(): Promise<Session | null> {
     try {
       const { data: refreshed, error } = await supabase.auth.refreshSession()
-      if (!error && refreshed?.session) {
-        setSession(refreshed.session)
-        return refreshed.session
-      }
-      const { data: current } = await supabase.auth.getSession()
-      if (current?.session) {
-        setSession(current.session)
-        return current.session
+      const targetSession = (!error && refreshed?.session) ? refreshed.session : (await supabase.auth.getSession()).data?.session
+      if (targetSession?.user) {
+        const isBanned = await checkIsUserBanned(
+          targetSession.user.id,
+          targetSession.user.user_metadata?.username,
+          targetSession.user.email
+        )
+        if (isBanned) {
+          await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+          setSession(null)
+          return null
+        }
+        setSession(targetSession)
+        return targetSession
       }
     } catch {}
     return null
@@ -90,20 +97,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (saved && saved in themes) setThemeNameState(saved as ThemeName)
     }).catch(() => null)
 
-    supabase.auth.getSession().then((res) => {
+    supabase.auth.getSession().then(async (res) => {
       const currentSession = res?.data?.session
       if (res?.error) {
         supabase.auth.signOut({ scope: 'local' }).catch(() => null)
         setSession(null)
-      } else {
-        setSession(currentSession || null)
-        if (currentSession?.user) {
-          syncUserProfileWithDatabase(currentSession.user).catch(() => null)
-
-          setTimeout(() => {
-            registerForPushNotificationsAsync(currentSession.user.id).catch(() => null)
-          }, 3000)
+      } else if (currentSession?.user) {
+        const isBanned = await checkIsUserBanned(
+          currentSession.user.id,
+          currentSession.user.user_metadata?.username,
+          currentSession.user.email
+        )
+        if (isBanned) {
+          await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+          setSession(null)
+          setIsAuthLoading(false)
+          return
         }
+        setSession(currentSession)
+        syncUserProfileWithDatabase(currentSession.user).catch(() => null)
+
+        setTimeout(() => {
+          registerForPushNotificationsAsync(currentSession.user.id).catch(() => null)
+        }, 3000)
+      } else {
+        setSession(null)
       }
       setIsAuthLoading(false)
     }).catch(() => {
@@ -118,7 +136,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const success = await authenticateFromUrl(url)
         if (success) {
           const { data } = await supabase.auth.getSession()
-          if (data?.session) {
+          if (data?.session?.user) {
+            const isBanned = await checkIsUserBanned(
+              data.session.user.id,
+              data.session.user.user_metadata?.username,
+              data.session.user.email
+            )
+            if (isBanned) {
+              await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+              setSession(null)
+              return
+            }
             setSession(data.session)
             return
           }
@@ -127,7 +155,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         for (let i = 0; i < 10; i++) {
           await new Promise(r => setTimeout(r, 500))
           const { data } = await supabase.auth.getSession()
-          if (data?.session) {
+          if (data?.session?.user) {
+            const isBanned = await checkIsUserBanned(
+              data.session.user.id,
+              data.session.user.user_metadata?.username,
+              data.session.user.email
+            )
+            if (isBanned) {
+              await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+              setSession(null)
+              return
+            }
             setSession(data.session)
             return
           }
@@ -146,13 +184,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }).catch(() => null)
 
     const authListener = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      setSession(newSession || null)
       if (newSession?.user) {
+        const isBanned = await checkIsUserBanned(
+          newSession.user.id,
+          newSession.user.user_metadata?.username,
+          newSession.user.email
+        )
+        if (isBanned) {
+          await supabase.auth.signOut({ scope: 'local' }).catch(() => null)
+          setSession(null)
+          setIsAuthLoading(false)
+          return
+        }
+        setSession(newSession)
         syncUserProfileWithDatabase(newSession.user).catch(() => null)
 
         setTimeout(() => {
           registerForPushNotificationsAsync(newSession.user.id).catch(() => null)
         }, 3000)
+      } else {
+        setSession(null)
       }
       setIsAuthLoading(false)
     })
