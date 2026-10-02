@@ -144,17 +144,11 @@ export async function checkIsUserBanned(
     if (isSuper) return false
   }
 
-  // 2. Açıkça banı kaldırılmış (unbanned) kullanıcılar ASLA kilitlenemez
-  if (userId) {
-    try {
-      const localUnbanned = await getLocallyUnbannedUsers()
-      if (localUnbanned.has(userId)) return false
-    } catch {}
-  }
+  if (!userId && !username && !email) return false
 
   let cleanUser = (username || '').toLowerCase().replace('@', '').trim()
 
-  // 3. Veritabanındaki son ban / unban denetim loglarını kontrol et
+  // 2. Veritabanındaki denetim loglarını kontrol et (en güncel aksiyon kazanır)
   try {
     const { data } = await supabase
       .from('reports')
@@ -171,20 +165,9 @@ export async function checkIsUserBanned(
           (userId && r.includes(`:${userId}:`))
         if (isUserMatch) {
           if (r.startsWith('ADMIN_ACTION:UNBAN_USER:')) {
-            if (userId) {
-              await removeLocallyBannedUser(userId)
-              await addLocallyUnbannedUser(userId)
-            }
             return false
           }
           if (r.startsWith('ADMIN_ACTION:BAN_USER:')) {
-            // Eğer daha önceden açıkça unban edilmişse ban kaydını geç
-            if (userId) {
-              const localUnbanned = await getLocallyUnbannedUsers()
-              if (localUnbanned.has(userId)) return false
-              await addLocallyBannedUser(userId)
-              await removeLocallyUnbannedUser(userId)
-            }
             return true
           }
         }
@@ -194,7 +177,7 @@ export async function checkIsUserBanned(
     console.warn('checkIsUserBanned reports error:', err)
   }
 
-  // 4. Veritabanı profiller tablosundaki rol kontrolü
+  // 3. Veritabanı profiller tablosundaki role kontrolü
   if (userId) {
     try {
       const { data: profile } = await supabase
@@ -205,34 +188,8 @@ export async function checkIsUserBanned(
 
       if (profile) {
         if (isSuperAdminUser(profile.username) || isSuperAdminUser(profile.email)) return false
-        
-        // Eğer veritabanında role 'banned' değilse kesinlikle banlı değildir
-        if (profile.role !== 'banned') {
-          await removeLocallyBannedUser(userId)
-          return false
-        }
-
-        // Eğer veritabanında role 'banned' kalmış ama yerelde unban edilmişse (RLS güncelleme kısıtlaması nedeniyle)
-        const localUnbanned = await getLocallyUnbannedUsers()
-        if (localUnbanned.has(userId)) {
-          // Kendisi giriş yapıyorsa profilini de user olarak güncelle
-          Promise.resolve(supabase.from('profiles').update({ role: 'user' }).eq('id', userId)).catch(() => {})
-          return false
-        }
-
-        await addLocallyBannedUser(userId)
-        return true
+        return profile.role === 'banned'
       }
-    } catch {}
-  }
-
-  // 5. Yerel önbellekte banlı mı? (Yalnızca açıkça unban edilmemişse)
-  if (userId) {
-    try {
-      const localUnbanned = await getLocallyUnbannedUsers()
-      if (localUnbanned.has(userId)) return false
-      const localBanned = await getLocallyBannedUsers()
-      if (localBanned.has(userId)) return true
     } catch {}
   }
 

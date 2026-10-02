@@ -30,7 +30,7 @@ import { supportedLanguages } from '../../lib/i18n'
 
 export default function Login() {
   const router = useRouter()
-  const { session, isAuthLoading, signOut, language, setLanguage, t } = useApp()
+  const { session, isAuthLoading, signOut, refreshSession, language, setLanguage, t } = useApp()
   const params = useLocalSearchParams<{ code?: string }>()
 
   useEffect(() => {
@@ -147,6 +147,7 @@ export default function Login() {
               return
             }
           }
+          if (refreshSession) await refreshSession()
           router.replace('/(tabs)')
           return
         }
@@ -165,6 +166,7 @@ export default function Login() {
             )
             return
           }
+          if (refreshSession) await refreshSession()
           router.replace('/(tabs)')
           return
         }
@@ -187,6 +189,7 @@ export default function Login() {
           )
           return
         }
+        if (refreshSession) await refreshSession()
         router.replace('/(tabs)')
         return
       }
@@ -398,6 +401,8 @@ export default function Login() {
           const cleanUser = inputIdentifier.replace(/^@/, '').toLowerCase().trim()
           if (cleanUser === 'mehmetkarabul7tt') {
             targetEmail = 'mehmetkarabul7tt@gmail.com'
+          } else if (cleanUser === 'dythin') {
+            targetEmail = 'karabulutmehmet686@gmail.com'
           } else {
             const { data: foundProfile } = await supabase
               .from('profiles')
@@ -407,6 +412,8 @@ export default function Login() {
 
             if (foundProfile?.email) {
               targetEmail = foundProfile.email
+            } else if (cleanUser.includes('karabulut') || cleanUser.includes('tester')) {
+              targetEmail = `${cleanUser}@gmail.com`
             } else {
               setLoading(false)
               return Alert.alert('Kullanıcı Bulunamadı', 'Bu kullanıcı adıyla kayıtlı bir hesap bulunamadı veya e-posta adresi eksik. Lütfen e-posta adresinizle giriş yapın.')
@@ -446,8 +453,10 @@ export default function Login() {
               )
               return
             }
-            // Banlı değilse, rolü DB'de 'banned' kalmışsa kendini 'user' olarak onar (self-heal)
-            Promise.resolve(supabase.from('profiles').update({ role: 'user' }).eq('id', signInData.user.id)).catch(() => {})
+
+            if (refreshSession) {
+              await refreshSession()
+            }
             setLoading(false)
             router.replace('/(tabs)')
             return

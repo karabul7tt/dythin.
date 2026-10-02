@@ -115,7 +115,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           return
         }
         setSession(currentSession)
-        Promise.resolve(supabase.from('profiles').update({ role: 'user' }).eq('id', currentSession.user.id)).catch(() => {})
         syncUserProfileWithDatabase(currentSession.user).catch(() => null)
 
         setTimeout(() => {
@@ -198,7 +197,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           return
         }
         setSession(newSession)
-        Promise.resolve(supabase.from('profiles').update({ role: 'user' }).eq('id', newSession.user.id)).catch(() => {})
         syncUserProfileWithDatabase(newSession.user).catch(() => null)
 
         setTimeout(() => {

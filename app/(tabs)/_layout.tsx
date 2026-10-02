@@ -5,9 +5,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { Platform, Alert } from 'react-native'
 import { useFonts } from 'expo-font'
 import { checkIsUserBanned } from '../../lib/admin'
+import { supabase } from '../../lib/supabase'
 
 export default function TabLayout() {
-  const { theme, session, isAuthLoading, signOut, t } = useApp()
+  const { theme, session, isAuthLoading, signOut, refreshSession, t } = useApp()
   const router = useRouter()
 
   const [fontsLoaded] = useFonts({
@@ -17,7 +18,15 @@ export default function TabLayout() {
   useEffect(() => {
     if (!isAuthLoading) {
       if (!session) {
-        router.replace('/(auth)/login')
+        supabase.auth.getSession().then(({ data }) => {
+          if (!data?.session) {
+            router.replace('/(auth)/login')
+          } else if (refreshSession) {
+            refreshSession()
+          }
+        }).catch(() => {
+          router.replace('/(auth)/login')
+        })
       } else if (session?.user) {
         checkIsUserBanned(session.user.id, session.user.user_metadata?.username, session.user.email).then((isBanned) => {
           if (isBanned) {
