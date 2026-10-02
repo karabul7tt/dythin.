@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useApp } from '../context/AppContext'
 import {
   checkIsAdmin,
+  checkIsSuperAdmin,
   getAdminKPIs,
   getReportedPosts,
   getAllUsersForAdmin,
@@ -66,7 +67,9 @@ export default function AdminScreen() {
 
   const currentUsername = (session?.user?.user_metadata?.username || '').toLowerCase().replace('@', '').trim()
   const currentEmail = (session?.user?.email || '').toLowerCase().trim()
-  const isCurrentUserSuperAdmin = isSuperAdminUser(currentUsername) || isSuperAdminUser(currentEmail)
+  const [isCurrentUserSuperAdmin, setIsCurrentUserSuperAdmin] = useState(
+    isSuperAdminUser(currentUsername) || isSuperAdminUser(currentEmail)
+  )
 
   useEffect(() => {
     verifyAndLoad()
@@ -87,6 +90,11 @@ export default function AdminScreen() {
         [{ text: t('common.ok'), onPress: () => router.back() }]
       )
       return
+    }
+
+    const isSuper = await checkIsSuperAdmin(session?.user?.id, username, email)
+    if (isSuper) {
+      setIsCurrentUserSuperAdmin(true)
     }
 
     setIsAdminAuthorized(true)

@@ -10,6 +10,7 @@ export const SUPER_ADMIN_EMAILS = [
 ]
 
 const PROMOTED_ADMINS_STORAGE_KEY = '@dythin_promoted_admins_v2'
+const REVOKED_ADMINS_STORAGE_KEY = '@dythin_revoked_admins_v2'
 
 export async function getLocallyPromotedAdmins(): Promise<Set<string>> {
   try {
@@ -39,10 +40,54 @@ export async function removeLocallyPromotedAdmin(userId: string): Promise<void> 
   } catch {}
 }
 
+export async function getLocallyRevokedAdmins(): Promise<Set<string>> {
+  try {
+    const raw = await AsyncStorage.getItem(REVOKED_ADMINS_STORAGE_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return new Set(parsed)
+    return new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+export async function addLocallyRevokedAdmin(userId: string): Promise<void> {
+  try {
+    const set = await getLocallyRevokedAdmins()
+    set.add(userId)
+    await AsyncStorage.setItem(REVOKED_ADMINS_STORAGE_KEY, JSON.stringify(Array.from(set)))
+  } catch {}
+}
+
+export async function removeLocallyRevokedAdmin(userId: string): Promise<void> {
+  try {
+    const set = await getLocallyRevokedAdmins()
+    set.delete(userId)
+    await AsyncStorage.setItem(REVOKED_ADMINS_STORAGE_KEY, JSON.stringify(Array.from(set)))
+  } catch {}
+}
+
 export function isSuperAdminUser(identifier?: string | null): boolean {
   if (!identifier) return false
   const clean = identifier.toLowerCase().replace('@', '').trim()
   return SUPER_ADMIN_USERNAMES.includes(clean) || SUPER_ADMIN_EMAILS.includes(clean)
+}
+
+export async function checkIsSuperAdmin(
+  userId?: string | null,
+  username?: string | null,
+  email?: string | null
+): Promise<boolean> {
+  if (isSuperAdminUser(username) || isSuperAdminUser(email)) return true
+  if (!userId) return false
+  try {
+    const { data } = await supabase.from('profiles').select('username, email').eq('id', userId).maybeSingle()
+    if (data && (isSuperAdminUser(data.username) || isSuperAdminUser(data.email))) {
+      return true
+    }
+  } catch {}
+  return false
 }
 
 export type AdminKPIs = {
@@ -93,45 +138,22 @@ export async function checkIsAdmin(
 ): Promise<boolean> {
   // 1. Kurucu (Super Admin) kontrolü - Yalnızca @mehmetkarabul7tt / mehmetkarabul7tt@gmail.com
   if (isSuperAdminUser(username) || isSuperAdminUser(email)) return true
+  if (userId) {
+    const isSuper = await checkIsSuperAdmin(userId, username, email)
+    if (isSuper) return true
+  }
 
-  let cleanUser = (username || '').toLowerCase().replace('@', '').trim()
-
-  // 2. Auth session ve veritabanı profil / rol kontrolü
+  // 2. Eğer bu kullanıcı için yetki kaldırılmışsa (revoked) ASLA admin değildir
   if (userId) {
     try {
-      const { data: authData } = await supabase.auth.getSession()
-      const sUser = authData?.session?.user
-      if (sUser && sUser.id === userId) {
-        if (isSuperAdminUser(sUser.email) || isSuperAdminUser(sUser.user_metadata?.username)) {
-          return true
-        }
-      }
-    } catch {}
-
-    try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role, username, email')
-        .eq('id', userId)
-        .maybeSingle()
-
-      if (profile) {
-        if (isSuperAdminUser(profile.username) || isSuperAdminUser(profile.email)) return true
-        if (profile.role === 'admin') return true
-        if (profile.username) cleanUser = profile.username.toLowerCase().replace('@', '').trim()
-      }
-    } catch {}
-
-    // Yerel önbellekte kayıtlı admin mi?
-    try {
-      const localAdmins = await getLocallyPromotedAdmins()
-      if (localAdmins.has(userId)) return true
+      const localRevoked = await getLocallyRevokedAdmins()
+      if (localRevoked.has(userId)) return false
     } catch {}
   }
 
-  if (role === 'admin') return true
+  let cleanUser = (username || '').toLowerCase().replace('@', '').trim()
 
-  // 3. Veritabanındaki admin rapor ve yetkilendirme aksiyonları
+  // 3. Veritabanındaki admin rapor ve yetkilendirme aksiyonları (en güncel aksiyonu uygula)
   try {
     const { data } = await supabase
       .from('reports')
@@ -155,6 +177,32 @@ export async function checkIsAdmin(
     }
   } catch {}
 
+  // 4. Yerel önbellekte kayıtlı admin mi?
+  if (userId) {
+    try {
+      const localAdmins = await getLocallyPromotedAdmins()
+      if (localAdmins.has(userId)) return true
+    } catch {}
+  }
+
+  // 5. Auth session ve veritabanı profil / rol kontrolü
+  if (userId) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, username, email')
+        .eq('id', userId)
+        .maybeSingle()
+
+      if (profile) {
+        if (isSuperAdminUser(profile.username) || isSuperAdminUser(profile.email)) return true
+        if (profile.role === 'admin') return true
+        if (profile.username) cleanUser = profile.username.toLowerCase().replace('@', '').trim()
+      }
+    } catch {}
+  }
+
+  if (role === 'admin') return true
   return false
 }
 
@@ -269,10 +317,11 @@ async function logAdminAction(adminUserId: string, reason: string): Promise<void
 
 export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
   try {
-    const [profilesRes, reportsRes, localAdmins] = await Promise.all([
+    const [profilesRes, reportsRes, localAdmins, localRevoked] = await Promise.all([
       supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-      supabase.from('reports').select('reason, created_at').like('reason', 'ADMIN_ACTION:%').order('created_at', { ascending: false }),
+      supabase.from('reports').select('reason, created_at').like('reason', 'ADMIN_ACTION:%').order('created_at', { ascending: true }),
       getLocallyPromotedAdmins(),
+      getLocallyRevokedAdmins(),
     ])
 
     const profiles = profilesRes.data || []
@@ -281,20 +330,20 @@ export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
     const bannedUsers = new Set<string>()
     const unbannedUsers = new Set<string>()
     const promotedAdmins = new Set<string>(localAdmins)
-    const revokedAdmins = new Set<string>()
+    const revokedAdmins = new Set<string>(localRevoked)
 
     for (const ev of adminEvents) {
       const r = ev.reason
       if (r.startsWith('ADMIN_ACTION:BAN_USER:')) {
         const uid = r.split(':')[2]
-        if (!unbannedUsers.has(uid)) bannedUsers.add(uid)
+        bannedUsers.add(uid)
       } else if (r.startsWith('ADMIN_ACTION:UNBAN_USER:')) {
         const uid = r.split(':')[2]
-        unbannedUsers.add(uid)
         bannedUsers.delete(uid)
       } else if (r.startsWith('ADMIN_ACTION:PROMOTE_ADMIN:')) {
         const uid = r.split(':')[2]
-        if (!revokedAdmins.has(uid)) promotedAdmins.add(uid)
+        promotedAdmins.add(uid)
+        revokedAdmins.delete(uid)
       } else if (r.startsWith('ADMIN_ACTION:REVOKE_ADMIN:')) {
         const uid = r.split(':')[2]
         revokedAdmins.add(uid)
@@ -302,11 +351,24 @@ export async function getAllUsersForAdmin(): Promise<AdminUserItem[]> {
       }
     }
 
+    // Yerel önbellekteki aksiyonları en yüksek öncelikle zorla
+    for (const revId of localRevoked) {
+      revokedAdmins.add(revId)
+      promotedAdmins.delete(revId)
+    }
+    for (const admId of localAdmins) {
+      if (!revokedAdmins.has(admId)) {
+        promotedAdmins.add(admId)
+      }
+    }
+
     return profiles.map(p => {
       const cleanUser = (p.username || '').toLowerCase().replace('@', '').trim()
       const cleanEmail = (p.email || '').toLowerCase().trim()
       const isSuper = isSuperAdminUser(cleanUser) || isSuperAdminUser(cleanEmail)
-      const isDynamicAdmin = !isSuper && (promotedAdmins.has(p.id) || p.role === 'admin') && !revokedAdmins.has(p.id)
+      
+      const isRevoked = revokedAdmins.has(p.id) || localRevoked.has(p.id)
+      const isDynamicAdmin = !isSuper && !isRevoked && (promotedAdmins.has(p.id) || p.role === 'admin')
       const isBanned = !isSuper && (bannedUsers.has(p.id) || p.role === 'banned')
 
       return {
@@ -426,10 +488,16 @@ export async function adminPromoteUser(
   try {
     const cleanUser = targetUsername.toLowerCase().replace('@', '').trim()
 
-    // 1. Yerel AsyncStorage önbelleğine derhal ekle (UI derhal güncellensin)
+    // 1. Yerel önbellekte revoked'dan çıkar, promoted'e ekle
+    await removeLocallyRevokedAdmin(targetUserId)
     await addLocallyPromotedAdmin(targetUserId)
 
-    // 2. Supabase RPC ile veritabanında role = 'admin' yap
+    // 2. Eski yetki kaldırma rapor kayıtlarını temizle
+    try {
+      await supabase.from('reports').delete().like('reason', `ADMIN_ACTION:REVOKE_ADMIN:${targetUserId}%`)
+    } catch {}
+
+    // 3. Supabase RPC ile veritabanında role = 'admin' yap
     try {
       await supabase.rpc('admin_set_user_role', {
         target_user_id: targetUserId,
@@ -439,14 +507,14 @@ export async function adminPromoteUser(
       console.warn('admin_set_user_role rpc error:', e)
     }
 
-    // 3. Profiles tablosunda role = 'admin' yapmayı dene
+    // 4. Profiles tablosunda role = 'admin' yapmayı dene
     try {
       await supabase.from('profiles').update({ role: 'admin' }).eq('id', targetUserId)
     } catch (e) {
       console.warn('profiles update role admin error:', e)
     }
 
-    // 4. Denetim loguna kaydet
+    // 5. Denetim loguna kaydet
     await logAdminAction(adminUserId, `ADMIN_ACTION:PROMOTE_ADMIN:${targetUserId}:@${cleanUser}`)
 
     return true
@@ -468,10 +536,18 @@ export async function adminRevokeUser(
       return false
     }
 
-    // 1. Yerel önbellekten çıkar
+    // 1. Yerel önbellek: Promoted listesinden çıkar, Revoked listesine derhal ekle
     await removeLocallyPromotedAdmin(targetUserId)
+    await addLocallyRevokedAdmin(targetUserId)
 
-    // 2. RPC ile role = 'user' yap
+    // 2. Eski promote rapor kayıtlarını veritabanından tamamen sil
+    try {
+      await supabase.from('reports').delete().like('reason', `ADMIN_ACTION:PROMOTE_ADMIN:${targetUserId}%`)
+    } catch (e) {
+      console.warn('reports delete old promote error:', e)
+    }
+
+    // 3. RPC ile role = 'user' yap
     try {
       await supabase.rpc('admin_set_user_role', {
         target_user_id: targetUserId,
@@ -481,14 +557,14 @@ export async function adminRevokeUser(
       console.warn('admin_set_user_role rpc error:', e)
     }
 
-    // 3. Profiles tablosunda role = 'user' yapmayı dene
+    // 4. Profiles tablosunda role = 'user' güncelle
     try {
       await supabase.from('profiles').update({ role: 'user' }).eq('id', targetUserId)
     } catch (e) {
       console.warn('profiles update role user error:', e)
     }
 
-    // 4. Denetim loguna yetki kaldırma kaydı ekle
+    // 5. Denetim loguna yetki kaldırma kaydı ekle
     await logAdminAction(adminUserId, `ADMIN_ACTION:REVOKE_ADMIN:${targetUserId}:@${cleanUser}`)
 
     return true
@@ -510,9 +586,19 @@ export async function adminDismissReport(reportId: string): Promise<boolean> {
 
 export async function adminSeedBots(): Promise<{ success: boolean; message: string }> {
   try {
-    const { data, error } = await supabase.rpc('seed_bots_and_posts')
-    if (error) throw error
-    return { success: true, message: data || 'Bot verileri başarıyla yüklendi.' }
+    // 1. Sıralı 12'şer yükleyen yeni RPC fonksiyonunu çağır (240 Bot Havuzu)
+    const { data, error } = await supabase.rpc('seed_next_bot_batch', { p_batch_size: 12 })
+    if (!error && data) {
+      return { success: true, message: data }
+    }
+
+    // 2. Yedek olarak eski alias'ı dene
+    const { data: aliasData, error: aliasErr } = await supabase.rpc('seed_bots_and_posts')
+    if (!aliasErr && aliasData) {
+      return { success: true, message: aliasData }
+    }
+
+    throw error || aliasErr || new Error('Bot yükleme fonksiyonu çağrılamadı.')
   } catch (err: any) {
     console.warn('adminSeedBots error:', err)
     return { success: false, message: err?.message || 'İşlem başarısız.' }

@@ -21,7 +21,7 @@ import { supabase } from '../lib/supabase'
 import { sendPushNotificationToUser } from '../lib/notifications'
 import type { Profile, Post, Vote } from '../lib/types'
 import ZoomablePhoto from '../components/ZoomablePhoto'
-import { isSuperAdminUser, checkIsAdmin, adminPromoteUser, adminRevokeUser, adminBanUser } from '../lib/admin'
+import { isSuperAdminUser, checkIsSuperAdmin, checkIsAdmin, adminPromoteUser, adminRevokeUser, adminBanUser } from '../lib/admin'
 
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window')
 
@@ -227,7 +227,7 @@ export default function UserProfileScreen() {
     if (!profile || !session?.user.id) return
     const currentUsername = session.user.user_metadata?.username
     const currentEmail = session.user.email
-    const amISuperAdmin = isSuperAdminUser(currentUsername) || isSuperAdminUser(currentEmail)
+    const amISuperAdmin = await checkIsSuperAdmin(session.user.id, currentUsername, currentEmail)
     const isTargetSuper = isSuperAdminUser(profile.username) || isSuperAdminUser((profile as any).email)
     const isTargetAdmin = await checkIsAdmin(profile.username, (profile as any).role, profile.id, (profile as any).email)
 

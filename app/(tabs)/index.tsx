@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import CustomRefreshContainer from '../../components/CustomRefreshContainer'
 import { sendPushNotificationToUser } from '../../lib/notifications'
-import { checkIsAdmin, adminDeletePost, adminBanUser, isSuperAdminUser, adminPromoteUser, adminRevokeUser } from '../../lib/admin'
+import { checkIsAdmin, checkIsSuperAdmin, adminDeletePost, adminBanUser, isSuperAdminUser, adminPromoteUser, adminRevokeUser } from '../../lib/admin'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -252,7 +252,7 @@ export default function VoteScreen() {
     const authorEmail = (current as any).profiles?.email
     const currentUsername = session.user.user_metadata?.username
     const currentEmail = session.user.email
-    const amISuperAdmin = isSuperAdminUser(currentUsername) || isSuperAdminUser(currentEmail)
+    const amISuperAdmin = await checkIsSuperAdmin(session.user.id, currentUsername, currentEmail)
     const isTargetSuper = isSuperAdminUser(authorUser) || isSuperAdminUser(authorEmail)
     const isTargetAdmin = await checkIsAdmin(authorUser, null, current.user_id, authorEmail)
 
